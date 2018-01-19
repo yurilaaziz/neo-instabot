@@ -18,6 +18,8 @@ import requests
 from .sql_updates import check_and_update, check_already_liked, check_already_followed
 from .sql_updates import insert_media, insert_username, insert_unfollow_count
 from .sql_updates import get_usernames_first, get_usernames, get_username_random
+import http.cookiejar
+import os
 
 class InstaBot:
     """
@@ -252,12 +254,8 @@ class InstaBot:
                 time.sleep(5 * random.random())
 
     def login(self):
-        log_string = 'Trying to login as %s...\n' % (self.user_login)
-        self.write_log(log_string)
-        self.login_post = {
-            'username': self.user_login,
-            'password': self.user_password
-        }
+        cj = http.cookiejar.LWPCookieJar(filename=self.database_name + "cookies.txt")
+        self.s.cookies = cj
 
         self.s.headers.update({
             'Accept': '*/*',
@@ -274,34 +272,54 @@ class InstaBot:
             'X-Requested-With': 'XMLHttpRequest'
         })
 
-        r = self.s.get(self.url)
-        self.s.headers.update({'X-CSRFToken': r.cookies['csrftoken']})
         time.sleep(5 * random.random())
-        login = self.s.post(
-            self.url_login, data=self.login_post, allow_redirects=True)
-        self.s.headers.update({'X-CSRFToken': login.cookies['csrftoken']})
-        self.csrftoken = login.cookies['csrftoken']
-        #ig_vw=1536; ig_pr=1.25; ig_vh=772;  ig_or=landscape-primary;
-        self.s.cookies['ig_vw'] = '1536'
-        self.s.cookies['ig_pr'] = '1.25'
-        self.s.cookies['ig_vh'] = '772'
-        self.s.cookies['ig_or'] = 'landscape-primary'
-        time.sleep(5 * random.random())
-
-        if login.status_code == 200:
+        if os.path.isfile(self.database_name + "cookies.txt"):
+            cj.load()
+            x_csrftoken = cj._cookies['.www.instagram.com']['/']['csrftoken'].value
+            self.s.headers.update({'X-CSRFToken': x_csrftoken})
             r = self.s.get('https://www.instagram.com/')
             finder = r.text.find(self.user_login)
             if finder != -1:
+                log_string = 'Already logged before.. %s' % self.user_login
+                self.write_log(log_string)
                 ui = UserInfo()
                 self.user_id = ui.get_user_id_by_login(self.user_login)
                 self.login_status = True
-                log_string = '%s login success!' % (self.user_login)
-                self.write_log(log_string)
-            else:
-                self.login_status = False
-                self.write_log('Login error! Check your login data!')
         else:
-            self.write_log('Login error! Connection error!')
+            r = self.s.get(self.url)
+            self.s.headers.update({'X-CSRFToken': r.cookies['csrftoken']})
+            log_string = 'Trying to login as %s...\n' % (self.user_login)
+            self.write_log(log_string)
+            self.login_post = {
+                'username': self.user_login,
+                'password': self.user_password
+            }
+            login = self.s.post(
+                self.url_login, data=self.login_post, allow_redirects=True)
+            self.s.headers.update({'X-CSRFToken': login.cookies['csrftoken']})
+            self.csrftoken = login.cookies['csrftoken']
+            #ig_vw=1536; ig_pr=1.25; ig_vh=772;  ig_or=landscape-primary;
+            #self.s.cookies['ig_vw'] = '1536'
+            #self.s.cookies['ig_pr'] = '1.25'
+            #self.s.cookies['ig_vh'] = '772'
+            #self.s.cookies['ig_or'] = 'landscape-primary'
+            time.sleep(5 * random.random())
+
+            if login.status_code == 200:
+                r = self.s.get('https://www.instagram.com/')
+                finder = r.text.find(self.user_login)
+                if finder != -1:
+                    ui = UserInfo()
+                    self.user_id = ui.get_user_id_by_login(self.user_login)
+                    self.login_status = True
+                    log_string = '%s login success!' % (self.user_login)
+                    self.write_log(log_string)
+                else:
+                    self.login_status = False
+                    self.write_log('Login error! Check your login data!')
+                cj.save(filename=self.database_name + "cookies.txt");
+            else:
+                self.write_log('Login error! Connection error!')
 
     def logout(self):
         now_time = datetime.datetime.now()
