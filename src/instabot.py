@@ -326,7 +326,8 @@ class InstaBot:
                 else:
                     self.login_status = False
                     self.write_log('Login error! Check your login data!')
-                cj.save(filename=self.database_name + "cookies.txt");
+                    sys.exit()
+                cj.save(filename=self.database_name + "cookies.txt")
             else:
                 self.write_log('Login error! Connection error!')
 
