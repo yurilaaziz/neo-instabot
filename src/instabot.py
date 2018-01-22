@@ -279,7 +279,12 @@ class InstaBot:
         time.sleep(5 * random.random())
         if os.path.isfile(self.database_name + "cookies.txt"):
             cj.load()
-            x_csrftoken = cj._cookies['.www.instagram.com']['/']['csrftoken'].value
+            if cj._cookies['.www.instagram.com']:
+                x_csrftoken = cj._cookies['.www.instagram.com']['/']['csrftoken'].value
+            elif cj._cookies['www.instagram.com']:
+                x_csrftoken = cj._cookies['www.instagram.com']['/']['csrftoken'].value
+            else:
+                self.write_log("Failed at getting x_csrftoken from file")
             self.s.headers.update({'X-CSRFToken': x_csrftoken})
             r = self.s.get('https://www.instagram.com/')
             finder = r.text.find(self.user_login)
