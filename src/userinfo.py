@@ -39,7 +39,7 @@ class UserInfo:
         url_info = self.url_user_info % (user_name)
         info = self.s.get(url_info)
         all_data = json.loads(info.text)
-        id_user = all_data['user']['id']
+        id_user = all_data['graphql']['user']['id']
         return id_user
 
     def search_user(self, user_id=None, user_name=None):
