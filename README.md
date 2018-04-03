@@ -1,8 +1,8 @@
 # InstaBot
 
-## On 03-Apr-2018, I wiped out the existing issues/PRs associated with this repo, they've built up due to some neglect. Now, there's a clean slate. So any new issues must follow the format provided and PRs will be reviewed an accepted. Contributors are encouraged to review existing issues and submit changes.
+### On 03-Apr-2018, I wiped out the existing issues/PRs associated with this repo, they've built up due to some neglect. Now, there's a clean slate. So any new issues must follow the format provided and PRs will be reviewed an accepted. Contributors are encouraged to review existing issues and submit changes.
 
-## We will not tolerate users cloning this repo and hosting it as their own. You must fork the repo if you wish to publish any changes.
+### We will not tolerate users cloning this repo and hosting it as their own. You must fork the repo if you wish to publish any changes.
 
 > Toolkit for building automated Instagram bots without direct access to the Instagram API or passsing through the review process.
 
