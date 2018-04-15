@@ -4,7 +4,7 @@
 
 - [x] This is a checked box. **Do not leave spaces around the `x`!**
 
-- [ ] I have searched for other issues with the same problem.
+- [ ] I have searched for other issues with the same problem. (including #1153)
 
 ## Hosting
 - [ ] Are you hosting the bot on a VPS or other Cloud hosting?
