@@ -20,6 +20,7 @@ from .sql_updates import insert_media, insert_username, insert_unfollow_count
 from .sql_updates import get_usernames_first, get_usernames, get_username_random
 from .sql_updates import check_and_insert_user_agent
 from fake_useragent import UserAgent
+import re
 
 class InstaBot:
     """
@@ -55,7 +56,7 @@ class InstaBot:
     url_login = 'https://www.instagram.com/accounts/login/ajax/'
     url_logout = 'https://www.instagram.com/accounts/logout/'
     url_media_detail = 'https://www.instagram.com/p/%s/?__a=1'
-    url_user_detail = 'https://www.instagram.com/%s/?__a=1'
+    url_user_detail = 'https://www.instagram.com/%s/'
     api_user_detail = 'https://i.instagram.com/api/v1/users/%s/info/'
 
     user_agent = "" ""
@@ -843,7 +844,7 @@ class InstaBot:
                 url_tag = self.url_user_detail % (current_user)
                 try:
                     r = self.s.get(url_tag)
-                    all_data = json.loads(r.text)
+                    all_data = json.loads(re.search('{"activity.+show_app', r.text, re.DOTALL).group(0)+'":""}')['entry_data']['ProfilePage'][0]
 
                     user_info = all_data['graphql']['user']
                     i = 0
