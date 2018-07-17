@@ -48,6 +48,7 @@ class InstaBot:
 
     url = 'https://www.instagram.com/'
     url_tag = 'https://www.instagram.com/explore/tags/%s/?__a=1'
+    url_location = 'https://www.instagram.com/explore/locations/%s/?__a=1'
     url_likes = 'https://www.instagram.com/web/likes/%s/like/'
     url_unlike = 'https://www.instagram.com/web/likes/%s/unlike/'
     url_comment = 'https://www.instagram.com/web/comments/%s/add/'
@@ -109,6 +110,7 @@ class InstaBot:
     media_on_feed = []
     media_by_user = []
     login_status = False
+    by_location = False
 
     # Running Times
     start_at_h = 0,
@@ -346,23 +348,43 @@ class InstaBot:
             self.logout()
 
     def get_media_id_by_tag(self, tag):
-        """ Get media ID set, by your hashtag """
+        """ Get media ID set, by your hashtag or location """
 
         if self.login_status:
-            log_string = "Get media id by tag: %s" % (tag)
-            self.write_log(log_string)
-            if self.login_status == 1:
-                url_tag = self.url_tag % (tag)
-                try:
-                    r = self.s.get(url_tag)
-                    all_data = json.loads(r.text)
-                    self.media_by_tag = list(all_data['graphql']['hashtag']['edge_hashtag_to_media']['edges'])
-                except:
-                    self.media_by_tag = []
-                    self.write_log("Except on get_media!")
-                    logging.exception("get_media_id_by_tag")
+            if tag.startswith('l:'):
+                tag = tag.replace('l:', '')
+                self.by_location = True
+                log_string = "Get Media by location: %s" % (tag)
+                self.write_log(log_string,True)
+                if self.login_status == 1:
+                    url_location = self.url_location % (tag)
+                    try:
+                        r = self.s.get(url_location)
+                        all_data = json.loads(r.text)
+                        self.media_by_tag = list(all_data['graphql']['location']['edge_location_to_media']['edges'])
+                    except:
+                        self.media_by_tag = []
+                        self.write_log("Except on get_media!")
+                        logging.exception("get_media_id_by_tag")
+                else:
+                    return 0
+                    
             else:
-                return 0
+                log_string = "Get Media by tag: %s" % (tag)
+                self.by_location = False
+                self.write_log(log_string,True)
+                if self.login_status == 1:
+                    url_tag = self.url_tag % (tag)
+                    try:
+                        r = self.s.get(url_tag)
+                        all_data = json.loads(r.text)
+                        self.media_by_tag = list(all_data['graphql']['hashtag']['edge_hashtag_to_media']['edges'])
+                    except:
+                        self.media_by_tag = []
+                        self.write_log("Except on get_media!")
+                        logging.exception("get_media_id_by_tag")
+                else:
+                    return 0
 
     def get_instagram_url_from_media_id(self, media_id, url_flag=True, only_code=None):
         """ Get Media Code or Full Url from Media ID Thanks to Nikished """

@@ -31,7 +31,7 @@
 | unfollow_per_day     | int | Users to unfollow per day                            | 0    |
 | comments_per_day     | int | Comments to post per day                             | 0    |
 | comment_list         | [[str]] | List of word lists for comment generation        | [['this', 'your'], ['photo', 'picture', 'pic', 'shot'], ['is', 'looks', 'is really'], ['great', 'super', 'good'], ['.', '...', '!', '!!']] |
-| tag_list             | [str] | Tags to use for finding posts                      | ['cat', 'car', 'dog'] |
+| tag_list             | [str] | Tags to use for finding posts by hasthag or location(l:locationid from e.g. https://www.instagram.com/explore/locations/212999109/los-angeles-california/)                     | ['cat', 'car', 'dog', 'l:212999109'] |
 | tag_blacklist        | [str] | Tags to ignore when liking posts                   | [] |
 | user_blacklist       | {str: str} | Users whose posts to ignore                   | {} |
 | max_like_for_one_tag | int | How many media of a given tag to like at once (out of 21) | 5 |
