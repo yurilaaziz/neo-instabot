@@ -355,7 +355,7 @@ class InstaBot:
                 tag = tag.replace('l:', '')
                 self.by_location = True
                 log_string = "Get Media by location: %s" % (tag)
-                self.write_log(log_string,True)
+                self.write_log(log_string)
                 if self.login_status == 1:
                     url_location = self.url_location % (tag)
                     try:
@@ -372,7 +372,7 @@ class InstaBot:
             else:
                 log_string = "Get Media by tag: %s" % (tag)
                 self.by_location = False
-                self.write_log(log_string,True)
+                self.write_log(log_string)
                 if self.login_status == 1:
                     url_tag = self.url_tag % (tag)
                     try:
