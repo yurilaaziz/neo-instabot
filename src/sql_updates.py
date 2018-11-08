@@ -23,7 +23,7 @@ def check_and_update(self):
     if not table_column_status:
         qry = """
             CREATE TABLE "usernames_new" ( `username_id` varchar ( 300 ), `username` TEXT  );
-            INSERT INTO "usernames_new" (username_id) Select username from usernames;
+            INSERT INTO "usernames_new" (username) Select username from usernames;
             DROP TABLE "usernames";
             ALTER TABLE "usernames_new" RENAME TO "usernames";
               """
@@ -45,7 +45,7 @@ def check_and_update(self):
     #table_column_status = [o for o in table_info if o[1] == "last_followed_time"]
     #if not table_column_status:
     #    self.follows_db_c.execute("ALTER TABLE usernames ADD COLUMN last_followed_time TEXT")
-    
+
 
 def check_already_liked(self, media_id):
     """ controls if media already liked before """
@@ -58,6 +58,13 @@ def check_already_followed(self, user_id):
     """ controls if user already followed before """
     if self.follows_db_c.execute("SELECT EXISTS(SELECT 1 FROM usernames WHERE username_id='"+
                                  user_id + "' LIMIT 1)").fetchone()[0] > 0:
+        return 1
+    return 0
+
+def check_already_unfollowed(self, user_id):
+    """ controls if user was already unfollowed before """
+    if self.follows_db_c.execute("SELECT EXISTS(SELECT 1 FROM usernames WHERE username_id='"+
+                                 user_id + "' AND unfollow_count > 0 LIMIT 1)").fetchone()[0] > 0:
         return 1
     return 0
 
