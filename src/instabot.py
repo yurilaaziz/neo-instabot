@@ -18,7 +18,8 @@ import requests
 from .sql_updates import check_and_update, check_already_liked
 from .sql_updates import check_already_followed, check_already_unfollowed
 from .sql_updates import insert_media, insert_username, insert_unfollow_count
-from .sql_updates import get_usernames_first, get_usernames, get_username_random
+from .sql_updates import get_usernames_first, get_usernames
+from .sql_updates import get_username_random, get_username_to_unfollow_random
 from .sql_updates import check_and_insert_user_agent
 from fake_useragent import UserAgent
 import re
@@ -845,7 +846,7 @@ class InstaBot:
     def auto_unfollow(self):
         checking = True
         while checking:
-            username_row = get_username_random(self)
+            username_row = get_username_to_unfollow_random(self)
             if not username_row:
                 self.write_log("Looks like there is nobody to unfollow.")
                 return False
@@ -875,7 +876,13 @@ class InstaBot:
                 url_tag = self.url_user_detail % (current_user)
                 try:
                     r = self.s.get(url_tag)
-                    all_data = json.loads(re.search('{"activity_.+(}(?=.*</script>))', r.text).group(0))['entry_data']['ProfilePage'][0]
+                    if r.text.find('The link you followed may be broken, or the page may have been removed.') != -1:
+                        log_string = "Looks like account was deleted, skipping : %s" % current_user
+                        self.write_log(log_string)
+                        insert_unfollow_count(self, user_id=current_id)
+                        time.sleep(3)
+                        return False
+                    all_data = json.loads(re.search('window._sharedData = (.*?);</script>', r.text, re.DOTALL).group(1))['entry_data']['ProfilePage'][0]
 
                     user_info = all_data['graphql']['user']
                     i = 0

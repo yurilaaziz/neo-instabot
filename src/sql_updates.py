@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import sqlite3
-from datetime import datetime, time
+from datetime import datetime, time, timedelta
 
 def check_and_update(self):
     """ At the Program start, i does look for the sql updates """
@@ -114,6 +114,18 @@ def get_usernames(self):
 def get_username_random(self):
     """ Gets random username """
     username = self.follows_db_c.execute("SELECT * FROM usernames WHERE unfollow_count=0 ORDER BY RANDOM() LIMIT 1").fetchone()
+    if username:
+        return username
+    else:
+        return False
+
+def get_username_to_unfollow_random(self):
+    """ Gets random username that is older than follow_time and has zero unfollow_count """
+    now_time = datetime.now()
+    cut_off_time = now_time - timedelta(seconds=self.follow_time)
+    username = self.follows_db_c.execute("SELECT * FROM usernames WHERE \
+    DATETIME(last_followed_time) < DATETIME('"+str(cut_off_time)+"') \
+    AND unfollow_count=0 ORDER BY RANDOM() LIMIT 1").fetchone()
     if username:
         return username
     else:
