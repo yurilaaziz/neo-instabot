@@ -957,6 +957,9 @@ class InstaBot:
                 self.unfollow(current_id)
                 # don't insert unfollow count as it is done now inside unfollow()
                 #insert_unfollow_count(self, user_id=current_id)
+            elif self.is_following is not True:
+                # we are not following this account, hence we unfollowed it, let's keep track
+                insert_unfollow_count(self, user_id=current_id)
 
     def get_media_id_recent_feed(self):
         if self.login_status:
