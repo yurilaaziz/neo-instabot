@@ -39,7 +39,7 @@ class UserInfo:
     def get_user_id_by_login(self, user_name):
         url_info = self.url_user_info % (user_name)
         info = self.s.get(url_info)
-        json_info = json.loads(re.search('{"activity.+show_app', info.text, re.DOTALL).group(0)+'":""}')
+        json_info = json.loads(re.search('window._sharedData = (.*?);</script>', info.text, re.DOTALL).group(1))
         id_user = json_info['entry_data']['ProfilePage'][0]['graphql']['user']['id']
         return id_user
 
