@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+from .sql_updates import insert_unfollow_count
 
 def new_unfollow(self, user_id, user_name):
     """ Send http request to unfollow """
@@ -12,6 +13,7 @@ def new_unfollow(self, user_id, user_name):
             log_string = "Unfollow: %s #%i." % (user_name,
                                                 self.unfollow_counter)
             self.write_log(log_string)
+            insert_unfollow_count(self, user_id=user_id)
         return unfollow
     except:
         self.write_log("Exept on unfollow!")

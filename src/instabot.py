@@ -15,9 +15,11 @@ import sys
 import sqlite3
 import time
 import requests
-from .sql_updates import check_and_update, check_already_liked, check_already_followed
+from .sql_updates import check_and_update, check_already_liked
+from .sql_updates import check_already_followed, check_already_unfollowed
 from .sql_updates import insert_media, insert_username, insert_unfollow_count
-from .sql_updates import get_usernames_first, get_usernames, get_username_random
+from .sql_updates import get_usernames_first, get_usernames
+from .sql_updates import get_username_random, get_username_to_unfollow_random
 from .sql_updates import check_and_insert_user_agent
 from fake_useragent import UserAgent
 import re
@@ -331,16 +333,21 @@ class InstaBot:
     def cleanup(self, *_):
         # Unfollow all bot follow
         if self.follow_counter >= self.unfollow_counter:
-            for f in self.bot_follow_list:
-                log_string = "Trying to unfollow: %s" % (f[0])
-                self.write_log(log_string)
-                self.unfollow_on_cleanup(f[0])
-                sleeptime = random.randint(self.unfollow_break_min,
-                                           self.unfollow_break_max)
-                log_string = "Pausing for %i seconds... %i of %i" % (
-                    sleeptime, self.unfollow_counter, self.follow_counter)
-                self.write_log(log_string)
-                time.sleep(sleeptime)
+            for i in range(len(self.bot_follow_list)):
+                f = self.bot_follow_list[0]
+                if check_already_unfollowed(self, f[0]):
+                    log_string = "Already unfollowed before, skipping: %s" % (f[0])
+                    self.write_log(log_string)
+                else:
+                    log_string = "Trying to unfollow: %s" % (f[0])
+                    self.write_log(log_string)
+                    self.unfollow_on_cleanup(f[0])
+                    sleeptime = random.randint(self.unfollow_break_min,
+                                               self.unfollow_break_max)
+                    log_string = "Pausing for %i seconds... %i of %i" % (
+                        sleeptime, self.unfollow_counter, self.follow_counter)
+                    self.write_log(log_string)
+                    time.sleep(sleeptime)
                 self.bot_follow_list.remove(f)
 
         # Logout
@@ -368,7 +375,7 @@ class InstaBot:
                         logging.exception("get_media_id_by_tag")
                 else:
                     return 0
-                    
+
             else:
                 log_string = "Get Media by tag: %s" % (tag)
                 self.by_location = False
@@ -653,6 +660,7 @@ class InstaBot:
                     log_string = "Unfollowed: %s #%i." % (user_id,
                                                           self.unfollow_counter)
                     self.write_log(log_string)
+                    insert_unfollow_count(self, user_id=user_id)
                 return unfollow
             except:
                 logging.exception("Exept on unfollow!")
@@ -669,6 +677,7 @@ class InstaBot:
                     log_string = "Unfollow: %s #%i of %i." % (
                         user_id, self.unfollow_counter, self.follow_counter)
                     self.write_log(log_string)
+                    insert_unfollow_count(self, user_id=user_id)
                 else:
                     log_string = "Slow Down - Pausing for 5 minutes so we don't get banned!"
                     self.write_log(log_string)
@@ -680,6 +689,7 @@ class InstaBot:
                             user_id, self.unfollow_counter,
                             self.follow_counter)
                         self.write_log(log_string)
+                        insert_unfollow_count(self, user_id=user_id)
                     else:
                         log_string = "Still no good :( Skipping and pausing for another 5 minutes"
                         self.write_log(log_string)
@@ -836,7 +846,7 @@ class InstaBot:
     def auto_unfollow(self):
         checking = True
         while checking:
-            username_row = get_username_random(self)
+            username_row = get_username_to_unfollow_random(self)
             if not username_row:
                 self.write_log("Looks like there is nobody to unfollow.")
                 return False
@@ -866,7 +876,13 @@ class InstaBot:
                 url_tag = self.url_user_detail % (current_user)
                 try:
                     r = self.s.get(url_tag)
-                    all_data = json.loads(re.search('{"activity_.+(}(?=.*</script>))', r.text).group(0))['entry_data']['ProfilePage'][0]
+                    if r.text.find('The link you followed may be broken, or the page may have been removed.') != -1:
+                        log_string = "Looks like account was deleted, skipping : %s" % current_user
+                        self.write_log(log_string)
+                        insert_unfollow_count(self, user_id=current_id)
+                        time.sleep(3)
+                        return False
+                    all_data = json.loads(re.search('window._sharedData = (.*?);</script>', r.text, re.DOTALL).group(1))['entry_data']['ProfilePage'][0]
 
                     user_info = all_data['graphql']['user']
                     i = 0
@@ -939,6 +955,10 @@ class InstaBot:
             ):
                 self.write_log(current_user)
                 self.unfollow(current_id)
+                # don't insert unfollow count as it is done now inside unfollow()
+                #insert_unfollow_count(self, user_id=current_id)
+            elif self.is_following is not True:
+                # we are not following this account, hence we unfollowed it, let's keep track
                 insert_unfollow_count(self, user_id=current_id)
 
     def get_media_id_recent_feed(self):
