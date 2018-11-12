@@ -866,7 +866,7 @@ class InstaBot:
                 url_tag = self.url_user_detail % (current_user)
                 try:
                     r = self.s.get(url_tag)
-                    all_data = json.loads(re.search('{"activity.+show_app', r.text, re.DOTALL).group(0)+'":""}')['entry_data']['ProfilePage'][0]
+                    all_data = json.loads(re.search('{"activity_.+(}(?=.*</script>))', r.text).group(0))['entry_data']['ProfilePage'][0]
 
                     user_info = all_data['graphql']['user']
                     i = 0
