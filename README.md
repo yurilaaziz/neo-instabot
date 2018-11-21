@@ -68,7 +68,7 @@ bot.auto_mod()
 Standard use with change default settings (you should know what you do!):
 ```py
 bot = InstaBot('login', 'password',
-               like_in_day=1000,
+               like_per_day=1000,
                media_max_like=50,
                media_min_like=5,
                tag_list=['like', 'follow', 'f4f'],
