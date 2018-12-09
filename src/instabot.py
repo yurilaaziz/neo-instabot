@@ -23,6 +23,7 @@ from .sql_updates import get_username_random, get_username_to_unfollow_random
 from .sql_updates import check_and_insert_user_agent
 from fake_useragent import UserAgent
 import re
+import instaloader
 
 class InstaBot:
     """
@@ -177,6 +178,7 @@ class InstaBot:
         self.tag_blacklist = tag_blacklist
         self.unfollow_whitelist = unfollow_whitelist
         self.comment_list = comment_list
+        self.instaloader = instaloader.Instaloader()
 
         self.time_in_day = 24 * 60 * 60
         # Like
@@ -284,7 +286,9 @@ class InstaBot:
         })
 
         r = self.s.get(self.url)
-        self.s.headers.update({'X-CSRFToken': r.cookies['csrftoken']})
+        #self.s.headers.update({'X-CSRFToken': r.cookies['csrftoken']})
+        csrf_token = re.search('(?<=\"csrf_token\":\")\w+', r.text).group(0)
+        self.s.headers.update({'X-CSRFToken': csrf_token})
         time.sleep(5 * random.random())
         login = self.s.post(
             self.url_login, data=self.login_post, allow_redirects=True)
@@ -428,19 +432,27 @@ class InstaBot:
                 return ""
 
     def get_username_by_user_id(self, user_id):
-        """ Get username by user_id """
         if self.login_status:
-            try:
-                url_info = self.api_user_detail % user_id
-                r = self.s.get(url_info, headers="")
-                all_data = json.loads(r.text)
-                username = all_data["user"]["username"]
-                return username
-            except:
-                logging.exception("Except on get_username_by_user_id")
-                return False
+            profile = instaloader.Profile.from_id(self.instaload.context,  user_id)
+            username = profile.username
+            return username
         else:
             return False
+
+    # def get_username_by_user_id(self, user_id):
+    #     """ Get username by user_id """
+    #     if self.login_status:
+    #         try:
+    #             url_info = self.api_user_detail % user_id
+    #             r = self.s.get(url_info, headers="")
+    #             all_data = json.loads(r.text)
+    #             username = all_data["user"]["username"]
+    #             return username
+    #         except:
+    #             logging.exception("Except on get_username_by_user_id")
+    #             return False
+    #     else:
+    #         return False
 
     def get_userinfo_by_name(self, username):
         """ Get user info by name """
@@ -765,6 +777,8 @@ class InstaBot:
             del self.media_by_tag[0]
 
     def new_auto_mod_follow(self):
+        if time.time() < self.next_iteration["Follow"]:
+        	return
         if time.time() > self.next_iteration["Follow"] and \
                         self.follow_per_day != 0 and len(self.media_by_tag) > 0:
             if self.media_by_tag[0]['node']["owner"]["id"] == self.user_id:
@@ -773,11 +787,14 @@ class InstaBot:
             if check_already_followed(self, user_id=self.media_by_tag[0]['node']["owner"]["id"]) == 1:
                 self.write_log("Already followed before " + self.media_by_tag[0]['node']["owner"]["id"])
                 self.next_iteration["Follow"] = time.time() + \
-                                                self.add_time(self.follow_delay/2)
+                                                self.add_time(self.follow_delay)
                 return
+                
             log_string = "Trying to follow: %s" % (
                 self.media_by_tag[0]['node']["owner"]["id"])
             self.write_log(log_string)
+            self.next_iteration["Follow"] = time.time() + \
+                                                self.add_time(self.follow_delay)
 
             if self.follow(self.media_by_tag[0]['node']["owner"]["id"]) != False:
                 self.bot_follow_list.append(
