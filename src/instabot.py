@@ -438,7 +438,7 @@ class InstaBot:
 
     def get_username_by_user_id(self, user_id):
         if self.login_status:
-            profile = instaloader.Profile.from_id(self.instaload.context,  user_id)
+            profile = instaloader.Profile.from_id(self.instaloader.context,  user_id)
             username = profile.username
             return username
         else:
