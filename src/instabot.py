@@ -293,10 +293,14 @@ class InstaBot:
         login = self.s.post(
             self.url_login, data=self.login_post, allow_redirects=True)
         if "checkpoint_required" in login.text:
-            challenge_url = 'https://instagram.com' + re.search('(/challenge/\w+/\w+/)', login.text).group(0)
-            print('Account Challenge required at ' + challenge_url)
-            quit()
-            
+            try:
+                challenge_url = 'https://instagram.com' + re.search('(/challenge/\w+/\w+/)', login.text).group(0)
+                print('Challenge required at ' + challenge_url)
+                quit()
+            except:
+                print("Login failed, response: \n\n" + login.text)
+                quit()
+                
         self.s.headers.update({'X-CSRFToken': login.cookies['csrftoken']})
         self.csrftoken = login.cookies['csrftoken']
         #ig_vw=1536; ig_pr=1.25; ig_vh=772;  ig_or=landscape-primary;
@@ -660,6 +664,7 @@ class InstaBot:
                                                         self.follow_counter)
                     self.write_log(log_string)
                     username = self.get_username_by_user_id(user_id=user_id)
+                    #print('Inserting ' + user_id + ' as ' + username + "\n")
                     insert_username(self, user_id=user_id, username=username)
                 return follow
             except:
