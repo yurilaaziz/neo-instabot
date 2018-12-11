@@ -797,7 +797,7 @@ class InstaBot:
             if check_already_followed(self, user_id=self.media_by_tag[0]['node']["owner"]["id"]) == 1:
                 self.write_log("Already followed before " + self.media_by_tag[0]['node']["owner"]["id"])
                 self.next_iteration["Follow"] = time.time() + \
-                                                self.add_time(self.follow_delay)
+                                                self.add_time(self.follow_delay/2)
                 return
                 
             log_string = "Trying to follow: %s" % (
