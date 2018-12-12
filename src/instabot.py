@@ -295,10 +295,10 @@ class InstaBot:
         if "checkpoint_required" in login.text:
             try:
                 challenge_url = 'https://instagram.com' + re.search('(/challenge/\w+/\w+/)', login.text).group(0)
-                print('Challenge required at ' + challenge_url)
+                self.write_log('Challenge required at ' + challenge_url)
                 quit()
             except:
-                print("Login failed, response: \n\n" + login.text)
+                self.write_log("Login failed, response: \n\n" + login.text)
                 quit()
                 
         self.s.headers.update({'X-CSRFToken': login.cookies['csrftoken']})
@@ -797,7 +797,7 @@ class InstaBot:
             if check_already_followed(self, user_id=self.media_by_tag[0]['node']["owner"]["id"]) == 1:
                 self.write_log("Already followed before " + self.media_by_tag[0]['node']["owner"]["id"])
                 self.next_iteration["Follow"] = time.time() + \
-                                                self.add_time(self.follow_delay/2)
+                                                self.add_time(self.follow_delay)
                 return
                 
             log_string = "Trying to follow: %s" % (
@@ -935,37 +935,37 @@ class InstaBot:
                     if follows == 0 or follower / follows > 2:
                         self.is_selebgram = True
                         self.is_fake_account = False
-                        print('   >>>This is probably Selebgram account')
+                        self.write_log('   >>>This is probably Selebgram account')
                     elif follower == 0 or follows / follower > 2:
                         self.is_fake_account = True
                         self.is_selebgram = False
-                        print('   >>>This is probably Fake account')
+                        self.write_log('   >>>This is probably Fake account')
                     else:
                         self.is_selebgram = False
                         self.is_fake_account = False
-                        print('   >>>This is a normal account')
+                        self.write_log('   >>>This is a normal account')
 
                     if media > 0 and follows / media < 25 and follower / media < 25:
                         self.is_active_user = True
-                        print('   >>>This user is active')
+                        self.write_log('   >>>This user is active')
                     else:
                         self.is_active_user = False
-                        print('   >>>This user is passive')
+                        self.write_log('   >>>This user is passive')
 
                     if follow_viewer or has_requested_viewer:
                         self.is_follower = True
-                        print("   >>>This account is following you")
+                        self.write_log("   >>>This account is following you")
                     else:
                         self.is_follower = False
-                        print('   >>>This account is NOT following you')
+                        self.write_log('   >>>This account is NOT following you')
 
                     if followed_by_viewer or requested_by_viewer:
                         self.is_following = True
-                        print('   >>>You are following this account')
+                        self.write_log('   >>>You are following this account')
 
                     else:
                         self.is_following = False
-                        print('   >>>You are NOT following this account')
+                        self.write_log('   >>>You are NOT following this account')
 
                 except:
                     logging.exception("Except on auto_unfollow!")
