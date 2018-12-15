@@ -23,8 +23,15 @@ from .sql_updates import get_username_random, get_username_to_unfollow_random
 from .sql_updates import check_and_insert_user_agent
 from fake_useragent import UserAgent
 import re
-import instaloader
 import pprint
+
+if (sys.version_info < (3, 0)):
+     # Python 3 code in this block
+     print('Python v3.5 or above required for Instaloader module at the moment. Exiting...')
+     quit()
+else:
+     import instaloader
+
 
 class InstaBot:
     """
@@ -296,7 +303,7 @@ class InstaBot:
         if "checkpoint_required" in login.text:
             try:
                 challenge_url = 'https://instagram.com' + re.search('(/challenge/\w+/\w+/)', login.text).group(0)
-                write_log('Challenge required at ' + challenge_url)
+                self.write_log('Challenge required at ' + challenge_url)
                 
                 #Get challenge page
                 challenge_request_explore = self.c.get(challenge_url)
@@ -327,7 +334,7 @@ class InstaBot:
                 }
                 
                 complete_challenge = self.c.post(challenge_url, data=challenge_security_post, allow_redirects=True)
-                write_log(complete_challenge.text)
+                self.write_log(complete_challenge.text)
                 
                 
                 
@@ -975,37 +982,37 @@ class InstaBot:
                     if follows == 0 or follower / follows > 2:
                         self.is_selebgram = True
                         self.is_fake_account = False
-                        write_log('   >>>This is probably Selebgram account')
+                        self.write_log('   >>>This is probably Selebgram account')
                     elif follower == 0 or follows / follower > 2:
                         self.is_fake_account = True
                         self.is_selebgram = False
-                        write_log('   >>>This is probably Fake account')
+                        self.write_log('   >>>This is probably Fake account')
                     else:
                         self.is_selebgram = False
                         self.is_fake_account = False
-                        write_log('   >>>This is a normal account')
+                        self.write_log('   >>>This is a normal account')
 
                     if media > 0 and follows / media < 25 and follower / media < 25:
                         self.is_active_user = True
-                        write_log('   >>>This user is active')
+                        self.write_log('   >>>This user is active')
                     else:
                         self.is_active_user = False
-                        write_log('   >>>This user is passive')
+                        self.write_log('   >>>This user is passive')
 
                     if follow_viewer or has_requested_viewer:
                         self.is_follower = True
-                        write_log("   >>>This account is following you")
+                        self.write_log("   >>>This account is following you")
                     else:
                         self.is_follower = False
-                        write_log('   >>>This account is NOT following you')
+                        self.write_log('   >>>This account is NOT following you')
 
                     if followed_by_viewer or requested_by_viewer:
                         self.is_following = True
-                        write_log('   >>>You are following this account')
+                        self.write_log('   >>>You are following this account')
 
                     else:
                         self.is_following = False
-                        write_log('   >>>You are NOT following this account')
+                        self.write_log('   >>>You are NOT following this account')
 
                 except:
                     logging.exception("Except on auto_unfollow!")
