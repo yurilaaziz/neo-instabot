@@ -327,7 +327,7 @@ class InstaBot:
                 }
                 
                 complete_challenge = self.c.post(challenge_url, data=challenge_security_post, allow_redirects=True)
-                pprint(complete_challenge.text)
+                write_log(complete_challenge.text)
                 
                 
                 
@@ -336,8 +336,11 @@ class InstaBot:
                 quit()
                 
 
-        self.s.headers.update({'X-CSRFToken': login.cookies['csrftoken']})
-        self.csrftoken = login.cookies['csrftoken']
+        
+        if login.status_code == 200:
+            self.csrftoken = login.cookies['csrftoken']
+            self.s.headers.update({'X-CSRFToken': login.cookies['csrftoken']})
+            
         rollout_hash = re.search('(?<=\"rollout_hash\":\")\w+', r.text).group(0)
         self.s.headers.update({'X-Instagram-AJAX': rollout_hash})      
         #ig_vw=1536; ig_pr=1.25; ig_vh=772;  ig_or=landscape-primary;
