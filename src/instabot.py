@@ -24,6 +24,7 @@ from .sql_updates import check_and_insert_user_agent
 from fake_useragent import UserAgent
 import re
 import instaloader
+import pprint
 
 class InstaBot:
     """
@@ -214,6 +215,7 @@ class InstaBot:
         # log_mod 0 to console, 1 to file
         self.log_mod = log_mod
         self.s = requests.Session()
+        self.c = requests.Session()
         # if you need proxy make something like this:
         # self.s.proxies = {"https" : "http://proxyip:proxyport"}
         # by @ageorgios
@@ -232,7 +234,7 @@ class InstaBot:
         self.media_by_user = []
         self.unwanted_username_list = unwanted_username_list
         now_time = datetime.datetime.now()
-        log_string = 'Instabot v1.2.0 started at %s:\n' % \
+        log_string = 'Instabot v1.2.0/1 started at %s:\n' % \
                      (now_time.strftime("%d.%m.%Y %H:%M"))
         self.write_log(log_string)
         self.login()
@@ -294,14 +296,50 @@ class InstaBot:
         if "checkpoint_required" in login.text:
             try:
                 challenge_url = 'https://instagram.com' + re.search('(/challenge/\w+/\w+/)', login.text).group(0)
-                self.write_log('Challenge required at ' + challenge_url)
-                quit()
+                write_log('Challenge required at ' + challenge_url)
+                
+                #Get challenge page
+                challenge_request_explore = self.c.get(challenge_url)
+                
+                #Get CSRF Token from challenge page
+                challenge_csrf_token = re.search('(?<=\"csrf_token\":\")\w+', challenge_request_explore.text).group(0)
+                #Get Rollout Hash from challenge page
+                rollout_hash = re.search('(?<=\"rollout_hash\":\")\w+', challenge_request_explore.text).group(0)
+                
+                #Ask for option 1 from challenge, which is usually Email or Phone
+                challenge_post = {
+                    'choice': 1
+                }
+                
+                #Update headers for challenge submit page
+                self.c.headers.update({'X-CSRFToken': challenge_csrf_token})
+                self.c.headers.update({'X-Instagram-AJAX': rollout_hash})
+                self.c.cookies['csrftoken'] = challenge_csrf_token
+                self.c.headers.update({'x-requested-with': 'XMLHttpRequest'}) #x-requested-with: XMLHttpRequest
+                
+                #Request instagram to send a code
+                challenge_request_code = self.c.post(challenge_url, data=challenge_post, allow_redirects=True)
+                
+                #User should receive a code soon, ask for it
+                challenge_userinput_code = input("Challenge Required.\n\nEnter the code sent to your mail/phone: ")
+                challenge_security_post = {
+                    'security_code': challenge_userinput_code
+                }
+                
+                complete_challenge = self.c.post(challenge_url, data=challenge_security_post, allow_redirects=True)
+                pprint(complete_challenge.text)
+                
+                
+                
             except:
-                self.write_log("Login failed, response: \n\n" + login.text)
+                print("Login failed, response: \n\n" + login.text)
                 quit()
                 
+
         self.s.headers.update({'X-CSRFToken': login.cookies['csrftoken']})
         self.csrftoken = login.cookies['csrftoken']
+        rollout_hash = re.search('(?<=\"rollout_hash\":\")\w+', r.text).group(0)
+        self.s.headers.update({'X-Instagram-AJAX': rollout_hash})      
         #ig_vw=1536; ig_pr=1.25; ig_vh=772;  ig_or=landscape-primary;
         self.s.cookies['ig_vw'] = '1536'
         self.s.cookies['ig_pr'] = '1.25'
@@ -796,7 +834,7 @@ class InstaBot:
             if check_already_followed(self, user_id=self.media_by_tag[0]['node']["owner"]["id"]) == 1:
                 self.write_log("Already followed before " + self.media_by_tag[0]['node']["owner"]["id"])
                 self.next_iteration["Follow"] = time.time() + \
-                                                self.add_time(self.follow_delay/2)
+                                                self.add_time(self.follow_delay)
                 return
                 
             log_string = "Trying to follow: %s" % (
@@ -934,37 +972,37 @@ class InstaBot:
                     if follows == 0 or follower / follows > 2:
                         self.is_selebgram = True
                         self.is_fake_account = False
-                        self.write_log('   >>>This is probably Selebgram account')
+                        write_log('   >>>This is probably Selebgram account')
                     elif follower == 0 or follows / follower > 2:
                         self.is_fake_account = True
                         self.is_selebgram = False
-                        self.write_log('   >>>This is probably Fake account')
+                        write_log('   >>>This is probably Fake account')
                     else:
                         self.is_selebgram = False
                         self.is_fake_account = False
-                        self.write_log('   >>>This is a normal account')
+                        write_log('   >>>This is a normal account')
 
                     if media > 0 and follows / media < 25 and follower / media < 25:
                         self.is_active_user = True
-                        self.write_log('   >>>This user is active')
+                        write_log('   >>>This user is active')
                     else:
                         self.is_active_user = False
-                        self.write_log('   >>>This user is passive')
+                        write_log('   >>>This user is passive')
 
                     if follow_viewer or has_requested_viewer:
                         self.is_follower = True
-                        self.write_log("   >>>This account is following you")
+                        write_log("   >>>This account is following you")
                     else:
                         self.is_follower = False
-                        self.write_log('   >>>This account is NOT following you')
+                        write_log('   >>>This account is NOT following you')
 
                     if followed_by_viewer or requested_by_viewer:
                         self.is_following = True
-                        self.write_log('   >>>You are following this account')
+                        write_log('   >>>You are following this account')
 
                     else:
                         self.is_following = False
-                        self.write_log('   >>>You are NOT following this account')
+                        write_log('   >>>You are NOT following this account')
 
                 except:
                     logging.exception("Except on auto_unfollow!")
