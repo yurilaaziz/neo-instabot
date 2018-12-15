@@ -275,7 +275,6 @@ class InstaBot:
             'Accept-Language': self.accept_language,
             'Accept-Encoding': 'gzip, deflate, br',
             'Connection': 'keep-alive',
-            'Content-Length': '0',
             'Host': 'www.instagram.com',
             'Origin': 'https://www.instagram.com',
             'Referer': 'https://www.instagram.com/',
