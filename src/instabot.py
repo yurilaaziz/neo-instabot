@@ -3,13 +3,15 @@
 
 from __future__ import print_function
 import sys
-from pip._internal import main
-import importlib
 
 if (sys.version_info < (3, 0)):
      # Python 3 code in this block
      print('Python v3.5 or above required for Instaloader module at the moment. Exiting...')
      quit()
+
+
+from pip._internal import main
+import importlib
 
 #Required Dependencies and Modules, offer to install them automatically
 required_modules = ['requests', 'instaloader', 'fake_useragent']
