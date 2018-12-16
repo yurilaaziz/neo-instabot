@@ -2,6 +2,42 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import print_function
+import sys
+from pip._internal import main
+import importlib
+
+if (sys.version_info < (3, 0)):
+     # Python 3 code in this block
+     print('Python v3.5 or above required for Instaloader module at the moment. Exiting...')
+     quit()
+
+"""Required Dependencies and Modules"""
+required_modules = ['requests', 'instaloader', 'fake_useragent']
+
+module_requirements = ''
+for modname in required_modules:
+    module_requirements = modname + " " + module_requirements
+    
+for modname in required_modules:
+    try:
+        # try to import the module normally and put it in globals
+        globals()[modname] = importlib.import_module(modname)
+    except ImportError as e:
+        module_install_question = input("\nOne or more required modules are missing.\n Would you like to try install them automatically? (yes/no): ")
+        if(module_install_question == "yes" or module_install_question == "y"):
+            result = main(['install', '-r', 'requirements.txt', '--quiet'])
+                        
+            if result != 0: # if pip could not install it reraise the error
+                print('Error installing modules. Please install manually using requirements.txt')
+                raise
+            else:
+            # if the install was sucessful, put modname in globals
+                print("Modules in requirements.txt installed successfuly. Loading...\n\n")
+                globals()[modname] = importlib.import_module(modname)
+        else:
+            print('Cannot continue without module ' + modname + '. Please requirements.txt. Exiting.')
+            quit()
+
 from .unfollow_protocol import unfollow_protocol
 from .userinfo import UserInfo
 import atexit
@@ -11,10 +47,9 @@ import json
 import logging
 import random
 import signal
-import sys
 import sqlite3
 import time
-import requests
+import re
 from .sql_updates import check_and_update, check_already_liked
 from .sql_updates import check_already_followed, check_already_unfollowed
 from .sql_updates import insert_media, insert_username, insert_unfollow_count
@@ -22,15 +57,7 @@ from .sql_updates import get_usernames_first, get_usernames
 from .sql_updates import get_username_random, get_username_to_unfollow_random
 from .sql_updates import check_and_insert_user_agent
 from fake_useragent import UserAgent
-import re
-import pprint
 
-if (sys.version_info < (3, 0)):
-     # Python 3 code in this block
-     print('Python v3.5 or above required for Instaloader module at the moment. Exiting...')
-     quit()
-else:
-     import instaloader
 
 
 class InstaBot:
@@ -241,14 +268,32 @@ class InstaBot:
         self.media_by_user = []
         self.unwanted_username_list = unwanted_username_list
         now_time = datetime.datetime.now()
-        log_string = 'Instabot v1.2.0/1 started at %s:\n' % \
+             
+        self.check_for_bot_update()
+        log_string = 'Instabot v1.2.0/1 started at %s:' % \
                      (now_time.strftime("%d.%m.%Y %H:%M"))
         self.write_log(log_string)
         self.login()
         self.populate_user_blacklist()
         signal.signal(signal.SIGTERM, self.cleanup)
         atexit.register(self.cleanup)
-
+        
+    
+    def check_for_bot_update(self):
+        self.write_log('Checking for updates...')
+        
+        try:
+            updated_timestamp = self.c.get('https://github.com/dimisdas/instabot.py/raw/master/version.txt') #CHANGE THIS TO OFFICIAL REPO IF KEPT
+            current_version_timestamp = open('version.txt','r')
+            if(int(updated_timestamp.text) > int(current_version_timestamp.read()) ):
+                self.write_log('UPDATE AVAILABLE >> Please update InstaBot. You are running an older version.')
+            else:
+                self.write_log('You are running the latest stable version')
+        except:
+            self.write_log('Could not check for updates')
+    
+    
+    
     def populate_user_blacklist(self):
         for user in self.user_blacklist:
             user_id_url = self.url_user_detail % (user)
