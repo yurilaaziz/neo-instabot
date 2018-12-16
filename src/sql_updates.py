@@ -129,7 +129,12 @@ def get_username_to_unfollow_random(self):
     if username:
         return username
     else:
-        return False
+        username = self.follows_db_c.execute("SELECT * FROM usernames WHERE \
+        unfollow_count=0 ORDER BY RANDOM() LIMIT 1").fetchone()
+        if username:
+            return username
+        else:
+            return False
 
 def check_and_insert_user_agent(self, user_agent):
     """ Check user agent  """
