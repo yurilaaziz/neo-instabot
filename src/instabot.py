@@ -49,7 +49,7 @@ import re
 from .sql_updates import check_and_update, check_already_liked
 from .sql_updates import check_already_followed, check_already_unfollowed
 from .sql_updates import insert_media, insert_username, insert_unfollow_count
-from .sql_updates import get_usernames_first, get_usernames
+from .sql_updates import get_usernames_first, get_usernames, get_username_row_count
 from .sql_updates import get_username_random, get_username_to_unfollow_random
 from .sql_updates import check_and_insert_user_agent
 from fake_useragent import UserAgent
@@ -162,7 +162,7 @@ class InstaBot:
                  media_max_like=50,
                  media_min_like=0,
                  follow_per_day=0,
-                 follow_time=5 * 60 * 60,
+                 follow_time=5 * 60 * 60, #Cannot be zero
                  unfollow_per_day=0,
                  start_at_h=0,
                  start_at_m=0,
@@ -199,6 +199,7 @@ class InstaBot:
         fake_ua = UserAgent()
         self.user_agent = check_and_insert_user_agent(self, str(fake_ua.random))
         self.bot_start = datetime.datetime.now()
+        self.bot_start_ts = time.time()
         self.start_at_h = start_at_h
         self.start_at_m = start_at_m
         self.end_at_h = end_at_h
@@ -218,7 +219,7 @@ class InstaBot:
             self.like_delay = self.time_in_day / self.like_per_day
 
         # Follow
-        self.follow_time = follow_time
+        self.follow_time = follow_time #Cannot be zero
         self.follow_per_day = follow_per_day
         if self.follow_per_day != 0:
             self.follow_delay = self.time_in_day / self.follow_per_day
@@ -281,7 +282,7 @@ class InstaBot:
             updated_timestamp = self.c.get(self.instabot_repo_update) #CHANGE THIS TO OFFICIAL REPO IF KEPT
             current_version_timestamp = open('version.txt','r')
             if(int(updated_timestamp.text) > int(current_version_timestamp.read()) ):
-                self.write_log('UPDATE AVAILABLE >> Please update InstaBot. You are running an older version.')
+                self.write_log('>>> UPDATE AVAILABLE <<< Please update Instabot. You are running an older version.')
             else:
                 self.write_log('You are running the latest stable version')
         except:
@@ -311,7 +312,7 @@ class InstaBot:
                 time.sleep(5 * random.random())
 
     def login(self):
-        log_string = 'Trying to login as %s...\n' % (self.user_login)
+        log_string = 'Trying to login as %s...' % (self.user_login)
         self.write_log(log_string)
         self.login_post = {
             'username': self.user_login,
@@ -402,7 +403,7 @@ class InstaBot:
                 ui = UserInfo()
                 self.user_id = ui.get_user_id_by_login(self.user_login)
                 self.login_status = True
-                log_string = '%s login success!' % (self.user_login)
+                log_string = "%s login success!\n" % (self.user_login)
                 self.write_log(log_string)
             else:
                 self.login_status = False
@@ -883,6 +884,16 @@ class InstaBot:
 
     def new_auto_mod_unfollow(self):
         if time.time() > self.next_iteration["Unfollow"] and self.unfollow_per_day != 0:
+            
+            if (time.time() - self.bot_start_ts) < 30:
+                #let bot initialize
+                return 
+            if get_username_row_count(self) < 10:
+                self.write_log('    >>>Waiting for database to populate before unfollowing (progress '+str(get_username_row_count(self))+"/10)")
+                self.next_iteration["Unfollow"] = time.time() + \
+                                                    (self.add_time(self.unfollow_delay)/2)
+                return #DB doesn't have enough followers yet
+
             if self.bot_mode == 0:
                 log_string = "Trying to unfollow #%i: " % (self.unfollow_counter + 1)
                 self.write_log(log_string)
