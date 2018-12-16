@@ -92,6 +92,7 @@ class InstaBot:
     url_media_detail = 'https://www.instagram.com/p/%s/?__a=1'
     url_user_detail = 'https://www.instagram.com/%s/'
     api_user_detail = 'https://i.instagram.com/api/v1/users/%s/info/'
+    instabot_repo_update = 'https://github.com/dimisdas/instabot.py/raw/master/version.txt' #Change this to official
 
     user_agent = "" ""
     accept_language = 'en-US,en;q=0.5'
@@ -277,7 +278,7 @@ class InstaBot:
         self.write_log('Checking for updates...')
         
         try:
-            updated_timestamp = self.c.get('https://github.com/dimisdas/instabot.py/raw/master/version.txt') #CHANGE THIS TO OFFICIAL REPO IF KEPT
+            updated_timestamp = self.c.get(self.instabot_repo_update) #CHANGE THIS TO OFFICIAL REPO IF KEPT
             current_version_timestamp = open('version.txt','r')
             if(int(updated_timestamp.text) > int(current_version_timestamp.read()) ):
                 self.write_log('UPDATE AVAILABLE >> Please update InstaBot. You are running an older version.')
