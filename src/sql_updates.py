@@ -135,6 +135,15 @@ def get_username_to_unfollow_random(self):
             return username
         else:
             return False
+            
+            
+def get_username_row_count(self):
+    """ Gets the number of usernames in table """
+    count = self.follows_db_c.execute("select count(*) from usernames").fetchone()
+    if count:
+        return count[0]
+    else:
+        return False
 
 def check_and_insert_user_agent(self, user_agent):
     """ Check user agent  """
