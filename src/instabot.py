@@ -11,12 +11,8 @@ if (sys.version_info < (3, 0)):
      print('Python v3.5 or above required for Instaloader module at the moment. Exiting...')
      quit()
 
-"""Required Dependencies and Modules"""
+#Required Dependencies and Modules, offer to install them automatically
 required_modules = ['requests', 'instaloader', 'fake_useragent']
-
-module_requirements = ''
-for modname in required_modules:
-    module_requirements = modname + " " + module_requirements
     
 for modname in required_modules:
     try:
@@ -35,7 +31,7 @@ for modname in required_modules:
                 print("Modules in requirements.txt installed successfuly. Loading...\n\n")
                 globals()[modname] = importlib.import_module(modname)
         else:
-            print('Cannot continue without module ' + modname + '. Please requirements.txt. Exiting.')
+            print('Cannot continue without module ' + modname + '. Please install dependencies in requirements.txt. Exiting.')
             quit()
 
 from .unfollow_protocol import unfollow_protocol
@@ -57,7 +53,6 @@ from .sql_updates import get_usernames_first, get_usernames
 from .sql_updates import get_username_random, get_username_to_unfollow_random
 from .sql_updates import check_and_insert_user_agent
 from fake_useragent import UserAgent
-
 
 
 class InstaBot:
@@ -268,7 +263,6 @@ class InstaBot:
         self.media_by_user = []
         self.unwanted_username_list = unwanted_username_list
         now_time = datetime.datetime.now()
-             
         self.check_for_bot_update()
         log_string = 'Instabot v1.2.0/1 started at %s:' % \
                      (now_time.strftime("%d.%m.%Y %H:%M"))
@@ -291,7 +285,6 @@ class InstaBot:
                 self.write_log('You are running the latest stable version')
         except:
             self.write_log('Could not check for updates')
-    
     
     
     def populate_user_blacklist(self):
@@ -339,7 +332,6 @@ class InstaBot:
         })
 
         r = self.s.get(self.url)
-        #self.s.headers.update({'X-CSRFToken': r.cookies['csrftoken']})
         csrf_token = re.search('(?<=\"csrf_token\":\")\w+', r.text).group(0)
         self.s.headers.update({'X-CSRFToken': csrf_token})
         time.sleep(5 * random.random())
@@ -539,21 +531,6 @@ class InstaBot:
             return username
         else:
             return False
-
-    # def get_username_by_user_id(self, user_id):
-    #     """ Get username by user_id """
-    #     if self.login_status:
-    #         try:
-    #             url_info = self.api_user_detail % user_id
-    #             r = self.s.get(url_info, headers="")
-    #             all_data = json.loads(r.text)
-    #             username = all_data["user"]["username"]
-    #             return username
-    #         except:
-    #             logging.exception("Except on get_username_by_user_id")
-    #             return False
-    #     else:
-    #         return False
 
     def get_userinfo_by_name(self, username):
         """ Get user info by name """
@@ -756,7 +733,6 @@ class InstaBot:
                                                         self.follow_counter)
                     self.write_log(log_string)
                     username = self.get_username_by_user_id(user_id=user_id)
-                    #print('Inserting ' + user_id + ' as ' + username + "\n")
                     insert_username(self, user_id=user_id, username=username)
                 return follow
             except:
