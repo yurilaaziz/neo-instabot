@@ -22,7 +22,7 @@ def user_feed_protocol(self):
             return 0
         if self.is_follower is not False:
             print(
-                "@@@@@@@@@@@@@@ This is your follower B****h!!! @@@@@@@@@@@@@")
+                "This is your follower")
             self.is_follower_number += 1
             time.sleep(5)
             return

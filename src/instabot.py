@@ -161,7 +161,7 @@ class InstaBot:
                  login,
                  password,
                  like_per_day=1000,
-                 media_max_like=50,
+                 media_max_like=150,
                  media_min_like=0,
                  follow_per_day=0,
                  follow_time=5 * 60 * 60, #Cannot be zero
@@ -265,6 +265,7 @@ class InstaBot:
         self.media_by_tag = []
         self.media_on_feed = []
         self.media_by_user = []
+        self.current_user_info = ''
         self.unwanted_username_list = unwanted_username_list
         now_time = datetime.datetime.now()
         self.check_for_bot_update()
@@ -1076,13 +1077,15 @@ class InstaBot:
             log_string = "%s : Get media id on recent feed" % (self.user_login)
             self.write_log(log_string)
             if self.login_status == 1:
-                url_tag = 'https://www.instagram.com/?__a=1'
+                url_tag = 'https://www.instagram.com/'
                 try:
                     r = self.s.get(url_tag)
-                    all_data = json.loads(r.text)
+                    
+                    jsondata = re.search('additionalDataLoaded\(\'feed\',({.*})\);', r.text).group(1)
+                    all_data = json.loads(jsondata.strip())
 
                     self.media_on_feed = list(
-                        all_data['graphql']['user']['edge_web_feed_timeline'][
+                        all_data['user']['edge_web_feed_timeline'][
                             'edges'])
 
                     log_string = "Media in recent feed = %i" % (
