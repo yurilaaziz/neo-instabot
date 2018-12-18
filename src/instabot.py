@@ -9,9 +9,12 @@ if (sys.version_info < (3, 0)):
      print('Python v3.5 or above required for Instaloader module at the moment. Exiting...')
      quit()
 
-
-from pip._internal import main
 import importlib
+try:
+    from pip._internal import main
+except:
+    print('>>> Please install the latest version of pip')
+
 
 #Required Dependencies and Modules, offer to install them automatically
 required_modules = ['requests', 'instaloader', 'fake_useragent']
@@ -21,17 +24,21 @@ for modname in required_modules:
         # try to import the module normally and put it in globals
         globals()[modname] = importlib.import_module(modname)
     except ImportError as e:
-        module_install_question = input("\nOne or more required modules are missing.\n Would you like to try install them automatically? (yes/no): ")
+        module_install_question = str(input("\nOne or more required modules are missing.\n Would you like to try install them automatically? (yes/no): "))
         if(module_install_question == "yes" or module_install_question == "y"):
-            result = main(['install', '-r', 'requirements.txt', '--quiet'])
+            try:
+                result = main(['install', '-r', 'requirements.txt', '--quiet'])
                         
-            if result != 0: # if pip could not install it reraise the error
-                print('Error installing modules. Please install manually using requirements.txt')
+                if result != 0: # if pip could not install it reraise the error
+                    print('Error installing modules. Please install manually using requirements.txt')
+                    raise
+                else:
+                # if the install was sucessful, put modname in globals
+                    print("Modules in requirements.txt installed successfuly. Loading...\n\n")
+                    globals()[modname] = importlib.import_module(modname)
+            except:
+                print('Error installing modules. Please make sure you have installed the latest version of pip.\n You can install manually using requirements.txt')
                 raise
-            else:
-            # if the install was sucessful, put modname in globals
-                print("Modules in requirements.txt installed successfuly. Loading...\n\n")
-                globals()[modname] = importlib.import_module(modname)
         else:
             print('Cannot continue without module ' + modname + '. Please install dependencies in requirements.txt. Exiting.')
             quit()
