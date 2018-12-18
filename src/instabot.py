@@ -373,6 +373,16 @@ class InstaBot:
                 self.c.cookies['csrftoken'] = challenge_csrf_token
                 self.c.headers.update({'User-Agent': self.user_agent})
                 self.c.headers.update({'x-requested-with': 'XMLHttpRequest'}) #x-requested-with: XMLHttpRequest
+                self.s.headers.update({
+                    'Accept': '*/*',
+                    'Accept-Language': self.accept_language,
+                    'Accept-Encoding': 'gzip, deflate, br',
+                    'Connection': 'keep-alive',
+                    'Host': 'www.instagram.com',
+                    'Origin': challenge_url,
+                    'Referer': challenge_url,
+                    'Content-Type': 'application/x-www-form-urlencoded',         
+                })
                 
                 #Request instagram to send a code
                 challenge_request_code = self.c.post(challenge_url, data=challenge_post, allow_redirects=True)
