@@ -371,6 +371,7 @@ class InstaBot:
                 self.c.headers.update({'X-CSRFToken': challenge_csrf_token})
                 self.c.headers.update({'X-Instagram-AJAX': rollout_hash})
                 self.c.cookies['csrftoken'] = challenge_csrf_token
+                self.c.headers.update({'User-Agent': self.user_agent})
                 self.c.headers.update({'x-requested-with': 'XMLHttpRequest'}) #x-requested-with: XMLHttpRequest
                 
                 #Request instagram to send a code
