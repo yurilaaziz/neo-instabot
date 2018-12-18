@@ -373,7 +373,7 @@ class InstaBot:
                 self.c.cookies['csrftoken'] = challenge_csrf_token
                 self.c.headers.update({'User-Agent': self.user_agent})
                 self.c.headers.update({'x-requested-with': 'XMLHttpRequest'}) #x-requested-with: XMLHttpRequest
-                self.s.headers.update({
+                self.c.headers.update({
                     'Accept': '*/*',
                     'Accept-Language': self.accept_language,
                     'Accept-Encoding': 'gzip, deflate, br',
