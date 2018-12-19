@@ -94,8 +94,10 @@ while True:
         bot.new_auto_mod()
 
     elif mode == 3:
-        unfollow_protocol(bot)
-        time.sleep(10 * 60)
+        bot.bot_mode = 3
+        while(bot.login_status == 1):
+            bot.unfollow_recent_feed()
+            time.sleep(5)
 
     elif mode == 4:
         feed_scanner(bot)
