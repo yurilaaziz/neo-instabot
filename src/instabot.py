@@ -350,6 +350,13 @@ class InstaBot:
         login = self.s.post(
             self.url_login, data=self.login_post, allow_redirects=True)
         #print(login.text)
+        try:
+            if login.status_code == 200:
+                self.csrftoken = login.cookies['csrftoken']
+                self.s.headers.update({'X-CSRFToken': login.cookies['csrftoken']})
+        except:
+            write_log('Something wrong with login')
+            
         if "checkpoint_required" in login.text:
             try:
                 try:
@@ -392,30 +399,21 @@ class InstaBot:
                 challenge_request_code = self.s.post(challenge_url, data=challenge_post, allow_redirects=True)
                 
                 #User should receive a code soon, ask for it
-                challenge_userinput_code = input("Challenge Required.\n\nEnter the code sent to your mail/phone: ")
+                challenge_userinput_code = int(input("Challenge Required.\n\nEnter the code sent to your mail/phone: "))
                 challenge_security_post = {
                     'security_code': challenge_userinput_code
                 }
                 
                 complete_challenge = self.s.post(challenge_url, data=challenge_security_post, allow_redirects=True)
                 self.write_log(complete_challenge.text)
-                
+                self.csrftoken = complete_challenge.cookies['csrftoken']
+                self.s.headers.update({'X-CSRFToken': self.csrftoken, 'X-Instagram-AJAX': '1'})
                 
                 
             except:
                 print("Login failed, response: \n\n" + login.text)
                 quit()
-                
-
-        
-        if login.status_code == 200:
-            try:
-                self.csrftoken = login.cookies['csrftoken']
-                self.s.headers.update({'X-CSRFToken': login.cookies['csrftoken']})
-            except:
-                self.write_log("Could not login.")
-                exit()
-            
+               
         rollout_hash = re.search('(?<=\"rollout_hash\":\")\w+', r.text).group(0)
         self.s.headers.update({'X-Instagram-AJAX': rollout_hash})      
         #ig_vw=1536; ig_pr=1.25; ig_vh=772;  ig_or=landscape-primary;
