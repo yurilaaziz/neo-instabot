@@ -276,7 +276,7 @@ class InstaBot:
         self.unwanted_username_list = unwanted_username_list
         now_time = datetime.datetime.now()
         self.check_for_bot_update()
-        log_string = 'Instabot v1.2.0/1 started at %s:' % \
+        log_string = 'Instabot v1.2.0/2 started at %s:' % \
                      (now_time.strftime("%d.%m.%Y %H:%M"))
         self.write_log(log_string)
         self.login()
@@ -413,9 +413,10 @@ class InstaBot:
             except:
                 print("Login failed, response: \n\n" + login.text)
                 quit()
-               
-        rollout_hash = re.search('(?<=\"rollout_hash\":\")\w+', r.text).group(0)
-        self.s.headers.update({'X-Instagram-AJAX': rollout_hash})      
+        
+        else:      
+            rollout_hash = re.search('(?<=\"rollout_hash\":\")\w+', r.text).group(0)
+            self.s.headers.update({'X-Instagram-AJAX': rollout_hash})      
         #ig_vw=1536; ig_pr=1.25; ig_vh=772;  ig_or=landscape-primary;
         self.s.cookies['ig_vw'] = '1536'
         self.s.cookies['ig_pr'] = '1.25'
