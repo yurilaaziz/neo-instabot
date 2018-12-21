@@ -349,9 +349,13 @@ class InstaBot:
         time.sleep(5 * random.random())
         login = self.s.post(
             self.url_login, data=self.login_post, allow_redirects=True)
+        #print(login.text)
         if "checkpoint_required" in login.text:
             try:
-                challenge_url = 'https://instagram.com' + re.search('(/challenge/\w+/\w+/)', login.text).group(0)
+                try:
+                    challenge_url = 'https://instagram.com' + re.search('(/challenge/\w+/\w+/)', login.text).group(0)
+                except:
+                    challenge_url = re.search('checkpoint_url": "(.*)"', login.text).group(1) #checkpoint_url": "(.*)",
                 self.write_log('Challenge required at ' + challenge_url)
                 
                 #Get challenge page
@@ -385,7 +389,7 @@ class InstaBot:
                 })
                 
                 #Request instagram to send a code
-                challenge_request_code = self.c.post(challenge_url, data=challenge_post, allow_redirects=True)
+                challenge_request_code = self.s.post(challenge_url, data=challenge_post, allow_redirects=True)
                 
                 #User should receive a code soon, ask for it
                 challenge_userinput_code = input("Challenge Required.\n\nEnter the code sent to your mail/phone: ")
@@ -393,7 +397,7 @@ class InstaBot:
                     'security_code': challenge_userinput_code
                 }
                 
-                complete_challenge = self.c.post(challenge_url, data=challenge_security_post, allow_redirects=True)
+                complete_challenge = self.s.post(challenge_url, data=challenge_security_post, allow_redirects=True)
                 self.write_log(complete_challenge.text)
                 
                 
@@ -405,8 +409,12 @@ class InstaBot:
 
         
         if login.status_code == 200:
-            self.csrftoken = login.cookies['csrftoken']
-            self.s.headers.update({'X-CSRFToken': login.cookies['csrftoken']})
+            try:
+                self.csrftoken = login.cookies['csrftoken']
+                self.s.headers.update({'X-CSRFToken': login.cookies['csrftoken']})
+            except:
+                self.write_log("Could not login.")
+                exit()
             
         rollout_hash = re.search('(?<=\"rollout_hash\":\")\w+', r.text).group(0)
         self.s.headers.update({'X-Instagram-AJAX': rollout_hash})      
