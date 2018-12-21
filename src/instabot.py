@@ -362,7 +362,7 @@ class InstaBot:
                 try:
                     challenge_url = 'https://instagram.com' + re.search('(/challenge/\w+/\w+/)', login.text).group(0)
                 except:
-                    challenge_url = re.search('checkpoint_url": "(.*)"', login.text).group(1) #checkpoint_url": "(.*)",
+                    challenge_url = re.search('checkpoint_url\": \"(.*)\",', login.text).group(1) #checkpoint_url": "(.*)",
                 self.write_log('Challenge required at ' + challenge_url)
                 
                 #Get challenge page
