@@ -366,7 +366,7 @@ class InstaBot:
                 self.write_log('Challenge required at ' + challenge_url)
                 
                 #Get challenge page
-                challenge_request_explore = self.c.get(challenge_url)
+                challenge_request_explore = self.s.get(challenge_url)
                 
                 #Get CSRF Token from challenge page
                 challenge_csrf_token = re.search('(?<=\"csrf_token\":\")\w+', challenge_request_explore.text).group(0)
@@ -379,12 +379,12 @@ class InstaBot:
                 }
                 
                 #Update headers for challenge submit page
-                self.c.headers.update({'X-CSRFToken': challenge_csrf_token})
-                self.c.headers.update({'X-Instagram-AJAX': rollout_hash})
-                self.c.cookies['csrftoken'] = challenge_csrf_token
-                self.c.headers.update({'User-Agent': self.user_agent})
-                self.c.headers.update({'x-requested-with': 'XMLHttpRequest'}) #x-requested-with: XMLHttpRequest
-                self.c.headers.update({
+                self.s.headers.update({'X-CSRFToken': challenge_csrf_token})
+                self.s.headers.update({'X-Instagram-AJAX': rollout_hash})
+                self.s.cookies['csrftoken'] = challenge_csrf_token
+                self.s.headers.update({'User-Agent': self.user_agent})
+                self.s.headers.update({'x-requested-with': 'XMLHttpRequest'}) #x-requested-with: XMLHttpRequest
+                self.s.headers.update({
                     'Accept': '*/*',
                     'Accept-Language': self.accept_language,
                     'Accept-Encoding': 'gzip, deflate, br',
