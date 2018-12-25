@@ -127,7 +127,7 @@ def setupinteractive(config, config_location='config.ini'):
     print('\nWriting to file...')                                   
     with open(config_location, 'w') as configfile:
          config.write(configfile)
-    print('Config updated!')
+    print('Config updated! Re-run script to login.')
     exit()
          
          
