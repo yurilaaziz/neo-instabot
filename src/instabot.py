@@ -343,6 +343,8 @@ class InstaBot:
             'Content-Type': 'application/x-www-form-urlencoded',
             'X-Requested-With': 'XMLHttpRequest'
         })
+        
+        
 
         r = self.s.get(self.url)
         csrf_token = re.search('(?<=\"csrf_token\":\")\w+', r.text).group(0)
@@ -366,44 +368,53 @@ class InstaBot:
                     challenge_url = re.search('checkpoint_url\": \"(.*)\",', login.text).group(1) #checkpoint_url": "(.*)",
                 self.write_log('Challenge required at ' + challenge_url)
                 
-                #Get challenge page
-                challenge_request_explore = self.s.get(challenge_url)
+                with requests.Session() as clg:
                 
-                #Get CSRF Token from challenge page
-                challenge_csrf_token = re.search('(?<=\"csrf_token\":\")\w+', challenge_request_explore.text).group(0)
-                #Get Rollout Hash from challenge page
-                rollout_hash = re.search('(?<=\"rollout_hash\":\")\w+', challenge_request_explore.text).group(0)
-                
-                #Ask for option 1 from challenge, which is usually Email or Phone
-                challenge_post = {
-                    'choice': 1
-                }
-                
-                #Update headers for challenge submit page
-                self.c.headers.update({'X-CSRFToken': challenge_csrf_token})
-                self.c.headers.update({'X-Instagram-AJAX': rollout_hash})
-                self.c.cookies['csrftoken'] = challenge_csrf_token
-                self.c.headers.update({'User-Agent': self.user_agent})
-                self.c.headers.update({'x-requested-with': 'XMLHttpRequest'}) #x-requested-with: XMLHttpRequest
-                self.s.headers.update({
-                    'Referer': challenge_url,
+                    clg.headers.update({
+                    'Accept': '*/*',
+                    'Accept-Language': self.accept_language,
+                    'Accept-Encoding': 'gzip, deflate, br',
+                    'Connection': 'keep-alive',
+                    'Host': 'www.instagram.com',
+                    'Origin': 'https://www.instagram.com',            
+                    'User-Agent': self.user_agent,
+                    'X-Instagram-AJAX': '1',
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'x-requested-with': "XMLHttpRequest",
+                    })
+                    #Get challenge page
+                    challenge_request_explore = clg.get(challenge_url)
                     
-                    'User-Agent': self.user_agent     
-                })
-                
-                #Request instagram to send a code
-                challenge_request_code = self.s.post(challenge_url, data=challenge_post, allow_redirects=True)
-                
-                #User should receive a code soon, ask for it
-                challenge_userinput_code = int(input("Challenge Required.\n\nEnter the code sent to your mail/phone: "))
-                challenge_security_post = {
-                    'security_code': challenge_userinput_code
-                }
-                
-                complete_challenge = self.s.post(challenge_url, data=challenge_security_post, allow_redirects=True)
-                self.write_log(complete_challenge.text)
-                self.csrftoken = complete_challenge.cookies['csrftoken']
-                self.s.headers.update({'X-CSRFToken': self.csrftoken, 'X-Instagram-AJAX': '1'})
+                    #Get CSRF Token from challenge page
+                    challenge_csrf_token = re.search('(?<=\"csrf_token\":\")\w+', challenge_request_explore.text).group(0)
+                    #Get Rollout Hash from challenge page
+                    rollout_hash = re.search('(?<=\"rollout_hash\":\")\w+', challenge_request_explore.text).group(0)
+                    
+                    #Ask for option 1 from challenge, which is usually Email or Phone
+                    challenge_post = {
+                        'choice': 1
+                    }
+                    
+                    
+                    #Update headers for challenge submit page
+                    clg.headers.update({'X-CSRFToken': challenge_csrf_token})
+                    clg.headers.update({'Referer': challenge_url})               
+                    #Request instagram to send a code
+                    challenge_request_code = clg.post(challenge_url, data=challenge_post, allow_redirects=True)
+                    
+                    #User should receive a code soon, ask for it
+                    challenge_userinput_code = input("Challenge Required.\n\nEnter the code sent to your mail/phone: ")
+                    challenge_security_post = {
+                        'security_code': challenge_userinput_code
+                    }
+                    
+                    complete_challenge = clg.post(challenge_url, data=challenge_security_post, allow_redirects=True)
+                    print(complete_challenge.request.headers)
+                    #quit()
+                    self.write_log(complete_challenge.text)
+                    #quit()
+                    self.csrftoken = complete_challenge.cookies['csrftoken']
+                    self.s.headers.update({'X-CSRFToken': self.csrftoken, 'X-Instagram-AJAX': '1'})
                 
                 
             except:
@@ -883,7 +894,7 @@ class InstaBot:
 
     def new_auto_mod_follow(self):
         if time.time() < self.next_iteration["Follow"]:
-        	return
+            return
         if time.time() > self.next_iteration["Follow"] and \
                         self.follow_per_day != 0 and len(self.media_by_tag) > 0:
             if self.media_by_tag[0]['node']["owner"]["id"] == self.user_id:
@@ -1108,10 +1119,10 @@ class InstaBot:
                 insert_unfollow_count(self, user_id=current_id)
 
     def unfollow_recent_feed(self):
-	    
+        
         if len(self.media_on_feed) == 0:
             self.get_media_id_recent_feed()
-	    
+        
         if len(self.media_on_feed) != 0 and self.is_follower_number < 5 and time.time() > self.next_iteration["Unfollow"] and self.unfollow_per_day != 0:
             self.get_media_id_recent_feed()
             chooser = random.randint(0, len(self.media_on_feed) - 1)
