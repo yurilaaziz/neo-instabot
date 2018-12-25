@@ -58,7 +58,7 @@ import re
 from .sql_updates import check_and_update, check_already_liked
 from .sql_updates import check_already_followed, check_already_unfollowed
 from .sql_updates import insert_media, insert_username, insert_unfollow_count
-from .sql_updates import get_usernames_first, get_usernames, get_username_row_count
+from .sql_updates import get_usernames_first, get_usernames, get_username_row_count, check_if_userid_exists
 from .sql_updates import get_username_random, get_username_to_unfollow_random
 from .sql_updates import check_and_insert_user_agent
 from fake_useragent import UserAgent
@@ -265,6 +265,7 @@ class InstaBot:
                 'https': 'http://' + proxy,
             }
             self.s.proxies.update(proxies)
+            self.c.proxies.update(proxies)
         # convert login to lower
         self.user_login = login.lower()
         self.user_password = password
@@ -276,7 +277,7 @@ class InstaBot:
         self.unwanted_username_list = unwanted_username_list
         now_time = datetime.datetime.now()
         self.check_for_bot_update()
-        log_string = 'Instabot v1.2.0/2 started at %s:' % \
+        log_string = 'Instabot v1.2.0/3 started at %s:' % \
                      (now_time.strftime("%d.%m.%Y %H:%M"))
         self.write_log(log_string)
         self.login()
@@ -379,12 +380,12 @@ class InstaBot:
                 }
                 
                 #Update headers for challenge submit page
-                self.s.headers.update({'X-CSRFToken': challenge_csrf_token})
-                self.s.headers.update({'X-Instagram-AJAX': rollout_hash})
-                self.s.cookies['csrftoken'] = challenge_csrf_token
-                self.s.headers.update({'User-Agent': self.user_agent})
-                self.s.headers.update({'x-requested-with': 'XMLHttpRequest'}) #x-requested-with: XMLHttpRequest
-                self.s.headers.update({
+                self.c.headers.update({'X-CSRFToken': challenge_csrf_token})
+                self.c.headers.update({'X-Instagram-AJAX': rollout_hash})
+                self.c.cookies['csrftoken'] = challenge_csrf_token
+                self.c.headers.update({'User-Agent': self.user_agent})
+                self.c.headers.update({'x-requested-with': 'XMLHttpRequest'}) #x-requested-with: XMLHttpRequest
+                self.c.headers.update({
                     'Accept': '*/*',
                     'Accept-Language': self.accept_language,
                     'Accept-Encoding': 'gzip, deflate, br',
@@ -404,7 +405,7 @@ class InstaBot:
                     'security_code': challenge_userinput_code
                 }
                 
-                complete_challenge = self.s.post(challenge_url, data=challenge_security_post, allow_redirects=True)
+                complete_challenge = self.s.post('http://httpbin.org/post', data=challenge_security_post, allow_redirects=True)
                 self.write_log(complete_challenge.text)
                 self.csrftoken = complete_challenge.cookies['csrftoken']
                 self.s.headers.update({'X-CSRFToken': self.csrftoken, 'X-Instagram-AJAX': '1'})
@@ -418,6 +419,7 @@ class InstaBot:
             rollout_hash = re.search('(?<=\"rollout_hash\":\")\w+', r.text).group(0)
             self.s.headers.update({'X-Instagram-AJAX': rollout_hash})      
         #ig_vw=1536; ig_pr=1.25; ig_vh=772;  ig_or=landscape-primary;
+        self.s.cookies['csrftoken'] = self.csrftoken
         self.s.cookies['ig_vw'] = '1536'
         self.s.cookies['ig_pr'] = '1.25'
         self.s.cookies['ig_vh'] = '772'
@@ -856,7 +858,7 @@ class InstaBot:
                 time.sleep(3)
                 # print("Tic!")
             else:
-                print("sleeping until {hour}:{min}".format(hour=self.start_at_h,
+                print("!!sleeping until {hour}:{min}".format(hour=self.start_at_h,
                                                            min=self.start_at_m), end="\r")
                 time.sleep(100)
 
@@ -910,14 +912,28 @@ class InstaBot:
                 self.next_iteration["Follow"] = time.time() + \
                                                 self.add_time(self.follow_delay)
 
+
+    def populate_from_feed(self):
+        self.get_media_id_recent_feed()
+        for mediafeed_user in self.media_on_feed:
+            feed_username = mediafeed_user["node"]["owner"]["username"]
+            feed_user_id = mediafeed_user["node"]["owner"]["id"]
+            #print(check_if_userid_exists(self, userid=feed_user_id))
+            if check_if_userid_exists(self, userid=feed_user_id) is False:
+                insert_username(self, user_id=feed_user_id, username=feed_username)
+                self.write_log("Inserted user "+feed_username+" from recent feed")
+            
+    
     def new_auto_mod_unfollow(self):
         if time.time() > self.next_iteration["Unfollow"] and self.unfollow_per_day != 0:
             
             if (time.time() - self.bot_start_ts) < 30:
                 #let bot initialize
                 return 
-            if get_username_row_count(self) < 10:
-                self.write_log('    >>>Waiting for database to populate before unfollowing (progress '+str(get_username_row_count(self))+"/10)")
+            if get_username_row_count(self) < 20:
+                self.write_log('    >>>Waiting for database to populate before unfollowing (progress '+str(get_username_row_count(self))+"/20)\n                        (Will try to populate using recent feed)")
+                self.populate_from_feed()
+                
                 self.next_iteration["Unfollow"] = time.time() + \
                                                     (self.add_time(self.unfollow_delay)/2)
                 return #DB doesn't have enough followers yet
