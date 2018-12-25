@@ -4,7 +4,6 @@ from __future__ import print_function
 import os
 import sys
 import time
-import configparser
 import json
 import sys
 
@@ -13,7 +12,7 @@ if (sys.version_info < (3, 0)):
      print('Python v3.5 or above required for Instaloader module at the moment. Exiting...')
      quit()
 
-import importlib
+import configparser
 try:
     from pip._internal import main
 except:
