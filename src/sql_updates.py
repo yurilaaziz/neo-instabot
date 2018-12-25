@@ -144,6 +144,19 @@ def get_username_row_count(self):
         return count[0]
     else:
         return False
+        
+        
+def check_if_userid_exists(self, userid):
+    """ Checks if username exists """
+    #print("select count(*) from usernames WHERE username_id = " + userid)
+    count = self.follows_db_c.execute("select count(*) from usernames WHERE username_id = " + userid).fetchone()
+    if count:
+        if count[0] > 0:
+            return True
+        else:
+            return False
+    else:
+        return False
 
 def check_and_insert_user_agent(self, user_agent):
     """ Check user agent  """
