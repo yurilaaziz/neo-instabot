@@ -358,7 +358,9 @@ class InstaBot:
                 self.csrftoken = login.cookies['csrftoken']
                 self.s.headers.update({'X-CSRFToken': login.cookies['csrftoken']})
         except:
-            write_log('Something wrong with login')
+            self.write_log('Something wrong with login')
+            self.write_log(login.text)
+            
             
         if "checkpoint_required" in login.text:
             try:
@@ -890,8 +892,11 @@ class InstaBot:
                 if self.this_tag_like_count >= self.max_tag_like_count:
                     self.media_by_tag = [0]
             # Del first media_id
-            del self.media_by_tag[0]
-
+        try:
+        	del self.media_by_tag[0]
+        except:
+        	print('Could not remove media')
+        	
     def new_auto_mod_follow(self):
         if time.time() < self.next_iteration["Follow"]:
             return
