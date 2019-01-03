@@ -444,6 +444,7 @@ class InstaBot:
             else:
                 self.login_status = False
                 self.write_log('Login error! Check your login data!')
+                self.prog_run = False;
         else:
             self.write_log('Login error! Connection error!')
 
@@ -846,7 +847,7 @@ class InstaBot:
             sys.exit(0)
 
     def new_auto_mod(self):
-        while self.prog_run:
+        while self.prog_run and self.login_status:
             now = datetime.datetime.now()
             if (
                     datetime.time(self.start_at_h, self.start_at_m) <= now.time()
