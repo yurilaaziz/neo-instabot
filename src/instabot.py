@@ -17,7 +17,7 @@ except:
 
 
 #Required Dependencies and Modules, offer to install them automatically
-required_modules = ['requests', 'instaloader', 'fake_useragent']
+required_modules = ['requests', 'instaloader', 'fake_useragent', 'threading']
     
 for modname in required_modules:
     try:
@@ -55,9 +55,6 @@ import signal
 import sqlite3
 import time
 import re
-import threading
-import requests
-import instaloader
 from .sql_updates import check_and_update, check_already_liked
 from .sql_updates import check_already_followed, check_already_unfollowed
 from .sql_updates import insert_media, insert_username, insert_unfollow_count
