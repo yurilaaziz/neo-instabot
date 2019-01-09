@@ -102,7 +102,7 @@ class InstaBot:
     url_media_detail = 'https://www.instagram.com/p/%s/?__a=1'
     url_user_detail = 'https://www.instagram.com/%s/'
     api_user_detail = 'https://i.instagram.com/api/v1/users/%s/info/'
-    instabot_repo_update = 'https://github.com/dimisdas/instabot.py/raw/master/version.txt' #Change this to official
+    instabot_repo_update = 'https://github.com/instabot-py/instabot.py/raw/master/version.txt'
 
     user_agent = "" ""
     accept_language = 'en-US,en;q=0.5'
