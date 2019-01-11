@@ -100,6 +100,7 @@ class InstaBot:
     url_login = 'https://www.instagram.com/accounts/login/ajax/'
     url_logout = 'https://www.instagram.com/accounts/logout/'
     url_media_detail = 'https://www.instagram.com/p/%s/?__a=1'
+    url_media = 'https://www.instagram.com/p/%s/'
     url_user_detail = 'https://www.instagram.com/%s/'
     api_user_detail = 'https://i.instagram.com/api/v1/users/%s/info/'
     instabot_repo_update = 'https://github.com/instabot-py/instabot.py/raw/master/version.txt'
@@ -991,10 +992,10 @@ class InstaBot:
         return res.capitalize()
 
     def check_exisiting_comment(self, media_code):
-        url_check = self.url_media_detail % (media_code)
+        url_check = self.url_media % (media_code)
         check_comment = self.s.get(url_check)
         if check_comment.status_code == 200:
-            all_data = json.loads(check_comment.text)
+            all_data = json.loads(re.search('window._sharedData = (.*?);', check_comment.text, re.DOTALL).group(1))['entry_data']['PostPage'][0] #window._sharedData = (.*?);
             if all_data['graphql']['shortcode_media']['owner']['id'] == self.user_id:
                 self.write_log("Keep calm - It's your own media ;)")
                 # Del media to don't loop on it
