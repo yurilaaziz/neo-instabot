@@ -465,6 +465,12 @@ class InstaBot:
             else:
                 self.login_status = False
                 self.write_log('Login error! Check your login data!')
+                if self.session_file != None and os.path.isfile(self.session_file):
+                    try:
+                        os.remove(self.session_file)
+                    except:
+                        self.write_log("Could not delete session file. Please delete manually")
+                        
                 self.prog_run = False;
         else:
             self.write_log('Login error! Connection error!')
