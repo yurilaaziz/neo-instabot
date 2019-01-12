@@ -205,7 +205,8 @@ bot = InstaBot(
     ### 'free_followers' will be blocked because it contains 'free'
     unwanted_username_list=json.loads(config[usrconfig]['unwanted_username_list']),
     unfollow_whitelist=json.loads(config[usrconfig]['unfollow_whitelist']),
-    database_name=usrconfig+'.db')
+    database_name=usrconfig+'.db',
+    session_file=usrconfig+'.session')
 
 while True:
     bot.new_auto_mod()
