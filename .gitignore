@@ -90,6 +90,9 @@ celerybeat-schedule
 # dotenv
 .env
 
+# Sessions
+.session
+
 # virtualenv
 .venv
 venv/
@@ -104,3 +107,6 @@ ENV/
 # IDEs
 .idea/
 *.iml
+*.ini
+*.db
+*.session

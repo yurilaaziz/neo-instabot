@@ -6,6 +6,7 @@ import sys
 import time
 import json
 import sys
+import re
 
 if (sys.version_info < (3, 0)):
      # Python 3 code in this block
@@ -35,7 +36,8 @@ def setupinteractive(config, config_location='config.ini'):
             "follow_time" : "opt",
             "unfollow_per_day" : "opt",
             "unfollow_break_min" : "opt",
-            "unfollow_break_max" : "opt"    
+            "unfollow_break_max" : "opt",
+            "tag_list" : "opt"   
         }
     
     config['DEFAULT'] =     {
@@ -118,10 +120,20 @@ def setupinteractive(config, config_location='config.ini'):
                     config[confusername][setting] = str(confvar)
                     requiredset = 'done'
             else:
-                confvar = input('Enter value for \'' + setting +'\' ('+ prompt_text + config[section][setting]+'): ')
-                if(confvar == ''):
+                if(setting == 'tag_list'):
+                    print('\n\nAttention!\n\nEnter the hashtags you would like to target separated with commas.\n For example:\n      follow4follow, instagood, f2f, instalifo\n\n')
+                    confvar = input('Enter tags (or skip to defaults): ')
+                else:
+                    confvar = input('Enter value for \'' + setting +'\' ('+ prompt_text + config[section][setting]+'): ')
+                if(setting == 'tag_list' and confvar != ''):
+                    confvar = re.sub(r'\s+', '', confvar)
+                    confvar = re.sub(r'#', '', confvar)
+                    tags_list = confvar.split(",")
+                    config[confusername][setting] = str(json.dumps(tags_list))
+                elif(confvar == ''):
                     #print('Entering default: '+ config[section][setting])
-                    config[confusername][setting] = config[section][setting]
+                    if(setting != 'tag_list'):
+                        config[confusername][setting] = config[section][setting]
                 else:
                     config[confusername][setting] = str(confvar)
                 requiredset = 'done'
@@ -130,7 +142,7 @@ def setupinteractive(config, config_location='config.ini'):
     with open(config_location, 'w') as configfile:
          config.write(configfile)
 
-    print('Config updated! Edit config.ini to setup tags. Re-run script to login.')
+    print('Config updated! Re-run script to login.')
 
     exit()
          
@@ -145,10 +157,12 @@ if(os.path.isfile(config_location) == False):
     setupinteractive(config, config_location)
 
 askusername = None
+loaded_with_argv = False
 
 try:
     if(len(sys.argv[1]) > 3):
         askusername = sys.argv[1]
+        loaded_with_argv = True
 except:
     askusername = None
     
@@ -161,10 +175,11 @@ if askusername == 'config':
     setupinteractive(config, config_location)
 elif askusername in config:
     print('     Loading settings for '+askusername+'!')
-    try:
-        print('     (Tip: Log in directly by running \'' + sys.argv[0] + ' ' + askusername + '\')')
-    except:
-        print('     (Tip: Log in directly by appending your username at the end of the script)')
+    if loaded_with_argv is False:
+        try:
+            print('     (Tip: Log in directly by running \'' + sys.argv[0] + ' ' + askusername + '\')')
+        except:
+            print('     (Tip: Log in directly by appending your username at the end of the script)')
     
 else:
     if ('yes' in input('Could not find user in settings. Would you like to add now? (yes/no): ')):

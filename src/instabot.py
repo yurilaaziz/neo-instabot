@@ -69,7 +69,7 @@ from fake_useragent import UserAgent
 
 class InstaBot:
     """
-    Instagram bot v 1.2.0
+    Instagram bot v 1.2.1
     like_per_day=1000 - How many likes set bot in one day.
 
     media_max_like=0 - Don't like media (photo or video) if it have more than
@@ -285,7 +285,7 @@ class InstaBot:
         self.unwanted_username_list = unwanted_username_list
         now_time = datetime.datetime.now()
         self.check_for_bot_update()
-        log_string = 'Instabot v1.2.0/3 started at %s:' % \
+        log_string = 'Instabot v1.2.1/0 started at %s:' % \
                      (now_time.strftime("%d.%m.%Y %H:%M"))
         self.write_log(log_string)
         self.login()
