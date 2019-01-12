@@ -64,7 +64,9 @@ def setupinteractive(config, config_location='config.ini'):
                        "very glorious", "adorable", "excellent", "amazing"],
                       [".", "..", "...", "!", "!!", "!!!"]])
                       
-    config['DEFAULT']['tag_list'] = json.dumps(['igers_greece', 'ig_greece', 'instalifo', 'shotoniphone', 'athensvoice', 'instagreece'])
+
+    config['DEFAULT']['tag_list'] = json.dumps(['follow4follow', 'f4f', 'cute', 'l:212999109'])
+
     
     config['DEFAULT']['tag_blacklist'] = json.dumps(['rain', 'thunderstorm'])
                       
@@ -127,7 +129,9 @@ def setupinteractive(config, config_location='config.ini'):
     print('\nWriting to file...')                                   
     with open(config_location, 'w') as configfile:
          config.write(configfile)
-    print('Config updated! Re-run script to login.')
+
+    print('Config updated! Edit config.ini to setup tags. Re-run script to login.')
+
     exit()
          
          

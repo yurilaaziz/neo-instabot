@@ -2,7 +2,9 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import print_function
+import os
 import sys
+import pickle
 
 if (sys.version_info < (3, 0)):
      # Python < 3 code in this block
@@ -86,6 +88,7 @@ class InstaBot:
     https://github.com/LevPasha/instabot.py
     """
     database_name = "follows_db.db"
+    session_file = None
     follows_db = None
     follows_db_c = None
 
@@ -181,6 +184,7 @@ class InstaBot:
                  end_at_h=23,
                  end_at_m=59,
                  database_name='follows_db.db',
+                 session_file=None,
                  comment_list=[["this", "the", "your"],
                                ["photo", "picture", "pic", "shot", "snapshot"],
                                ["is", "looks", "feels", "is really"],
@@ -204,6 +208,7 @@ class InstaBot:
                  unwanted_username_list=[],
                  unfollow_whitelist=[]):
 
+        self.session_file = session_file
         self.database_name = database_name
         self.follows_db = sqlite3.connect(database_name, timeout=0, isolation_level=None)
         self.follows_db_c = self.follows_db.cursor()
@@ -327,11 +332,8 @@ class InstaBot:
 
     def login(self):
         log_string = 'Trying to login as %s...' % (self.user_login)
-        self.write_log(log_string)
-        self.login_post = {
-            'username': self.user_login,
-            'password': self.user_password
-        }
+
+        successfulLogin = False
 
         self.s.headers.update({
             'Accept': '*/*',
@@ -346,95 +348,109 @@ class InstaBot:
             'Content-Type': 'application/x-www-form-urlencoded',
             'X-Requested-With': 'XMLHttpRequest'
         })
-        
-        
 
-        r = self.s.get(self.url)
-        csrf_token = re.search('(?<=\"csrf_token\":\")\w+', r.text).group(0)
-        self.s.headers.update({'X-CSRFToken': csrf_token})
-        time.sleep(5 * random.random())
-        login = self.s.post(
-            self.url_login, data=self.login_post, allow_redirects=True)
-        successfulLogin = login.status_code == 200
-        try:
-            if successfulLogin:
-                self.csrftoken = login.cookies['csrftoken']
-                self.s.headers.update({'X-CSRFToken': login.cookies['csrftoken']})
-        except:
-            self.write_log('Something wrong with login')
-            self.write_log(login.text)
-            
-            
-        if "checkpoint_required" in login.text:
+        if self.session_file != None and os.path.isfile(self.session_file):
+            self.write_log("Found session file %s" % self.session_file)
+            successfulLogin = True
+            with open(self.session_file, 'rb') as i:
+                cookies = pickle.load(i)
+                self.s.cookies.update(cookies)
+        else:
+            self.write_log(log_string)
+            self.login_post = {
+                'username': self.user_login,
+                'password': self.user_password
+            }
+
+            r = self.s.get(self.url)
+            csrf_token = re.search('(?<=\"csrf_token\":\")\w+', r.text).group(0)
+            self.s.headers.update({'X-CSRFToken': csrf_token})
+            time.sleep(5 * random.random())
+            login = self.s.post(
+                self.url_login, data=self.login_post, allow_redirects=True)
+            successfulLogin = login.status_code == 200
             try:
+                if successfulLogin:
+                    self.csrftoken = login.cookies['csrftoken']
+                    self.s.headers.update({'X-CSRFToken': login.cookies['csrftoken']})
+            except:
+                self.write_log('Something wrong with login')
+                self.write_log(login.text)
+                
+            if "checkpoint_required" in login.text:
                 try:
-                    challenge_url = 'https://instagram.com' + re.search('(/challenge/\w+/\w+/)', login.text).group(0)
-                except:
-                    challenge_url = re.search('checkpoint_url\": \"(.*)\",', login.text).group(1) #checkpoint_url": "(.*)",
-                self.write_log('Challenge required at ' + challenge_url)
-                
-                with self.s as clg:
-                
-                    clg.headers.update({
-                        'Accept': '*/*',
-                        'Accept-Language': self.accept_language,
-                        'Accept-Encoding': 'gzip, deflate, br',
-                        'Connection': 'keep-alive',
-                        'Host': 'www.instagram.com',
-                        'Origin': 'https://www.instagram.com',            
-                        'User-Agent': self.user_agent,
-                        'X-Instagram-AJAX': '1',
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                        'x-requested-with': "XMLHttpRequest",
-                    })
-                    #Get challenge page
-                    challenge_request_explore = clg.get(challenge_url)
+                    try:
+                        challenge_url = 'https://instagram.com' + re.search('(/challenge/\w+/\w+/)', login.text).group(0)
+                    except:
+                        challenge_url = re.search('checkpoint_url\": \"(.*)\",', login.text).group(1) #checkpoint_url": "(.*)",
+                    self.write_log('Challenge required at ' + challenge_url)
                     
-                    #Get CSRF Token from challenge page
-                    challenge_csrf_token = re.search('(?<=\"csrf_token\":\")\w+', challenge_request_explore.text).group(0)
-                    #Get Rollout Hash from challenge page
-                    rollout_hash = re.search('(?<=\"rollout_hash\":\")\w+', challenge_request_explore.text).group(0)
+                    with self.s as clg:
                     
-                    #Ask for option 1 from challenge, which is usually Email or Phone
-                    challenge_post = {
-                        'choice': 1
-                    }
+                        clg.headers.update({
+                            'Accept': '*/*',
+                            'Accept-Language': self.accept_language,
+                            'Accept-Encoding': 'gzip, deflate, br',
+                            'Connection': 'keep-alive',
+                            'Host': 'www.instagram.com',
+                            'Origin': 'https://www.instagram.com',            
+                            'User-Agent': self.user_agent,
+                            'X-Instagram-AJAX': '1',
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                            'x-requested-with': "XMLHttpRequest",
+                        })
+                        #Get challenge page
+                        challenge_request_explore = clg.get(challenge_url)
+                        
+                        #Get CSRF Token from challenge page
+                        challenge_csrf_token = re.search('(?<=\"csrf_token\":\")\w+', challenge_request_explore.text).group(0)
+                        #Get Rollout Hash from challenge page
+                        rollout_hash = re.search('(?<=\"rollout_hash\":\")\w+', challenge_request_explore.text).group(0)
+                        
+                        #Ask for option 1 from challenge, which is usually Email or Phone
+                        challenge_post = {
+                            'choice': 1
+                        }
+                        
+                        
+                        #Update headers for challenge submit page
+                        clg.headers.update({'X-CSRFToken': challenge_csrf_token})
+                        clg.headers.update({'Referer': challenge_url})               
+                        #Request instagram to send a code
+                        challenge_request_code = clg.post(challenge_url, data=challenge_post, allow_redirects=True)
+                        
+                        #User should receive a code soon, ask for it
+                        challenge_userinput_code = input("Challenge Required.\n\nEnter the code sent to your mail/phone: ")
+                        challenge_security_post = {
+                            'security_code': challenge_userinput_code
+                        }
+                        
+                        complete_challenge = clg.post(challenge_url, data=challenge_security_post, allow_redirects=True)
+                        self.csrftoken = complete_challenge.cookies['csrftoken']
+                        self.s.headers.update({'X-CSRFToken': self.csrftoken, 'X-Instagram-AJAX': '1'})
+                        successfulLogin = complete_challenge.status_code == 200
                     
-                    
-                    #Update headers for challenge submit page
-                    clg.headers.update({'X-CSRFToken': challenge_csrf_token})
-                    clg.headers.update({'Referer': challenge_url})               
-                    #Request instagram to send a code
-                    challenge_request_code = clg.post(challenge_url, data=challenge_post, allow_redirects=True)
-                    
-                    #User should receive a code soon, ask for it
-                    challenge_userinput_code = input("Challenge Required.\n\nEnter the code sent to your mail/phone: ")
-                    challenge_security_post = {
-                        'security_code': challenge_userinput_code
-                    }
-                    
-                    complete_challenge = clg.post(challenge_url, data=challenge_security_post, allow_redirects=True)
-                    self.csrftoken = complete_challenge.cookies['csrftoken']
-                    self.s.headers.update({'X-CSRFToken': self.csrftoken, 'X-Instagram-AJAX': '1'})
-                    successfulLogin = complete_challenge.status_code == 200
-                
-            except Exception as err:
-                print("Login failed, response: \n\n" + login.text, err)
-                quit()
-        
-        else:      
-            rollout_hash = re.search('(?<=\"rollout_hash\":\")\w+', r.text).group(0)
-            self.s.headers.update({'X-Instagram-AJAX': rollout_hash})      
-        #ig_vw=1536; ig_pr=1.25; ig_vh=772;  ig_or=landscape-primary;
-        self.s.cookies['csrftoken'] = self.csrftoken
-        self.s.cookies['ig_vw'] = '1536'
-        self.s.cookies['ig_pr'] = '1.25'
-        self.s.cookies['ig_vh'] = '772'
-        self.s.cookies['ig_or'] = 'landscape-primary'
-        time.sleep(5 * random.random())
+                except Exception as err:
+                    print("Login failed, response: \n\n" + login.text, err)
+                    quit()
+            
+            else:      
+                rollout_hash = re.search('(?<=\"rollout_hash\":\")\w+', r.text).group(0)
+                self.s.headers.update({'X-Instagram-AJAX': rollout_hash})      
+            #ig_vw=1536; ig_pr=1.25; ig_vh=772;  ig_or=landscape-primary;
+            self.s.cookies['csrftoken'] = self.csrftoken
+            self.s.cookies['ig_vw'] = '1536'
+            self.s.cookies['ig_pr'] = '1.25'
+            self.s.cookies['ig_vh'] = '772'
+            self.s.cookies['ig_or'] = 'landscape-primary'
+            time.sleep(5 * random.random())
+
 
         if successfulLogin:
             r = self.s.get('https://www.instagram.com/')
+            self.csrftoken = re.search('(?<=\"csrf_token\":\")\w+', r.text).group(0)
+            self.s.cookies['csrftoken'] = self.csrftoken
+            self.s.headers.update({'X-CSRFToken': self.csrftoken})
             finder = r.text.find(self.user_login)
             if finder != -1:
                 ui = UserInfo()
@@ -442,6 +458,10 @@ class InstaBot:
                 self.login_status = True
                 log_string = "%s login success!\n" % (self.user_login)
                 self.write_log(log_string)
+                if self.session_file != None:
+                    self.write_log("Saving cookies to session file %s" % self.session_file)
+                    with open(self.session_file, 'wb') as output:
+                        pickle.dump(self.s.cookies, output, pickle.HIGHEST_PROTOCOL)
             else:
                 self.login_status = False
                 self.write_log('Login error! Check your login data!')
@@ -488,7 +508,7 @@ class InstaBot:
                 self.bot_follow_list.remove(f)
 
         # Logout
-        if self.login_status:
+        if self.login_status and self.session_file == None:
             self.logout()
         self.prog_run = False
 
@@ -935,13 +955,18 @@ class InstaBot:
 
     def populate_from_feed(self):
         self.get_media_id_recent_feed()
-        for mediafeed_user in self.media_on_feed:
-            feed_username = mediafeed_user["node"]["owner"]["username"]
-            feed_user_id = mediafeed_user["node"]["owner"]["id"]
-            #print(check_if_userid_exists(self, userid=feed_user_id))
-            if check_if_userid_exists(self, userid=feed_user_id) is False:
-                insert_username(self, user_id=feed_user_id, username=feed_username)
-                self.write_log("Inserted user "+feed_username+" from recent feed")
+
+        try:
+            for mediafeed_user in self.media_on_feed:
+                feed_username = mediafeed_user["node"]["owner"]["username"]
+                feed_user_id = mediafeed_user["node"]["owner"]["id"]
+                #print(check_if_userid_exists(self, userid=feed_user_id))
+                if check_if_userid_exists(self, userid=feed_user_id) is False:
+                    insert_username(self, user_id=feed_user_id, username=feed_username)
+                    self.write_log("Inserted user "+feed_username+" from recent feed")
+        except:
+            self.write_log("Notice: could not populate from recent feed")
+
             
     
     def new_auto_mod_unfollow(self):
@@ -959,6 +984,13 @@ class InstaBot:
                 return #DB doesn't have enough followers yet
 
             if self.bot_mode == 0 or self.bot_mode == 3:
+
+                try:
+                    self.populate_from_feed()
+                except:
+                    self.write_log('Notice: Could not populate from recent feed right now')
+                    
+
                 log_string = "Trying to unfollow #%i: " % (self.unfollow_counter + 1)
                 self.write_log(log_string)
                 self.auto_unfollow()
@@ -1084,6 +1116,7 @@ class InstaBot:
                         self.is_selebgram = True
                         self.is_fake_account = False
                         self.write_log('   >>>This is probably Selebgram account')
+
                     elif follower == 0 or follows / follower > 2:
                         self.is_fake_account = True
                         self.is_selebgram = False
@@ -1190,6 +1223,7 @@ class InstaBot:
                         self.is_selebgram = True
                         self.is_fake_account = False
                         self.write_log('   >>>This is probably Selebgram account')
+
                     elif follower == 0 or follows / follower > 2:
                         self.is_fake_account = True
                         self.is_selebgram = False
@@ -1243,7 +1277,6 @@ class InstaBot:
                 # we are not following this account, hence we unfollowed it, let's keep track
                 insert_unfollow_count(self, user_id=current_id)
         time.sleep(8)
-
 
     
     def get_media_id_recent_feed(self):
