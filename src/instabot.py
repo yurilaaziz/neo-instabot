@@ -167,7 +167,7 @@ class InstaBot:
     end_at_m = 59,
 
     # For new_auto_mod
-    next_iteration = {"Like": 0, "Follow": 0, "Unfollow": 0, "Comments": 0}
+    next_iteration = {"Like": 0, "Follow": 0, "Unfollow": 0, "Comments": 0, "Populate": 0}
     prog_run = True
     
     def __init__(self,
@@ -992,7 +992,10 @@ class InstaBot:
             if self.bot_mode == 0 or self.bot_mode == 3:
 
                 try:
-                    self.populate_from_feed()
+                    if time.time() > self.next_iteration["Populate"]:
+                        self.populate_from_feed()
+                        self.next_iteration["Populate"] = time.time() + \
+                                                    (self.add_time(360))
                 except:
                     self.write_log('Notice: Could not populate from recent feed right now')
                     
