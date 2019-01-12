@@ -384,7 +384,10 @@ class InstaBot:
                 return 
             if loginResponse.get('message') == 'checkpoint_required':
                 try:
-                    challenge_url = 'https://instagram.com' + loginResponse['checkpoint_url']
+                    if 'instagram.com' in loginResponse['checkpoint_url']:
+                         challenge_url = loginResponse['checkpoint_url']
+                    else:
+                         challenge_url = 'https://instagram.com' + loginResponse['checkpoint_url']
                     self.write_log('Challenge required at ' + challenge_url)
                     with self.s as clg:
                         clg.headers.update({
@@ -415,7 +418,8 @@ class InstaBot:
                         
                         #Update headers for challenge submit page
                         clg.headers.update({'X-CSRFToken': challenge_csrf_token})
-                        clg.headers.update({'Referer': challenge_url})               
+                        clg.headers.update({'Referer': challenge_url})  
+                         
                         #Request instagram to send a code
                         challenge_request_code = clg.post(challenge_url, data=challenge_post, allow_redirects=True)
                         
