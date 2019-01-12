@@ -2,7 +2,7 @@
 
 ---
 
-### On 03-Apr-2018, I wiped out the existing issues/PRs associated with this repo, they've built up due to some neglect. Now, there's a clean slate. New issues must follow the format provided and PRs will be reviewed and potentially accepted. Contributors are encouraged to review existing issues and submit changes.
+### Since the bot has received major updates the past few days, very old issues have been closed. If you're still experiencing any problems with the latest version, please feel free to reopen them.
 
 ### Please do not clone this repo and publish it as your own. Fork the repo if you wish to publish any changes.
 
@@ -23,6 +23,7 @@
 | end\_at\_h           | int | End program at the hour                              | 23   |
 | end\_at\_m           | int | End program at the min                               | 59   |
 | database\_name       | str | change the name of database file to use multiple account | "follows\_db.db"   |
+| session\_name        | str | change the name of session file so to avoid having to login every time | "username.session"   |
 | like_per_day         | int | Number of photos to like per day (over 1000 may cause throttling) | 1000 |
 | media_max_like       | int | Maximum number of likes on photos to like (set to 0 to disable) | 0    |
 | media_min_like       | int | Minimum number of likes on photos to like (set to 0 to disable) | 0    |
