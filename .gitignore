@@ -110,3 +110,4 @@ ENV/
 *.ini
 *.db
 *.session
+DS/

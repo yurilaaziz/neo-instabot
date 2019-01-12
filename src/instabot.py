@@ -368,6 +368,7 @@ class InstaBot:
             time.sleep(5 * random.random())
             login = self.s.post(
                 self.url_login, data=self.login_post, allow_redirects=True)
+            loginResponse = login.json()
             successfulLogin = login.status_code == 200
             try:
                 if successfulLogin:
@@ -376,17 +377,16 @@ class InstaBot:
             except:
                 self.write_log('Something wrong with login')
                 self.write_log(login.text)
-                
-            if "checkpoint_required" in login.text:
+            if loginResponse.get('errors'):
+                self.write_log('Something is wrong with Instagram! Please try again later...')
+                for error in loginResponse['errors']['error']:
+                    self.write_log('Error => ' + error)
+                return 
+            if loginResponse.get('message') == 'checkpoint_required':
                 try:
-                    try:
-                        challenge_url = 'https://instagram.com' + re.search('(/challenge/\w+/\w+/)', login.text).group(0)
-                    except:
-                        challenge_url = re.search('checkpoint_url\": \"(.*)\",', login.text).group(1) #checkpoint_url": "(.*)",
+                    challenge_url = 'https://instagram.com' + loginResponse['checkpoint_url']
                     self.write_log('Challenge required at ' + challenge_url)
-                    
                     with self.s as clg:
-                    
                         clg.headers.update({
                             'Accept': '*/*',
                             'Accept-Language': self.accept_language,
@@ -424,8 +424,12 @@ class InstaBot:
                         challenge_security_post = {
                             'security_code': challenge_userinput_code
                         }
+                        clg.headers.update({'Content-Type': 'application/x-www-form-urlencoded'})
                         
                         complete_challenge = clg.post(challenge_url, data=challenge_security_post, allow_redirects=True)
+                        if complete_challenge.status_code != 200:
+                            self.write_log('Entered code is wrong, Try again later!')
+                            return 
                         self.csrftoken = complete_challenge.cookies['csrftoken']
                         self.s.headers.update({'X-CSRFToken': self.csrftoken, 'X-Instagram-AJAX': '1'})
                         successfulLogin = complete_challenge.status_code == 200
