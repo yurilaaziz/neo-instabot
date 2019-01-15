@@ -7,9 +7,9 @@ import sys
 import pickle
 
 if (sys.version_info < (3, 0)):
-     # Python < 3 code in this block
-     print('Python v3.5 or above required for Instaloader module at the moment. Exiting...')
-     quit()
+    """Python < 3 code in this block"""
+    print('Python v3.5 or above required for Instaloader module at the moment. Exiting...')
+    quit()
 
 import importlib
 try:
@@ -331,7 +331,6 @@ class InstaBot:
                 time.sleep(5 * random.random())
 
     def login(self):
-        log_string = 'Trying to login as %s...' % (self.user_login)
 
         successfulLogin = False
 
@@ -356,25 +355,33 @@ class InstaBot:
                 cookies = pickle.load(i)
                 self.s.cookies.update(cookies)
         else:
-            self.write_log(log_string)
+            self.write_log('Trying to login as {}...'.format(self.user_login))
             self.login_post = {
                 'username': self.user_login,
                 'password': self.user_password
             }
-
             r = self.s.get(self.url)
             csrf_token = re.search('(?<=\"csrf_token\":\")\w+', r.text).group(0)
             self.s.headers.update({'X-CSRFToken': csrf_token})
             time.sleep(5 * random.random())
-            login = self.s.post(
-                self.url_login, data=self.login_post, allow_redirects=True)
+            login = self.s.post(self.url_login, data=self.login_post, allow_redirects=True)
+            if login.status_code != 200 and login.status_code != 400: # Handling Other Status Codes and making debug easier!!
+                self.write_log('Request didn\'t return 200 as status code!')
+                self.write_log('Here is more info for debbugin or creating an issue')
+                print('=' * 15)
+                print('Response Status: ', login.status_code)
+                print('=' * 15)
+                print('Response Content:\n', login.text)
+                print('=' * 15)
+                print('Response Header:\n', login.headers)
+                print('=' * 15)
+                return
+
             loginResponse = login.json()
-            successfulLogin = login.status_code == 200
             try:
-                if successfulLogin:
-                    self.csrftoken = login.cookies['csrftoken']
-                    self.s.headers.update({'X-CSRFToken': login.cookies['csrftoken']})
-            except:
+                self.csrftoken = login.cookies['csrftoken']
+                self.s.headers.update({'X-CSRFToken': login.cookies['csrftoken']})
+            except Exception as e:
                 self.write_log('Something wrong with login')
                 self.write_log(login.text)
             if loginResponse.get('errors'):
@@ -426,9 +433,8 @@ class InstaBot:
                         #User should receive a code soon, ask for it
                         challenge_userinput_code = input("Challenge Required.\n\nEnter the code sent to your mail/phone: ")
                         challenge_security_post = {
-                            'security_code': challenge_userinput_code
+                            'security_code': int(challenge_userinput_code)
                         }
-                        clg.headers.update({'Content-Type': 'application/x-www-form-urlencoded'})
                         
                         complete_challenge = clg.post(challenge_url, data=challenge_security_post, allow_redirects=True)
                         if complete_challenge.status_code != 200:
@@ -441,10 +447,14 @@ class InstaBot:
                 except Exception as err:
                     print("Login failed, response: \n\n" + login.text, err)
                     quit()
+            elif loginResponse.get('authenticated') == False:
+                self.write_log("Login error! Check your login data!")
+                return
             
             else:      
                 rollout_hash = re.search('(?<=\"rollout_hash\":\")\w+', r.text).group(0)
-                self.s.headers.update({'X-Instagram-AJAX': rollout_hash})      
+                self.s.headers.update({'X-Instagram-AJAX': rollout_hash}) 
+                successfulLogin = True
             #ig_vw=1536; ig_pr=1.25; ig_vh=772;  ig_or=landscape-primary;
             self.s.cookies['csrftoken'] = self.csrftoken
             self.s.cookies['ig_vw'] = '1536'

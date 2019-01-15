@@ -9,7 +9,7 @@ Before opening a new issue, please ensure:
 -->
 
 Check this or we will delete your issue. (fill in the checkbox with an X like so: [x])
-- [ ] I have searched for other issues with the same problem. (including #1153)
+- [ ] I have searched for other issues with the same problem. 
 
 ## Hosting
 - [ ] Are you hosting the bot on a VPS or other Cloud hosting?
