@@ -1042,30 +1042,46 @@ class InstaBot:
 
     def check_exisiting_comment(self, media_code):
         url_check = self.url_media % (media_code)
-        check_comment = self.s.get(url_check)
-        if check_comment.status_code == 200:
-            all_data = json.loads(re.search('window._sharedData = (.*?);', check_comment.text, re.DOTALL).group(1))['entry_data']['PostPage'][0] #window._sharedData = (.*?);
-            if all_data['graphql']['shortcode_media']['owner']['id'] == self.user_id:
-                self.write_log("Keep calm - It's your own media ;)")
-                # Del media to don't loop on it
-                del self.media_by_tag[0]
-                return True
-            try:    
-                comment_list = list(all_data['graphql']['shortcode_media']['edge_media_to_comment']['edges'])
-            except:
-                comment_list = list(all_data['graphql']['shortcode_media']['edge_media_to_parent_comment']['edges'])
+        try:
+            check_comment = self.s.get(url_check)
+            if check_comment.status_code == 200:
                 
-            for d in comment_list:
-                if d['node']['owner']['id'] == self.user_id:
-                    self.write_log("Keep calm - Media already commented ;)")
+                if 'dialog-404' in check_comment.text:
+                    self.write_log('Tried to comment ' + media_code + ' but it doesn\'t exist (404). Resuming...')
+                    del self.media_by_tag[0]
+                    return True
+            
+                all_data = json.loads(re.search('window._sharedData = (.*?);', check_comment.text, re.DOTALL).group(1))['entry_data']['PostPage'][0] #window._sharedData = (.*?);
+                if all_data['graphql']['shortcode_media']['owner']['id'] == self.user_id:
+                    self.write_log("Keep calm - It's your own media ;)")
                     # Del media to don't loop on it
                     del self.media_by_tag[0]
                     return True
-            return False
-        else:
-            insert_media(self, self.media_by_tag[0]['node']['id'], str(check_comment.status_code))
-            self.media_by_tag.remove(self.media_by_tag[0])
-            return False
+                try:    
+                    comment_list = list(all_data['graphql']['shortcode_media']['edge_media_to_comment']['edges'])
+                except:
+                    comment_list = list(all_data['graphql']['shortcode_media']['edge_media_to_parent_comment']['edges'])
+                    
+                for d in comment_list:
+                    if d['node']['owner']['id'] == self.user_id:
+                        self.write_log("Keep calm - Media already commented ;)")
+                        # Del media to don't loop on it
+                        del self.media_by_tag[0]
+                        return True
+                return False
+            elif check_comment.status_code == 404:
+                insert_media(self, self.media_by_tag[0]['node']['id'], str(check_comment.status_code))
+                self.write_log('Tried to comment ' + media_code + ' but it doesn\'t exist (404). Resuming...')
+                del self.media_by_tag[0]
+                return True
+            else:
+                insert_media(self, self.media_by_tag[0]['node']['id'], str(check_comment.status_code))
+                self.media_by_tag.remove(self.media_by_tag[0])
+                return True
+        except:
+            self.write_log('Couldn\'t comment post, resuming.')
+            del self.media_by_tag[0]
+            return True
 
     def auto_unfollow(self):
         checking = True
