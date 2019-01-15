@@ -47,7 +47,7 @@ def setupinteractive(config, config_location='config.ini'):
                              'comments_per_day': 31,
                              'max_like_for_one_tag': 36,
                              'follow_per_day': 310,
-                             'follow_time': 90,
+                             'follow_time': 3600,
                              'unfollow_per_day': 297,
                              'unfollow_break_min': 3,
                              'unfollow_break_max': 17,
