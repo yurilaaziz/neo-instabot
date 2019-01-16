@@ -178,6 +178,7 @@ class InstaBot:
                  media_min_like=0,
                  follow_per_day=0,
                  follow_time=5 * 60 * 60, #Cannot be zero
+                 follow_time_enabled=True,
                  unfollow_per_day=0,
                  start_at_h=0,
                  start_at_m=0,
@@ -237,6 +238,7 @@ class InstaBot:
 
         # Follow
         self.follow_time = follow_time #Cannot be zero
+        self.follow_time_enabled = follow_time_enabled
         self.follow_per_day = follow_per_day
         if self.follow_per_day != 0:
             self.follow_delay = self.time_in_day / self.follow_per_day

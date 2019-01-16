@@ -128,13 +128,15 @@ def get_username_to_unfollow_random(self):
     AND unfollow_count=0 ORDER BY RANDOM() LIMIT 1").fetchone()
     if username:
         return username
-    else:
+    elif self.follow_time_enabled is False:
         username = self.follows_db_c.execute("SELECT * FROM usernames WHERE \
         unfollow_count=0 ORDER BY RANDOM() LIMIT 1").fetchone()
         if username:
             return username
         else:
             return False
+    else:
+        return False
             
             
 def get_username_row_count(self):
