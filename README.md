@@ -1,14 +1,8 @@
 # InstaBot
 
----
+Instabot is a toolkit written in Python for building Instagram bots using the undocumented private API. 
 
-### Since the bot has received major updates the past few days, very old issues have been closed. If you're still experiencing any problems with the latest version, please feel free to reopen them.
-
-### Please do not clone this repo and publish it as your own. Fork the repo if you wish to publish any changes.
-
----
-
-> Toolkit for building automated Instagram bots without direct access to the Instagram API or passsing through the review process.
+Please do not clone this repo and publish it as your own. Fork the repo if you wish to publish any changes.
 
 [![Donate](https://img.shields.io/badge/PayPal-Donate-brightgreen.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=7BMM6JGE73322&lc=US)
 [![Chat on Telegram](https://img.shields.io/badge/Chat%20on-Telegram-brightgreen.svg)](https://t.me/joinchat/DYKH-0G_8hsDDoN_iE8ZlA)
