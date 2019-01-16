@@ -180,7 +180,7 @@ class InstaBot:
                  follow_time=5 * 60 * 60, #Cannot be zero
                  follow_time_enabled=True,
                  unfollow_per_day=0,
-                 unfollow_from_recent_feed=True,
+                 unfollow_recent_feed=True,
                  start_at_h=0,
                  start_at_m=0,
                  end_at_h=23,
@@ -230,7 +230,7 @@ class InstaBot:
         self.unfollow_whitelist = unfollow_whitelist
         self.comment_list = comment_list
         self.instaloader = instaloader.Instaloader()
-        self.unfollow_from_recent_feed = unfollow_from_recent_feed
+        self.unfollow_recent_feed = unfollow_recent_feed
 
         self.time_in_day = 24 * 60 * 60
         # Like
@@ -1006,7 +1006,7 @@ class InstaBot:
             if get_username_row_count(self) < 20:
                 self.write_log('    >>>Waiting for database to populate before unfollowing (progress '+str(get_username_row_count(self))+"/20)")                        
                 
-                if self.unfollow_from_recent_feed is True:
+                if self.unfollow_recent_feed is True:
                     self.write_log("Will try to populate using recent feed")
                     self.populate_from_feed()
                 
@@ -1017,7 +1017,7 @@ class InstaBot:
             if self.bot_mode == 0 or self.bot_mode == 3:
 
                 try:
-                    if time.time() > self.next_iteration["Populate"] and self.unfollow_from_recent_feed is True:
+                    if time.time() > self.next_iteration["Populate"] and self.unfollow_recent_feed is True:
                         self.populate_from_feed()
                         self.next_iteration["Populate"] = time.time() + \
                                                     (self.add_time(360))

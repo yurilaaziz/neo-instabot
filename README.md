@@ -31,7 +31,7 @@
 | follow_time          | int | Seconds to wait before unfollowing                   | 5 * 60 * 60 |
 | follow_time_enabled  | bool| Whether to wait seconds set in follow_time before unfollowing | True |
 | unfollow_per_day     | int | Users to unfollow per day                            | 0    |
-| unfollow_from_recent_feed | bool| If enabled, will populate database with users from recent feed and check them against unfollow conditions. Disable if you only want the bot to unfollow people it has previously followed. | True |
+| unfollow_recent_feed | bool| If enabled, will populate database with users from recent feed and unfollow if they meet the conditions. Disable if you only want the bot to unfollow people it has previously followed. | True |
 | comments_per_day     | int | Comments to post per day                             | 0    |
 | comment_list         | [[str]] | List of word lists for comment generation        | [['this', 'your'], ['photo', 'picture', 'pic', 'shot'], ['is', 'looks', 'is really'], ['great', 'super', 'good'], ['.', '...', '!', '!!']] |
 | tag_list             | [str] | Tags to use for finding posts by hasthag or location(l:locationid from e.g. https://www.instagram.com/explore/locations/212999109/los-angeles-california/)                     | ['cat', 'car', 'dog', 'l:212999109'] |
