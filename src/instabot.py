@@ -31,12 +31,8 @@ import os
 import sys
 import pickle
 
-if sys.version_info < (3, 0):
-    """Python < 3 code in this block"""
-    print(
-        "Python v3.5 or above required for Instaloader module at the moment. Exiting..."
-    )
-    quit()
+
+python_version_test = f"If you are reading this error, you are not running Python 3.6 or greater. Check 'python --version' or 'python3 --version'."
 
 try:
     from pip._internal import main
