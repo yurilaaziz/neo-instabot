@@ -943,7 +943,7 @@ class InstaBot:
                 comment = self.s.post(url_comment, data=comment_post)
                 if comment.status_code == 200:
                     self.comments_counter += 1
-                    log_string = f'Write: {comment_text}. #{self.comments_counter}.'
+                    log_string = f"Write: {comment_text}. #{self.comments_counter}."
                     self.write_log(log_string)
                 return comment
             except:
@@ -1124,7 +1124,9 @@ class InstaBot:
                 )
                 return
 
-            log_string = f"Trying to follow: {self.media_by_tag[0]['node']['owner']['id']}"
+            log_string = (
+                f"Trying to follow: {self.media_by_tag[0]['node']['owner']['id']}"
+            )
             self.write_log(log_string)
             self.next_iteration["Follow"] = time.time() + self.add_time(
                 self.follow_delay
@@ -1148,9 +1150,7 @@ class InstaBot:
                 # print(check_if_userid_exists(self, userid=feed_user_id))
                 if check_if_userid_exists(self, userid=feed_user_id) is False:
                     insert_username(self, user_id=feed_user_id, username=feed_username)
-                    self.write_log(
-                        f"Inserted user {feed_username} from recent feed"
-                    )
+                    self.write_log(f"Inserted user {feed_username} from recent feed")
         except:
             self.write_log("Notice: could not populate from recent feed")
 
@@ -1210,7 +1210,10 @@ class InstaBot:
             comment_text = self.generate_comment()
             log_string = f"Trying to comment: {self.media_by_tag[0]['node']['id']}"
             self.write_log(log_string)
-            if self.comment(self.media_by_tag[0]["node"]["id"], comment_text) is not False:
+            if (
+                self.comment(self.media_by_tag[0]["node"]["id"], comment_text)
+                is not False
+            ):
                 self.next_iteration["Comments"] = time.time() + self.add_time(
                     self.comments_delay
                 )
