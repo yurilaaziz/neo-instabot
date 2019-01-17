@@ -9,8 +9,8 @@ Please do not clone this repo and publish it as your own. Fork the repo if you w
 
 ## Requirements
 
-- Python 3.6 or greater
-- pip version 10 or greater
+- Python v3.6 or greater
+- pip v10 or greater
 - Install requirements.txt (requests, fake-useragent, instaloader)
 
 ## Getting started
