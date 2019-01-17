@@ -379,14 +379,14 @@ class InstaBot:
                 all_data = json.loads(info.text)
             except JSONDecodeError as e:
                 self.write_log(
-                    "Account of user %s was deleted or link is " "invalid" % (user)
+                    f"Account of user {user} was deleted or link is " "invalid"
                 )
             else:
                 # prevent exception if user have no media
                 id_user = all_data["user"]["id"]
                 # Update the user_name with the user_id
                 self.user_blacklist[user] = id_user
-                log_string = "Blacklisted user %s added with ID: %s" % (user, id_user)
+                log_string = f"Blacklisted user {user} added with ID: {id_user}"
                 self.write_log(log_string)
                 time.sleep(5 * random.random())
 
@@ -411,7 +411,7 @@ class InstaBot:
         )
 
         if self.session_file is not None and os.path.isfile(self.session_file):
-            self.write_log("Found session file %s" % self.session_file)
+            self.write_log(f"Found session file {self.session_file}")
             successfulLogin = True
             with open(self.session_file, "rb") as i:
                 cookies = pickle.load(i)
@@ -556,11 +556,11 @@ class InstaBot:
                 ui = UserInfo()
                 self.user_id = ui.get_user_id_by_login(self.user_login)
                 self.login_status = True
-                log_string = "%s login success!\n" % (self.user_login)
+                log_string = f"{self.user_login} login success!\n"
                 self.write_log(log_string)
                 if self.session_file is not None:
                     self.write_log(
-                        "Saving cookies to session file %s" % self.session_file
+                        f"Saving cookies to session file {self.session_file}"
                     )
                     with open(self.session_file, "wb") as output:
                         pickle.dump(self.s.cookies, output, pickle.HIGHEST_PROTOCOL)
@@ -863,10 +863,7 @@ class InstaBot:
                                     # Like, all ok!
                                     self.error_400 = 0
                                     self.like_counter += 1
-                                    log_string = "Liked: %s. Like #%i." % (
-                                        self.media_by_tag[i]["node"]["id"],
-                                        self.like_counter,
-                                    )
+                                    log_string = f"Liked: {self.media_by_tag[i]['node']['id']}. Like #{self.like_counter}."
                                     insert_media(
                                         self,
                                         media_id=self.media_by_tag[i]["node"]["id"],
@@ -874,7 +871,7 @@ class InstaBot:
                                     )
                                     self.write_log(log_string)
                                 elif like.status_code == 400:
-                                    log_string = "Not liked: %i" % (like.status_code)
+                                    log_string = f"Not liked: {like.status_code}"
                                     self.write_log(log_string)
                                     insert_media(
                                         self,
@@ -888,7 +885,7 @@ class InstaBot:
                                     else:
                                         self.error_400 += 1
                                 else:
-                                    log_string = "Not liked: %i" % (like.status_code)
+                                    log_string = f"Not liked: {like.status_code}"
                                     insert_media(
                                         self,
                                         media_id=self.media_by_tag[i]["node"]["id"],
@@ -946,10 +943,7 @@ class InstaBot:
                 comment = self.s.post(url_comment, data=comment_post)
                 if comment.status_code == 200:
                     self.comments_counter += 1
-                    log_string = 'Write: "%s". #%i.' % (
-                        comment_text,
-                        self.comments_counter,
-                    )
+                    log_string = f'Write: {comment_text}. #{self.comments_counter}.'
                     self.write_log(log_string)
                 return comment
             except:
@@ -964,7 +958,7 @@ class InstaBot:
                 follow = self.s.post(url_follow)
                 if follow.status_code == 200:
                     self.follow_counter += 1
-                    log_string = "Followed: %s #%i." % (user_id, self.follow_counter)
+                    log_string = f"Followed: {user_id} #{self.follow_counter}."
                     self.write_log(log_string)
                     username = self.get_username_by_user_id(user_id=user_id)
                     insert_username(self, user_id=user_id, username=username)
@@ -981,10 +975,7 @@ class InstaBot:
                 unfollow = self.s.post(url_unfollow)
                 if unfollow.status_code == 200:
                     self.unfollow_counter += 1
-                    log_string = "Unfollowed: %s #%i." % (
-                        user_id,
-                        self.unfollow_counter,
-                    )
+                    log_string = f"Unfollowed: {user_id} #{self.unfollow_counter}."
                     self.write_log(log_string)
                     insert_unfollow_count(self, user_id=user_id)
                 return unfollow
@@ -1000,11 +991,7 @@ class InstaBot:
                 unfollow = self.s.post(url_unfollow)
                 if unfollow.status_code == 200:
                     self.unfollow_counter += 1
-                    log_string = "Unfollow: %s #%i of %i." % (
-                        user_id,
-                        self.unfollow_counter,
-                        self.follow_counter,
-                    )
+                    log_string = f"Unfollow: {user_id} #{self.unfollow_counter} of {self.follow_counter}."
                     self.write_log(log_string)
                     insert_unfollow_count(self, user_id=user_id)
                 else:
@@ -1016,11 +1003,7 @@ class InstaBot:
                     unfollow = self.s.post(url_unfollow)
                     if unfollow.status_code == 200:
                         self.unfollow_counter += 1
-                        log_string = "Unfollow: %s #%i of %i." % (
-                            user_id,
-                            self.unfollow_counter,
-                            self.follow_counter,
-                        )
+                        log_string = f"Unfollow: {user_id} #{self.unfollow_counter} of {self.follow_counter}."
                         self.write_log(log_string)
                         insert_unfollow_count(self, user_id=user_id)
                     else:
@@ -1141,9 +1124,7 @@ class InstaBot:
                 )
                 return
 
-            log_string = "Trying to follow: %s" % (
-                self.media_by_tag[0]["node"]["owner"]["id"]
-            )
+            log_string = f"Trying to follow: {self.media_by_tag[0]['node']['owner']['id']}"
             self.write_log(log_string)
             self.next_iteration["Follow"] = time.time() + self.add_time(
                 self.follow_delay
@@ -1209,7 +1190,7 @@ class InstaBot:
                         "Notice: Could not populate from recent feed right now"
                     )
 
-                log_string = "Trying to unfollow #%i: " % (self.unfollow_counter + 1)
+                log_string = f"Trying to unfollow #{self.unfollow_counter + 1}:"
                 self.write_log(log_string)
                 self.auto_unfollow()
                 self.next_iteration["Unfollow"] = time.time() + self.add_time(
@@ -1227,7 +1208,7 @@ class InstaBot:
             is False
         ):
             comment_text = self.generate_comment()
-            log_string = "Trying to comment: %s" % (self.media_by_tag[0]["node"]["id"])
+            log_string = f"Trying to comment: {self.media_by_tag[0]['node']['id']}"
             self.write_log(log_string)
             if self.comment(self.media_by_tag[0]["node"]["id"], comment_text) is not False:
                 self.next_iteration["Comments"] = time.time() + self.add_time(
@@ -1345,7 +1326,7 @@ class InstaBot:
                 checking = False
 
         if self.login_status:
-            log_string = "Getting user info : %s" % current_user
+            log_string = f"Getting user info : {current_user}"
             self.write_log(log_string)
             if self.login_status == 1:
                 url_tag = self.url_user_detail % (current_user)
@@ -1358,8 +1339,7 @@ class InstaBot:
                         != -1
                     ):
                         log_string = (
-                            "Looks like account was deleted, skipping : %s"
-                            % current_user
+                            f"Looks like account was deleted, skipping : {current_user}"
                         )
                         self.write_log(log_string)
                         insert_unfollow_count(self, user_id=current_id)
@@ -1383,11 +1363,11 @@ class InstaBot:
                     followed_by_viewer = user_info["followed_by_viewer"]
                     requested_by_viewer = user_info["requested_by_viewer"]
                     has_requested_viewer = user_info["has_requested_viewer"]
-                    log_string = "Follower : %i" % (follower)
+                    log_string = f"Follower : {follower}"
                     self.write_log(log_string)
-                    log_string = "Following : %s" % (follows)
+                    log_string = f"Following : {follows}"
                     self.write_log(log_string)
-                    log_string = "Media : %i" % (media)
+                    log_string = f"Media : {media}"
                     self.write_log(log_string)
                     if follows == 0 or follower / follows > 2:
                         self.is_selebgram = True
@@ -1466,7 +1446,7 @@ class InstaBot:
             current_id = self.current_id
 
             if self.login_status:
-                log_string = "Getting user info : %s" % current_user
+                log_string = f"Getting user info : {current_user}"
                 self.write_log(log_string)
             if self.login_status == 1:
                 url_tag = self.url_user_detail % (current_user)
@@ -1479,8 +1459,7 @@ class InstaBot:
                         != -1
                     ):
                         log_string = (
-                            "Looks like account was deleted, skipping : %s"
-                            % current_user
+                            f"Looks like account was deleted, skipping : {current_user}"
                         )
                         self.write_log(log_string)
                         insert_unfollow_count(self, user_id=current_id)
@@ -1504,11 +1483,11 @@ class InstaBot:
                     followed_by_viewer = user_info["followed_by_viewer"]
                     requested_by_viewer = user_info["requested_by_viewer"]
                     has_requested_viewer = user_info["has_requested_viewer"]
-                    log_string = "Follower : %i" % (follower)
+                    log_string = f"Follower : {follower}"
                     self.write_log(log_string)
-                    log_string = "Following : %s" % (follows)
+                    log_string = f"Following : {follows}"
                     self.write_log(log_string)
-                    log_string = "Media : %i" % (media)
+                    log_string = f"Media : {media}"
                     self.write_log(log_string)
                     if follows == 0 or follower / follows > 2:
                         self.is_selebgram = True
@@ -1574,7 +1553,7 @@ class InstaBot:
     def get_media_id_recent_feed(self):
         if self.login_status:
             now_time = datetime.datetime.now()
-            log_string = "%s : Get media id on recent feed" % (self.user_login)
+            log_string = f"{self.user_login} : Get media id on recent feed"
             self.write_log(log_string)
             if self.login_status == 1:
                 url_tag = "https://www.instagram.com/"
@@ -1590,7 +1569,7 @@ class InstaBot:
                         all_data["user"]["edge_web_feed_timeline"]["edges"]
                     )
 
-                    log_string = "Media in recent feed = %i" % (len(self.media_on_feed))
+                    log_string = f"Media in recent feed = {len(self.media_on_feed)}"
                     self.write_log(log_string)
                 except:
                     logging.exception("get_media_id_recent_feed")
