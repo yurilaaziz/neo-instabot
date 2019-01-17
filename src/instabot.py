@@ -40,8 +40,9 @@ if sys.version_info < (3, 0):
 
 try:
     from pip._internal import main
-except:
+except Exception as err:
     print(">>> Please install the latest version of pip")
+    print(err)
 
 
 # Required Dependencies and Modules, offer to install them automatically
@@ -79,9 +80,7 @@ for modname in required_modules:
                 raise
         else:
             print(
-                "Cannot continue without module "
-                + modname
-                + ". Please install dependencies in requirements.txt. Exiting."
+                f"Cannot continue without module {modname} Please install dependencies in requirements.txt. Exiting."
             )
             quit()
 
@@ -327,7 +326,7 @@ class InstaBot:
         # self.s.proxies = {"https" : "http://proxyip:proxyport"}
         # by @ageorgios
         if proxy != "":
-            proxies = {"http": "http://" + proxy, "https": "http://" + proxy}
+            proxies = {"http": f"http://{proxy}", "https": f"https://{proxy}"}
             self.s.proxies.update(proxies)
             self.c.proxies.update(proxies)
         # convert login to lower
@@ -456,7 +455,7 @@ class InstaBot:
                     "Something is wrong with Instagram! Please try again later..."
                 )
                 for error in loginResponse["errors"]["error"]:
-                    self.write_log("Error => " + error)
+                    self.write_log(f"Error =>{error}")
                 return
             if loginResponse.get("message") == "checkpoint_required":
                 try:
@@ -464,9 +463,9 @@ class InstaBot:
                         challenge_url = loginResponse["checkpoint_url"]
                     else:
                         challenge_url = (
-                            "https://instagram.com" + loginResponse["checkpoint_url"]
+                            f"https://instagram.com{loginResponse['checkpoint_url']}"
                         )
-                    self.write_log("Challenge required at " + challenge_url)
+                    self.write_log(f"Challenge required at {challenge_url}")
                     with self.s as clg:
                         clg.headers.update(
                             {
@@ -529,7 +528,7 @@ class InstaBot:
                         successfulLogin = complete_challenge.status_code == 200
 
                 except Exception as err:
-                    print("Login failed, response: \n\n" + login.text, err)
+                    print(f"Login failed, response: \n\n{login.text} {err}")
                     quit()
             elif loginResponse.get("authenticated") is False:
                 self.write_log("Login error! Check your login data!")
@@ -696,7 +695,7 @@ class InstaBot:
             if only_code:
                 return shortened_id
             else:
-                return "instagram.com/p/" + shortened_id + "/"
+                return f"instagram.com/p/{shortened_id}/"
 
     def get_username_by_media_id(self, media_id):
         """ Get username by media ID Thanks to Nikished """
@@ -793,8 +792,7 @@ class InstaBot:
                                     == blacklisted_user_id
                                 ):
                                     self.write_log(
-                                        "Not liking media owned by blacklisted user: "
-                                        + blacklisted_user_name
+                                        f"Not liking media owned by blacklisted user: {blacklisted_user_name}"
                                     )
                                     return False
                             if (
@@ -846,8 +844,7 @@ class InstaBot:
                                             tags.intersection(tag_blacklist)
                                         )
                                         self.write_log(
-                                            "Not liking media with blacklisted tag(s): "
-                                            + matching_tags
+                                            f"Not liking media with blacklisted tag(s): {matching_tags}"
                                         )
                                         return False
                             except:
@@ -1137,8 +1134,7 @@ class InstaBot:
                 == 1
             ):
                 self.write_log(
-                    "Already followed before "
-                    + self.media_by_tag[0]["node"]["owner"]["id"]
+                    f"Already followed before {self.media_by_tag[0]['node']['owner']['id']}"
                 )
                 self.next_iteration["Follow"] = time.time() + self.add_time(
                     self.follow_delay / 2
@@ -1172,7 +1168,7 @@ class InstaBot:
                 if check_if_userid_exists(self, userid=feed_user_id) is False:
                     insert_username(self, user_id=feed_user_id, username=feed_username)
                     self.write_log(
-                        "Inserted user " + feed_username + " from recent feed"
+                        f"Inserted user {feed_username} from recent feed"
                     )
         except:
             self.write_log("Notice: could not populate from recent feed")
@@ -1185,9 +1181,7 @@ class InstaBot:
                 return
             if get_username_row_count(self) < 20:
                 self.write_log(
-                    "    >>>Waiting for database to populate before unfollowing (progress "
-                    + str(get_username_row_count(self))
-                    + "/20)"
+                    f"    >>>Waiting for database to populate before unfollowing (progress {str(get_username_row_count(self))} /20)"
                 )
 
                 if self.unfollow_recent_feed is True:
@@ -1261,9 +1255,7 @@ class InstaBot:
 
                 if "dialog-404" in check_comment.text:
                     self.write_log(
-                        "Tried to comment "
-                        + media_code
-                        + " but it doesn't exist (404). Resuming..."
+                        f"Tried to comment {media_code} but it doesn't exist (404). Resuming..."
                     )
                     del self.media_by_tag[0]
                     return True
@@ -1310,9 +1302,7 @@ class InstaBot:
                     str(check_comment.status_code),
                 )
                 self.write_log(
-                    "Tried to comment "
-                    + media_code
-                    + " but it doesn't exist (404). Resuming..."
+                    f"Tried to comment {media_code} but it doesn't exist (404). Resuming..."
                 )
                 del self.media_by_tag[0]
                 return True
@@ -1616,7 +1606,7 @@ class InstaBot:
         if self.log_mod == 0:
             try:
                 now_time = datetime.datetime.now()
-                print(now_time.strftime("%d.%m.%Y_%H:%M") + " " + log_text)
+                print(f"{now_time.strftime('%d.%m.%Y_%H:%M')} {log_text}")
             except UnicodeEncodeError:
                 print("Your text has unicode problem!")
         elif self.log_mod == 1:
