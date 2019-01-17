@@ -15,7 +15,7 @@ Please do not clone this repo and publish it as your own. Fork the repo if you w
 
 ## Getting started
 
-- Download & extract project. `cd instabot.py-master`
+- `git clone https://github.com/instabot-py/instabot.py.git && cd instabot.py`
 
 - Head into your virtual environment and use pip or pip3 depending on your installation:
 ```
