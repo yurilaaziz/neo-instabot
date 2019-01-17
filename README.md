@@ -17,7 +17,7 @@ Please do not clone this repo and publish it as your own. Fork the repo if you w
 
 - `git clone https://github.com/instabot-py/instabot.py.git && cd instabot.py` or [download zip](https://github.com/instabot-py/instabot.py/archive/master.zip).
 
-- Head into your virtual environment and use pip or pip3 depending on your installation:
+- Head into your virtual environment and use `pip` or `pip3` depending on your installation:
 ```
 pip3 install -r requirements.txt
 ```
@@ -26,6 +26,7 @@ pip3 install -r requirements.txt
 ```
 python3 run.py
 ```
+Depending on your operating system and python installation, you might need to use `py`, `python`, or `python3`.
 
 - To set extra parameters and more complex configurations, copy and edit `example.py` and run.
 
