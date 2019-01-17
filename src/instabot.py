@@ -2,6 +2,26 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import print_function
+from fake_useragent import UserAgent
+from .sql_updates import check_and_insert_user_agent
+from .sql_updates import get_username_random, get_username_to_unfollow_random
+from .sql_updates import get_usernames_first, get_usernames, get_username_row_count, check_if_userid_exists
+from .sql_updates import insert_media, insert_username, insert_unfollow_count
+from .sql_updates import check_already_followed, check_already_unfollowed
+from .sql_updates import check_and_update, check_already_liked
+import re
+import time
+import sqlite3
+import signal
+import random
+import logging
+import json
+import itertools
+import datetime
+import atexit
+from .userinfo import UserInfo
+from .unfollow_protocol import unfollow_protocol
+import importlib
 import os
 import sys
 import pickle
@@ -11,60 +31,40 @@ if (sys.version_info < (3, 0)):
     print('Python v3.5 or above required for Instaloader module at the moment. Exiting...')
     quit()
 
-import importlib
 try:
     from pip._internal import main
 except:
     print('>>> Please install the latest version of pip')
 
 
-#Required Dependencies and Modules, offer to install them automatically
+# Required Dependencies and Modules, offer to install them automatically
 required_modules = ['requests', 'instaloader', 'fake_useragent', 'threading']
-    
+
 for modname in required_modules:
     try:
         # try to import the module normally and put it in globals
         globals()[modname] = importlib.import_module(modname)
     except ImportError as e:
-        module_install_question = str(input("\nOne or more required modules are missing.\n Would you like to try install them automatically? (yes/no): "))
+        module_install_question = str(input(
+            "\nOne or more required modules are missing.\n Would you like to try install them automatically? (yes/no): "))
         if(module_install_question == "yes" or module_install_question == "y"):
             try:
                 result = main(['install', '-r', 'requirements.txt', '--quiet'])
-                        
-                if result != 0: # if pip could not install it reraise the error
+
+                if result != 0:  # if pip could not install it reraise the error
                     print('Error installing modules. Please install manually using requirements.txt')
                     raise
                 else:
-                # if the install was sucessful, put modname in globals
+                    # if the install was sucessful, put modname in globals
                     print("Modules in requirements.txt installed successfuly. Loading...\n\n")
                     globals()[modname] = importlib.import_module(modname)
             except:
                 print('Error installing modules. Please make sure you have installed the latest version of pip.\n You can install manually using requirements.txt')
                 raise
         else:
-            print('Cannot continue without module ' + modname + '. Please install dependencies in requirements.txt. Exiting.')
+            print('Cannot continue without module ' + modname +
+                  '. Please install dependencies in requirements.txt. Exiting.')
             quit()
-
-from .unfollow_protocol import unfollow_protocol
-from .userinfo import UserInfo
-import atexit
-import datetime
-import itertools
-import json
-import logging
-import random
-import signal
-import sqlite3
-import time
-import os
-import re
-from .sql_updates import check_and_update, check_already_liked
-from .sql_updates import check_already_followed, check_already_unfollowed
-from .sql_updates import insert_media, insert_username, insert_unfollow_count
-from .sql_updates import get_usernames_first, get_usernames, get_username_row_count, check_if_userid_exists
-from .sql_updates import get_username_random, get_username_to_unfollow_random
-from .sql_updates import check_and_insert_user_agent
-from fake_useragent import UserAgent
 
 
 class InstaBot:
@@ -169,7 +169,7 @@ class InstaBot:
     # For new_auto_mod
     next_iteration = {"Like": 0, "Follow": 0, "Unfollow": 0, "Comments": 0, "Populate": 0}
     prog_run = True
-    
+
     def __init__(self,
                  login,
                  password,
@@ -177,7 +177,7 @@ class InstaBot:
                  media_max_like=150,
                  media_min_like=0,
                  follow_per_day=0,
-                 follow_time=5 * 60 * 60, #Cannot be zero
+                 follow_time=5 * 60 * 60,  # Cannot be zero
                  follow_time_enabled=True,
                  unfollow_per_day=0,
                  unfollow_recent_feed=True,
@@ -239,7 +239,7 @@ class InstaBot:
             self.like_delay = self.time_in_day / self.like_per_day
 
         # Follow
-        self.follow_time = follow_time #Cannot be zero
+        self.follow_time = follow_time  # Cannot be zero
         self.follow_time_enabled = follow_time_enabled
         self.follow_per_day = follow_per_day
         if self.follow_per_day != 0:
@@ -298,20 +298,22 @@ class InstaBot:
         signal.signal(signal.SIGTERM, self.cleanup)
         atexit.register(self.cleanup)
         self.instaload = instaloader.Instaloader()
-    
+
     def check_for_bot_update(self):
         self.write_log('Checking for updates...')
-        
+
         try:
-            updated_timestamp = self.c.get(self.instabot_repo_update) #CHANGE THIS TO OFFICIAL REPO IF KEPT
-            current_version_timestamp = open('version.txt','r')
-            if(int(updated_timestamp.text) > int(current_version_timestamp.read()) ):
-                self.write_log('>>> UPDATE AVAILABLE <<< Please update Instabot. You are running an older version.')
+            # CHANGE THIS TO OFFICIAL REPO IF KEPT
+            updated_timestamp = self.c.get(self.instabot_repo_update)
+            current_version_timestamp = open('version.txt', 'r')
+            if(int(updated_timestamp.text) > int(current_version_timestamp.read())):
+                self.write_log(
+                    '>>> UPDATE AVAILABLE <<< Please update Instabot. You are running an older version.')
             else:
                 self.write_log('You are running the latest stable version')
         except:
             self.write_log('Could not check for updates')
-    
+
     def populate_user_blacklist(self):
         for user in self.user_blacklist:
             user_id_url = self.url_user_detail % (user)
@@ -369,7 +371,7 @@ class InstaBot:
             self.s.headers.update({'X-CSRFToken': csrf_token})
             time.sleep(5 * random.random())
             login = self.s.post(self.url_login, data=self.login_post, allow_redirects=True)
-            if login.status_code != 200 and login.status_code != 400: # Handling Other Status Codes and making debug easier!!
+            if login.status_code != 200 and login.status_code != 400:  # Handling Other Status Codes and making debug easier!!
                 self.write_log('Request didn\'t return 200 as status code!')
                 self.write_log('Here is more info for debbugin or creating an issue')
                 print('=' * 15)
@@ -392,13 +394,13 @@ class InstaBot:
                 self.write_log('Something is wrong with Instagram! Please try again later...')
                 for error in loginResponse['errors']['error']:
                     self.write_log('Error => ' + error)
-                return 
+                return
             if loginResponse.get('message') == 'checkpoint_required':
                 try:
                     if 'instagram.com' in loginResponse['checkpoint_url']:
-                         challenge_url = loginResponse['checkpoint_url']
+                        challenge_url = loginResponse['checkpoint_url']
                     else:
-                         challenge_url = 'https://instagram.com' + loginResponse['checkpoint_url']
+                        challenge_url = 'https://instagram.com' + loginResponse['checkpoint_url']
                     self.write_log('Challenge required at ' + challenge_url)
                     with self.s as clg:
                         clg.headers.update({
@@ -407,57 +409,62 @@ class InstaBot:
                             'Accept-Encoding': 'gzip, deflate, br',
                             'Connection': 'keep-alive',
                             'Host': 'www.instagram.com',
-                            'Origin': 'https://www.instagram.com',            
+                            'Origin': 'https://www.instagram.com',
                             'User-Agent': self.user_agent,
                             'X-Instagram-AJAX': '1',
                             'Content-Type': 'application/x-www-form-urlencoded',
                             'x-requested-with': "XMLHttpRequest",
                         })
-                        #Get challenge page
+                        # Get challenge page
                         challenge_request_explore = clg.get(challenge_url)
-                        
-                        #Get CSRF Token from challenge page
-                        challenge_csrf_token = re.search('(?<=\"csrf_token\":\")\w+', challenge_request_explore.text).group(0)
-                        #Get Rollout Hash from challenge page
-                        rollout_hash = re.search('(?<=\"rollout_hash\":\")\w+', challenge_request_explore.text).group(0)
-                        
-                        #Ask for option 1 from challenge, which is usually Email or Phone
+
+                        # Get CSRF Token from challenge page
+                        challenge_csrf_token = re.search(
+                            '(?<=\"csrf_token\":\")\w+', challenge_request_explore.text).group(0)
+                        # Get Rollout Hash from challenge page
+                        rollout_hash = re.search('(?<=\"rollout_hash\":\")\w+',
+                                                 challenge_request_explore.text).group(0)
+
+                        # Ask for option 1 from challenge, which is usually Email or Phone
                         challenge_post = {
                             'choice': 1
                         }
-                        
-                        
-                        #Update headers for challenge submit page
+
+                        # Update headers for challenge submit page
                         clg.headers.update({'X-CSRFToken': challenge_csrf_token})
-                        clg.headers.update({'Referer': challenge_url})  
-                         
-                        #Request instagram to send a code
-                        challenge_request_code = clg.post(challenge_url, data=challenge_post, allow_redirects=True)
-                        
-                        #User should receive a code soon, ask for it
-                        challenge_userinput_code = input("Challenge Required.\n\nEnter the code sent to your mail/phone: ")
+                        clg.headers.update({'Referer': challenge_url})
+
+                        # Request instagram to send a code
+                        challenge_request_code = clg.post(
+                            challenge_url, data=challenge_post, allow_redirects=True)
+
+                        # User should receive a code soon, ask for it
+                        challenge_userinput_code = input(
+                            "Challenge Required.\n\nEnter the code sent to your mail/phone: ")
                         challenge_security_post = {
                             'security_code': int(challenge_userinput_code)
                         }
-                        
-                        complete_challenge = clg.post(challenge_url, data=challenge_security_post, allow_redirects=True)
+
+                        complete_challenge = clg.post(
+                            challenge_url, data=challenge_security_post, allow_redirects=True)
                         if complete_challenge.status_code != 200:
                             self.write_log('Entered code is wrong, Try again later!')
-                            return 
+                            return
                         self.csrftoken = complete_challenge.cookies['csrftoken']
-                        self.s.headers.update({'X-CSRFToken': self.csrftoken, 'X-Instagram-AJAX': '1'})
+                        self.s.headers.update(
+                            {'X-CSRFToken': self.csrftoken, 'X-Instagram-AJAX': '1'})
                         successfulLogin = complete_challenge.status_code == 200
-                    
+
                 except Exception as err:
                     print("Login failed, response: \n\n" + login.text, err)
                     quit()
             elif loginResponse.get('authenticated') == False:
                 self.write_log("Login error! Check your login data!")
                 return
-            
-            else:      
+
+            else:
                 rollout_hash = re.search('(?<=\"rollout_hash\":\")\w+', r.text).group(0)
-                self.s.headers.update({'X-Instagram-AJAX': rollout_hash}) 
+                self.s.headers.update({'X-Instagram-AJAX': rollout_hash})
                 successfulLogin = True
             #ig_vw=1536; ig_pr=1.25; ig_vh=772;  ig_or=landscape-primary;
             self.s.cookies['csrftoken'] = self.csrftoken
@@ -466,7 +473,6 @@ class InstaBot:
             self.s.cookies['ig_vh'] = '772'
             self.s.cookies['ig_or'] = 'landscape-primary'
             time.sleep(5 * random.random())
-
 
         if successfulLogin:
             r = self.s.get('https://www.instagram.com/')
@@ -492,8 +498,8 @@ class InstaBot:
                         os.remove(self.session_file)
                     except:
                         self.write_log("Could not delete session file. Please delete manually")
-                        
-                self.prog_run = False;
+
+                self.prog_run = False
         else:
             self.write_log('Login error! Connection error!')
 
@@ -554,7 +560,8 @@ class InstaBot:
                     try:
                         r = self.s.get(url_location)
                         all_data = json.loads(r.text)
-                        self.media_by_tag = list(all_data['graphql']['location']['edge_location_to_media']['edges'])
+                        self.media_by_tag = list(
+                            all_data['graphql']['location']['edge_location_to_media']['edges'])
                     except:
                         self.media_by_tag = []
                         self.write_log("Except on get_media!")
@@ -571,7 +578,8 @@ class InstaBot:
                     try:
                         r = self.s.get(url_tag)
                         all_data = json.loads(r.text)
-                        self.media_by_tag = list(all_data['graphql']['hashtag']['edge_hashtag_to_media']['edges'])
+                        self.media_by_tag = list(
+                            all_data['graphql']['hashtag']['edge_hashtag_to_media']['edges'])
                     except:
                         self.media_by_tag = []
                         self.write_log("Except on get_media!")
@@ -582,15 +590,18 @@ class InstaBot:
     def get_instagram_url_from_media_id(self, media_id, url_flag=True, only_code=None):
         """ Get Media Code or Full Url from Media ID Thanks to Nikished """
         media_id = int(media_id)
-        if url_flag is False: return ""
+        if url_flag is False:
+            return ""
         else:
             alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_'
             shortened_id = ''
             while media_id > 0:
                 media_id, idx = divmod(media_id, 64)
                 shortened_id = alphabet[idx] + shortened_id
-            if only_code: return shortened_id
-            else: return 'instagram.com/p/' + shortened_id + '/'
+            if only_code:
+                return shortened_id
+            else:
+                return 'instagram.com/p/' + shortened_id + '/'
 
     def get_username_by_media_id(self, media_id):
         """ Get username by media ID Thanks to Nikished """
@@ -890,8 +901,8 @@ class InstaBot:
             while self.prog_run:
                 random.shuffle(self.tag_list)
                 self.get_media_id_by_tag(random.choice(self.tag_list))
-                self.like_all_exist_media(random.randint \
-                                              (1, self.max_like_for_one_tag))
+                self.like_all_exist_media(random.randint
+                                          (1, self.max_like_for_one_tag))
             self.write_log("Exit Program... GoodBye")
             sys.exit(0)
 
@@ -916,13 +927,13 @@ class InstaBot:
                 # ------------------- Unfollow -------------------
                 self.new_auto_mod_unfollow()
                 # ------------------- Comment -------------------
-                self.new_auto_mod_comments()    
+                self.new_auto_mod_comments()
                 # Bot iteration in 1 sec
                 time.sleep(3)
                 # print("Tic!")
             else:
                 print("!!sleeping until {hour}:{min}".format(hour=self.start_at_h,
-                                                           min=self.start_at_m), end="\r")
+                                                             min=self.start_at_m), end="\r")
                 time.sleep(100)
         self.write_log("Exit Program... GoodBye")
         sys.exit(0)
@@ -943,7 +954,7 @@ class InstaBot:
             if self.like_all_exist_media(media_size=1, delay=False):
                 # If like go to sleep:
                 self.next_iteration["Like"] = time.time() + \
-                                              self.add_time(self.like_delay)
+                    self.add_time(self.like_delay)
                 # Count this tag likes:
                 self.this_tag_like_count += 1
                 if self.this_tag_like_count >= self.max_tag_like_count:
@@ -953,33 +964,33 @@ class InstaBot:
             del self.media_by_tag[0]
         except:
             print('Could not remove media')
-            
+
     def new_auto_mod_follow(self):
         if time.time() < self.next_iteration["Follow"]:
             return
         if time.time() > self.next_iteration["Follow"] and \
-                        self.follow_per_day != 0 and len(self.media_by_tag) > 0:
+                self.follow_per_day != 0 and len(self.media_by_tag) > 0:
             if self.media_by_tag[0]['node']["owner"]["id"] == self.user_id:
                 self.write_log("Keep calm - It's your own profile ;)")
                 return
             if check_already_followed(self, user_id=self.media_by_tag[0]['node']["owner"]["id"]) == 1:
-                self.write_log("Already followed before " + self.media_by_tag[0]['node']["owner"]["id"])
+                self.write_log("Already followed before " +
+                               self.media_by_tag[0]['node']["owner"]["id"])
                 self.next_iteration["Follow"] = time.time() + \
-                                                self.add_time(self.follow_delay/2)
+                    self.add_time(self.follow_delay/2)
                 return
-                
+
             log_string = "Trying to follow: %s" % (
                 self.media_by_tag[0]['node']["owner"]["id"])
             self.write_log(log_string)
             self.next_iteration["Follow"] = time.time() + \
-                                                self.add_time(self.follow_delay)
+                self.add_time(self.follow_delay)
 
             if self.follow(self.media_by_tag[0]['node']["owner"]["id"]) != False:
                 self.bot_follow_list.append(
                     [self.media_by_tag[0]['node']["owner"]["id"], time.time()])
                 self.next_iteration["Follow"] = time.time() + \
-                                                self.add_time(self.follow_delay)
-
+                    self.add_time(self.follow_delay)
 
     def populate_from_feed(self):
         self.get_media_id_recent_feed()
@@ -995,24 +1006,23 @@ class InstaBot:
         except:
             self.write_log("Notice: could not populate from recent feed")
 
-            
-    
     def new_auto_mod_unfollow(self):
         if time.time() > self.next_iteration["Unfollow"] and self.unfollow_per_day != 0:
-            
+
             if (time.time() - self.bot_start_ts) < 30:
-                #let bot initialize
-                return 
+                # let bot initialize
+                return
             if get_username_row_count(self) < 20:
-                self.write_log('    >>>Waiting for database to populate before unfollowing (progress '+str(get_username_row_count(self))+"/20)")                        
-                
+                self.write_log(
+                    '    >>>Waiting for database to populate before unfollowing (progress '+str(get_username_row_count(self))+"/20)")
+
                 if self.unfollow_recent_feed is True:
                     self.write_log("Will try to populate using recent feed")
                     self.populate_from_feed()
-                
+
                 self.next_iteration["Unfollow"] = time.time() + \
-                                                    (self.add_time(self.unfollow_delay)/2)
-                return #DB doesn't have enough followers yet
+                    (self.add_time(self.unfollow_delay)/2)
+                return  # DB doesn't have enough followers yet
 
             if self.bot_mode == 0 or self.bot_mode == 3:
 
@@ -1020,16 +1030,15 @@ class InstaBot:
                     if time.time() > self.next_iteration["Populate"] and self.unfollow_recent_feed is True:
                         self.populate_from_feed()
                         self.next_iteration["Populate"] = time.time() + \
-                                                    (self.add_time(360))
+                            (self.add_time(360))
                 except:
                     self.write_log('Notice: Could not populate from recent feed right now')
-                    
 
                 log_string = "Trying to unfollow #%i: " % (self.unfollow_counter + 1)
                 self.write_log(log_string)
                 self.auto_unfollow()
                 self.next_iteration["Unfollow"] = time.time() + \
-                                                    self.add_time(self.unfollow_delay)
+                    self.add_time(self.unfollow_delay)
             if self.bot_mode == 1:
                 unfollow_protocol(self)
 
@@ -1042,7 +1051,7 @@ class InstaBot:
             self.write_log(log_string)
             if self.comment(self.media_by_tag[0]['node']['id'], comment_text) != False:
                 self.next_iteration["Comments"] = time.time() + \
-                                                  self.add_time(self.comments_delay)
+                    self.add_time(self.comments_delay)
 
     def add_time(self, time):
         """ Make some random for next iteration"""
@@ -1062,23 +1071,27 @@ class InstaBot:
         try:
             check_comment = self.s.get(url_check)
             if check_comment.status_code == 200:
-                
+
                 if 'dialog-404' in check_comment.text:
-                    self.write_log('Tried to comment ' + media_code + ' but it doesn\'t exist (404). Resuming...')
+                    self.write_log('Tried to comment ' + media_code +
+                                   ' but it doesn\'t exist (404). Resuming...')
                     del self.media_by_tag[0]
                     return True
-            
-                all_data = json.loads(re.search('window._sharedData = (.*?);', check_comment.text, re.DOTALL).group(1))['entry_data']['PostPage'][0] #window._sharedData = (.*?);
+
+                all_data = json.loads(re.search('window._sharedData = (.*?);', check_comment.text, re.DOTALL).group(1))[
+                    'entry_data']['PostPage'][0]  # window._sharedData = (.*?);
                 if all_data['graphql']['shortcode_media']['owner']['id'] == self.user_id:
                     self.write_log("Keep calm - It's your own media ;)")
                     # Del media to don't loop on it
                     del self.media_by_tag[0]
                     return True
-                try:    
-                    comment_list = list(all_data['graphql']['shortcode_media']['edge_media_to_comment']['edges'])
+                try:
+                    comment_list = list(all_data['graphql']['shortcode_media']
+                                        ['edge_media_to_comment']['edges'])
                 except:
-                    comment_list = list(all_data['graphql']['shortcode_media']['edge_media_to_parent_comment']['edges'])
-                    
+                    comment_list = list(all_data['graphql']['shortcode_media']
+                                        ['edge_media_to_parent_comment']['edges'])
+
                 for d in comment_list:
                     if d['node']['owner']['id'] == self.user_id:
                         self.write_log("Keep calm - Media already commented ;)")
@@ -1087,12 +1100,15 @@ class InstaBot:
                         return True
                 return False
             elif check_comment.status_code == 404:
-                insert_media(self, self.media_by_tag[0]['node']['id'], str(check_comment.status_code))
-                self.write_log('Tried to comment ' + media_code + ' but it doesn\'t exist (404). Resuming...')
+                insert_media(self, self.media_by_tag[0]['node']
+                             ['id'], str(check_comment.status_code))
+                self.write_log('Tried to comment ' + media_code +
+                               ' but it doesn\'t exist (404). Resuming...')
                 del self.media_by_tag[0]
                 return True
             else:
-                insert_media(self, self.media_by_tag[0]['node']['id'], str(check_comment.status_code))
+                insert_media(self, self.media_by_tag[0]['node']
+                             ['id'], str(check_comment.status_code))
                 self.media_by_tag.remove(self.media_by_tag[0])
                 return True
         except:
@@ -1139,7 +1155,8 @@ class InstaBot:
                         insert_unfollow_count(self, user_id=current_id)
                         time.sleep(3)
                         return False
-                    all_data = json.loads(re.search('window._sharedData = (.*?);</script>', r.text, re.DOTALL).group(1))['entry_data']['ProfilePage'][0]
+                    all_data = json.loads(re.search(
+                        'window._sharedData = (.*?);</script>', r.text, re.DOTALL).group(1))['entry_data']['ProfilePage'][0]
 
                     user_info = all_data['graphql']['user']
                     i = 0
@@ -1220,19 +1237,19 @@ class InstaBot:
                 insert_unfollow_count(self, user_id=current_id)
 
     def unfollow_recent_feed(self):
-        
+
         if len(self.media_on_feed) == 0:
             self.get_media_id_recent_feed()
-        
+
         if len(self.media_on_feed) != 0 and self.is_follower_number < 5 and time.time() > self.next_iteration["Unfollow"] and self.unfollow_per_day != 0:
             self.get_media_id_recent_feed()
             chooser = random.randint(0, len(self.media_on_feed) - 1)
             self.current_user = self.media_on_feed[chooser]["node"]["owner"]["username"]
             self.current_id = self.media_on_feed[chooser]["node"]["owner"]["id"]
-            
+
             current_user = self.current_user
             current_id = self.current_id
-            
+
             if self.login_status:
                 log_string = "Getting user info : %s" % current_user
                 self.write_log(log_string)
@@ -1246,7 +1263,8 @@ class InstaBot:
                         insert_unfollow_count(self, user_id=current_id)
                         time.sleep(3)
                         return False
-                    all_data = json.loads(re.search('window._sharedData = (.*?);</script>', r.text, re.DOTALL).group(1))['entry_data']['ProfilePage'][0]
+                    all_data = json.loads(re.search(
+                        'window._sharedData = (.*?);</script>', r.text, re.DOTALL).group(1))['entry_data']['ProfilePage'][0]
 
                     user_info = all_data['graphql']['user']
                     i = 0
@@ -1328,7 +1346,6 @@ class InstaBot:
                 insert_unfollow_count(self, user_id=current_id)
         time.sleep(8)
 
-    
     def get_media_id_recent_feed(self):
         if self.login_status:
             now_time = datetime.datetime.now()
@@ -1338,8 +1355,9 @@ class InstaBot:
                 url_tag = 'https://www.instagram.com/'
                 try:
                     r = self.s.get(url_tag)
-                    
-                    jsondata = re.search('additionalDataLoaded\(\'feed\',({.*})\);', r.text).group(1)
+
+                    jsondata = re.search(
+                        'additionalDataLoaded\(\'feed\',({.*})\);', r.text).group(1)
                     all_data = json.loads(jsondata.strip())
 
                     self.media_on_feed = list(
@@ -1363,7 +1381,7 @@ class InstaBot:
         if self.log_mod == 0:
             try:
                 now_time = datetime.datetime.now()
-                print(now_time.strftime("%d.%m.%Y_%H:%M")  + " " + log_text)
+                print(now_time.strftime("%d.%m.%Y_%H:%M") + " " + log_text)
             except UnicodeEncodeError:
                 print("Your text has unicode problem!")
         elif self.log_mod == 1:

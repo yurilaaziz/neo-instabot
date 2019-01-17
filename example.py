@@ -31,15 +31,15 @@ bot = InstaBot(
                   ["photo", "picture", "pic", "shot", "snapshot"],
                   ["is", "looks", "feels", "is really"],
                   ["great", "super", "good", "very good", "good", "wow",
-                   "WOW", "cool", "GREAT","magnificent", "magical",
+                   "WOW", "cool", "GREAT", "magnificent", "magical",
                    "very cool", "stylish", "beautiful", "so beautiful",
                    "so stylish", "so professional", "lovely",
-                   "so lovely", "very lovely", "glorious","so glorious",
+                   "so lovely", "very lovely", "glorious", "so glorious",
                    "very glorious", "adorable", "excellent", "amazing"],
                   [".", "..", "...", "!", "!!", "!!!"]],
     # Use unwanted_username_list to block usernames containing a string
-    ## Will do partial matches; i.e. 'mozart' will block 'legend_mozart'
-    ### 'free_followers' will be blocked because it contains 'free'
+    # Will do partial matches; i.e. 'mozart' will block 'legend_mozart'
+    # 'free_followers' will be blocked because it contains 'free'
     unwanted_username_list=[
         'second', 'stuff', 'art', 'project', 'love', 'life', 'food', 'blog',
         'free', 'keren', 'photo', 'graphy', 'indo', 'travel', 'art', 'shop',
@@ -52,25 +52,25 @@ bot = InstaBot(
     unfollow_whitelist=['example_user_1', 'example_user_2'])
 while True:
 
-    #print("# MODE 0 = ORIGINAL MODE BY LEVPASHA")
-    #print("## MODE 1 = MODIFIED MODE BY KEMONG")
-    #print("### MODE 2 = ORIGINAL MODE + UNFOLLOW WHO DON'T FOLLOW BACK")
-    #print("#### MODE 3 = MODIFIED MODE : UNFOLLOW USERS WHO DON'T FOLLOW YOU BASED ON RECENT FEED")
-    #print("##### MODE 4 = MODIFIED MODE : FOLLOW USERS BASED ON RECENT FEED ONLY")
-    #print("###### MODE 5 = MODIFIED MODE : JUST UNFOLLOW EVERYBODY, EITHER YOUR FOLLOWER OR NOT")
+    # print("# MODE 0 = ORIGINAL MODE BY LEVPASHA")
+    # print("## MODE 1 = MODIFIED MODE BY KEMONG")
+    # print("### MODE 2 = ORIGINAL MODE + UNFOLLOW WHO DON'T FOLLOW BACK")
+    # print("#### MODE 3 = MODIFIED MODE : UNFOLLOW USERS WHO DON'T FOLLOW YOU BASED ON RECENT FEED")
+    # print("##### MODE 4 = MODIFIED MODE : FOLLOW USERS BASED ON RECENT FEED ONLY")
+    # print("###### MODE 5 = MODIFIED MODE : JUST UNFOLLOW EVERYBODY, EITHER YOUR FOLLOWER OR NOT")
 
     ################################
     ##  WARNING   ###
     ################################
 
     # DON'T USE MODE 5 FOR A LONG PERIOD. YOU RISK YOUR ACCOUNT FROM GETTING BANNED
-    ## USE MODE 5 IN BURST MODE, USE IT TO UNFOLLOW PEOPLE AS MANY AS YOU WANT IN SHORT TIME PERIOD
+    # USE MODE 5 IN BURST MODE, USE IT TO UNFOLLOW PEOPLE AS MANY AS YOU WANT IN SHORT TIME PERIOD
 
     mode = 0
 
     #print("You choose mode : %i" %(mode))
     #print("CTRL + C to cancel this operation or wait 30 seconds to start")
-    #time.sleep(30)
+    # time.sleep(30)
 
     if mode == 0:
         bot.new_auto_mod()
