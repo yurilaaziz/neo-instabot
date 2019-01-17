@@ -241,7 +241,7 @@ def setupinteractive(config, config_location="config.ini"):
     exit()
 
 
-if os.path.isfile(config_location) == False:
+if not os.path.isfile(config_location):
     overwrite_answer = None
     while overwrite_answer not in ("yes", "no", "n", "y"):
         overwrite_answer = input(

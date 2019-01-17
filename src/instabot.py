@@ -411,7 +411,7 @@ class InstaBot:
             }
         )
 
-        if self.session_file != None and os.path.isfile(self.session_file):
+        if self.session_file is not None and os.path.isfile(self.session_file):
             self.write_log("Found session file %s" % self.session_file)
             successfulLogin = True
             with open(self.session_file, "rb") as i:
@@ -531,7 +531,7 @@ class InstaBot:
                 except Exception as err:
                     print("Login failed, response: \n\n" + login.text, err)
                     quit()
-            elif loginResponse.get("authenticated") == False:
+            elif loginResponse.get("authenticated") is False:
                 self.write_log("Login error! Check your login data!")
                 return
 
@@ -559,7 +559,7 @@ class InstaBot:
                 self.login_status = True
                 log_string = "%s login success!\n" % (self.user_login)
                 self.write_log(log_string)
-                if self.session_file != None:
+                if self.session_file is not None:
                     self.write_log(
                         "Saving cookies to session file %s" % self.session_file
                     )
@@ -568,7 +568,7 @@ class InstaBot:
             else:
                 self.login_status = False
                 self.write_log("Login error! Check your login data!")
-                if self.session_file != None and os.path.isfile(self.session_file):
+                if self.session_file is not None and os.path.isfile(self.session_file):
                     try:
                         os.remove(self.session_file)
                     except:
@@ -629,7 +629,7 @@ class InstaBot:
                 self.bot_follow_list.remove(f)
 
         # Logout
-        if self.login_status and self.session_file == None:
+        if self.login_status and self.session_file is None:
             self.logout()
         self.prog_run = False
 
@@ -1153,7 +1153,7 @@ class InstaBot:
                 self.follow_delay
             )
 
-            if self.follow(self.media_by_tag[0]["node"]["owner"]["id"]) != False:
+            if self.follow(self.media_by_tag[0]["node"]["owner"]["id"]) is not False:
                 self.bot_follow_list.append(
                     [self.media_by_tag[0]["node"]["owner"]["id"], time.time()]
                 )
@@ -1230,12 +1230,12 @@ class InstaBot:
             and self.comments_per_day != 0
             and len(self.media_by_tag) > 0
             and self.check_exisiting_comment(self.media_by_tag[0]["node"]["shortcode"])
-            == False
+            is False
         ):
             comment_text = self.generate_comment()
             log_string = "Trying to comment: %s" % (self.media_by_tag[0]["node"]["id"])
             self.write_log(log_string)
-            if self.comment(self.media_by_tag[0]["node"]["id"], comment_text) != False:
+            if self.comment(self.media_by_tag[0]["node"]["id"], comment_text) is not False:
                 self.next_iteration["Comments"] = time.time() + self.add_time(
                     self.comments_delay
                 )
