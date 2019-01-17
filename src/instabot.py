@@ -182,10 +182,10 @@ class InstaBot:
     by_location = False
 
     # Running Times
-    start_at_h = (0,)
-    start_at_m = (0,)
-    end_at_h = (23,)
-    end_at_m = (59,)
+    start_at_h = 0
+    start_at_m = 0
+    end_at_h = 23
+    end_at_m = 59
 
     # For new_auto_mod
     next_iteration = {
