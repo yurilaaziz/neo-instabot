@@ -198,7 +198,7 @@ def setupinteractive(config, config_location="config.ini"):
 
         while requiredset is None:
             if reqset is "req":
-                confvar = input("Enter value for '" + setting + "' (Required): ")
+                confvar = input(f"Enter value for '{setting}' (Required): ")
                 if confvar == "":
                     print("This field is required")
                 else:
@@ -212,12 +212,7 @@ def setupinteractive(config, config_location="config.ini"):
                     confvar = input("Enter tags (or skip to defaults): ")
                 else:
                     confvar = input(
-                        "Enter value for '"
-                        + setting
-                        + "' ("
-                        + prompt_text
-                        + config[section][setting]
-                        + "): "
+                        f"Enter value for '{setting} ({prompt_text}{config[section][setting]}):"
                     )
                 if setting == "tag_list" and confvar != "":
                     confvar = re.sub(r"\s+", "", confvar)
@@ -271,15 +266,11 @@ if askusername is None:
 if askusername == "config":
     setupinteractive(config, config_location)
 elif askusername in config:
-    print("     Loading settings for " + askusername + "!")
+    print(f"     Loading settings for {askusername}!")
     if loaded_with_argv is False:
         try:
             print(
-                "     (Tip: Log in directly by running '"
-                + sys.argv[0]
-                + " "
-                + askusername
-                + "')"
+                f"     (Tip: Log in directly by running '{sys.argv[0]} {askusername}')'"
             )
         except:
             print(
@@ -322,8 +313,8 @@ bot = InstaBot(
     # 'free_followers' will be blocked because it contains 'free'
     unwanted_username_list=json.loads(config[usrconfig]["unwanted_username_list"]),
     unfollow_whitelist=json.loads(config[usrconfig]["unfollow_whitelist"]),
-    database_name=usrconfig + ".db",
-    session_file=usrconfig + ".session",
+    database_name=f"{usrconfig}.db",
+    session_file=f"{usrconfig}.session",
 )
 
 while True:
