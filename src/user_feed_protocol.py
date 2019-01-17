@@ -8,7 +8,7 @@ from .user_feed import get_media_id_user_feed
 
 
 def user_feed_protocol(self):
-    #To limit how many photos to scan
+    # To limit how many photos to scan
     limit = random.randint(4, 6)
     counterz = 0
     self.is_checked = False
@@ -21,8 +21,7 @@ def user_feed_protocol(self):
         if self.is_rejected is not False:
             return 0
         if self.is_follower is not False:
-            print(
-                "This is your follower")
+            print("This is your follower")
             self.is_follower_number += 1
             time.sleep(5)
             return
