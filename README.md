@@ -28,7 +28,7 @@ python3 run.py
 ```
 Depending on your operating system and python installation, you might need to use `py`, `python`, or `python3`.
 
-- To set extra parameters and more complex configurations, copy and edit `example.py` and run.
+- To set extra parameters and more sophisticated configurations, copy and edit `example.py` and run.
 
 
 ## Parameters
