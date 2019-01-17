@@ -7,6 +7,29 @@ Please do not clone this repo and publish it as your own. Fork the repo if you w
 [![Donate](https://img.shields.io/badge/PayPal-Donate-brightgreen.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=7BMM6JGE73322&lc=US)
 [![Chat on Telegram](https://img.shields.io/badge/Chat%20on-Telegram-brightgreen.svg)](https://t.me/joinchat/DYKH-0G_8hsDDoN_iE8ZlA)
 
+## Requirements
+
+- Python 3.6 or greater
+- pip version 10 or greater
+- Install requirements.txt (requests, fake-useragent, instaloader)
+
+## Getting started
+
+- Download & extract project. `cd instabot.py-master`
+
+- Head into your virtual environment and use pip or pip3 depending on your installation:
+```
+pip3 install -r requirements.txt
+```
+
+- For a quick & dirty test run, use `run.py`
+```
+python3 run.py
+```
+
+- To set extra parameters and more complex configurations, copy and edit `example.py` and run.
+
+
 ## Parameters
 | Parameter            | Type|                Description                           |        Default value             |
 |:--------------------:|:---:|:----------------------------------------------------:|:--------------------------------:|
