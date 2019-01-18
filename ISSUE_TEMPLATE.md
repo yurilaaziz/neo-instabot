@@ -9,45 +9,45 @@ Before opening a new issue, please ensure:
 -->
 
 Check this or we will delete your issue. (fill in the checkbox with an X like so: [x])
-- [ ] I have searched for other issues with the same problem. 
+- [ ] I have searched for other issues with the same problem or similar feature requests. 
 
-## Environment
-- [ ] Are you hosting the bot on a VPS or other Cloud hosting?
-- [ ] If so, have you tried running the code on your local machine?
-
-#### Select one:
+## Select one:
 - [ ] Bug
 - [ ] Feature Request
 - [ ] Technical Help
 - [ ] Other
 
-## Operating System? (include version)
+#### Environment
+- [ ] Are you hosting the bot on a VPS or other Cloud hosting?
+- [ ] If so, have you tried running the code on your local machine?
+
+#### Operating System? (include version)
 - [ ] macOS
 - [ ] Windows
 - [ ] Linux (include flavour)
 - [ ] Android (include terminal)
 
 
-## Python Version Requirement
+#### Python Version Requirement
 - [ ] I am using Python 3.6 or above
 
-## Exact Python Version?
+#### Exact Python Version?
 ```
 Include here the response of 'python --version' or 'python3 --version'
 ```
 
-## Pip Version?
+#### Pip Version?
 ```
 Include here the response of 'pip --version' or 'pip3 --version'
 ```
 
-## Description of your issue
+#### Description of your issue
 
 ```
 Include the contents of the error.log here (if applicable). < REPLACE THIS TEXT
 ```
 
-## Config
+#### Config
 
 ```
 Include the contents of your config here (REMOVE YOUR USERNAME AND PASSWORD!) (if applicable). < REPLACE THIS TEXT
