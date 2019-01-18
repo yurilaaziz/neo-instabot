@@ -11,9 +11,9 @@ Before opening a new issue, please ensure:
 Check this or we will delete your issue. (fill in the checkbox with an X like so: [x])
 - [ ] I have searched for other issues with the same problem. 
 
-## Hosting
+## Environment
 - [ ] Are you hosting the bot on a VPS or other Cloud hosting?
-- [ ] If so; have you tried running the code on your local machine?
+- [ ] If so, have you tried running the code on your local machine?
 
 #### Select one:
 - [ ] Bug
@@ -21,15 +21,25 @@ Check this or we will delete your issue. (fill in the checkbox with an X like so
 - [ ] Technical Help
 - [ ] Other
 
-### Operating System? (include version)
-- [ ] MAC
+## Operating System? (include version)
+- [ ] macOS
 - [ ] Windows
-- [ ] Linux
-- [ ] Android
+- [ ] Linux (include flavour)
+- [ ] Android (include terminal)
 
-## Python Version?
-- [ ] 2.x
-- [ ] 3.x
+
+## Python Version Requirement
+- [ ] I am using Python 3.6 or above
+
+## Exact Python Version?
+```
+Include here the response of 'python --version' or 'python3 --version'
+```
+
+## Pip Version?
+```
+Include here the response of 'pip --version' or 'pip3 --version'
+```
 
 ## Description of your issue
 
