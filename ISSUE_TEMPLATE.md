@@ -11,7 +11,7 @@ Before opening a new issue, please ensure:
 Check this or we will delete your issue. (fill in the checkbox with an X like so: [x])
 - [ ] I have searched for other issues with the same problem or similar feature requests. 
 
-## Select one:
+#### Select one:
 - [ ] Bug
 - [ ] Feature Request
 - [ ] Technical Help
