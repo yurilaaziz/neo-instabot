@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 from __future__ import print_function
-from src.unfollow_protocol import unfollow_protocol
-from src.follow_protocol import follow_protocol
-from src.feed_scanner import feed_scanner
-from src.check_status import check_status
-from src import InstaBot
+from instabot_py.unfollow_protocol import unfollow_protocol
+from instabot_py.follow_protocol import follow_protocol
+from instabot_py.feed_scanner import feed_scanner
+from instabot_py.check_status import check_status
+from instabot_py import InstaBot
 import configparser
 import os
 import sys

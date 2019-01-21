@@ -3,11 +3,11 @@
 import os
 import time
 
-from src import InstaBot
-from src.check_status import check_status
-from src.feed_scanner import feed_scanner
-from src.follow_protocol import follow_protocol
-from src.unfollow_protocol import unfollow_protocol
+from instabot_py import InstaBot
+from instabot_py.check_status import check_status
+from instabot_py.feed_scanner import feed_scanner
+from instabot_py.follow_protocol import follow_protocol
+from instabot_py.unfollow_protocol import unfollow_protocol
 
 bot = InstaBot(
     login="username",  # Enter username (lowercase). Do not enter email!
