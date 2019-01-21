@@ -111,3 +111,4 @@ ENV/
 *.db
 *.session
 DS/
+nohup.out
