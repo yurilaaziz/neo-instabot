@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import print_function
-import random
 from .sql_updates import check_and_insert_user_agent
 from .sql_updates import get_username_random, get_username_to_unfollow_random
 from .sql_updates import (
@@ -282,9 +281,13 @@ class InstaBot:
 "Mozilla/5.0 (Windows NT 6.1; rv:5.0) Gecko/20100101 Firefox/5.02",
 "Mozilla/5.0 (Windows NT 6.0) AppleWebKit/535.1 (KHTML, like Gecko) Chrome/13.0.782.112 Safari/535.1",
 "Mozilla/4.0 (compatible; MSIE 6.0; MSIE 5.5; Windows NT 5.0) Opera 7.02 Bork-edition [en]"]
-        fake_ua = random.sample(list_of_ua, 1)
-        # self.user_agent = check_and_insert_user_agent(self, str(fake_ua))
-        self.user_agent = str(fake_ua[0])
+        try:
+            fallback = random.sample(list_of_ua, 1)
+            fake_ua = fake_useragent.UserAgent(fallback=fallback[0])
+            self.user_agent = check_and_insert_user_agent(self, str(fake_ua))
+        except:
+            fake_ua = random.sample(list_of_ua, 1)
+            self.user_agent = check_and_insert_user_agent(self, str(fake_ua[0]))
         self.bot_start = datetime.datetime.now()
         self.bot_start_ts = time.time()
         self.start_at_h = start_at_h
