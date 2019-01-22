@@ -33,50 +33,20 @@ import pickle
 
 python_version_test = f"If you are reading this error, you are not running Python 3.6 or greater. Check 'python --version' or 'python3 --version'."
 
-try:
-    from pip._internal import main
-except Exception as err:
-    print(">>> Please install the latest version of pip")
-    print(err)
-
 
 # Required Dependencies and Modules, offer to install them automatically
-required_modules = ["requests", "instaloader", "fake_useragent", "threading"]
+# Keep fake_useragent last, quirk for pythonanywhere
+required_modules = ["requests", "instaloader", "threading", "fake_useragent"]
 
 for modname in required_modules:
     try:
         # try to import the module normally and put it in globals
         globals()[modname] = importlib.import_module(modname)
     except ImportError as e:
-        module_install_question = str(
-            input(
-                "\nOne or more required modules are missing.\n Would you like to try install them automatically? (yes/no): "
-            )
-        )
-        if module_install_question == "yes" or module_install_question == "y":
-            try:
-                result = main(["install", "-r", "requirements.txt", "--quiet"])
-
-                if result != 0:  # if pip could not install it reraise the error
-                    print(
-                        "Error installing modules. Please install manually using requirements.txt"
-                    )
-                    raise
-                else:
-                    # if the install was sucessful, put modname in globals
-                    print(
-                        "Modules in requirements.txt installed successfuly. Loading...\n\n"
-                    )
-                    globals()[modname] = importlib.import_module(modname)
-            except:
-                print(
-                    "Error installing modules. Please make sure you have installed the latest version of pip.\n You can install manually using requirements.txt"
-                )
-                raise
-        else:
+        if modname is not "fake_useragent":
             print(
                 f"Cannot continue without module {modname} Please install dependencies in requirements.txt. Exiting."
-            )
+                )
             quit()
 
 
