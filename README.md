@@ -4,8 +4,10 @@ Instabot is a toolkit written in Python for building Instagram bots using the un
 
 Please do not clone this repo and publish it as your own. Fork the repo if you wish to publish any changes.
 
-[![Donate](https://img.shields.io/badge/PayPal-Donate-brightgreen.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=7BMM6JGE73322&lc=US)
+[![Donate](https://img.shields.io/badge/PayPal-Donate%20to%20Author-blue.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=7BMM6JGE73322&lc=US)
 [![Chat on Telegram](https://img.shields.io/badge/Chat%20on-Telegram-brightgreen.svg)](https://t.me/joinchat/DYKH-0G_8hsDDoN_iE8ZlA)
+[![Chat on IRC](https://img.shields.io/badge/Chat%20on%20IRC-freenode.net%23instabot-brightgreen.svg)](https://kiwiirc.com/nextclient/irc.freenode.net/?nick=insta?#instabot)
+
 
 ## Requirements
 
@@ -114,3 +116,4 @@ The following video tutorials demo setting up and running the bot:
 
 - [Telegram Group](https://t.me/joinchat/DYKH-0G_8hsDDoN_iE8ZlA)
 - [Facebook Group](https://www.facebook.com/groups/instabot/)
+- [IRC Channel on Freenode.net #instabot](http://webchat.freenode.net?channels=%23instabot)
