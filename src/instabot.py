@@ -2,6 +2,13 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import print_function
+
+import fake_useragent
+import instaloader
+import requests
+from bs4 import BeautifulSoup
+
+from src.user_info import get_user_info
 from .sql_updates import check_and_insert_user_agent
 from .sql_updates import get_username_random, get_username_to_unfollow_random
 from .sql_updates import (
@@ -169,6 +176,8 @@ class InstaBot:
         like_per_day=1000,
         media_max_like=150,
         media_min_like=0,
+        user_max_follow=0,
+        user_min_follow=0,
         follow_per_day=0,
         follow_time=5 * 60 * 60,  # Cannot be zero
         follow_time_enabled=True,
@@ -180,42 +189,9 @@ class InstaBot:
         end_at_m=59,
         database_name=None,
         session_file=None,
-        comment_list=[
-            ["this", "the", "your"],
-            ["photo", "picture", "pic", "shot", "snapshot"],
-            ["is", "looks", "feels", "is really"],
-            [
-                "great",
-                "super",
-                "good",
-                "very good",
-                "good",
-                "wow",
-                "WOW",
-                "cool",
-                "GREAT",
-                "magnificent",
-                "magical",
-                "very cool",
-                "stylish",
-                "beautiful",
-                "so beautiful",
-                "so stylish",
-                "so professional",
-                "lovely",
-                "so lovely",
-                "very lovely",
-                "glorious",
-                "so glorious",
-                "very glorious",
-                "adorable",
-                "excellent",
-                "amazing",
-            ],
-            [".", "..", "...", "!", "!!", "!!!"],
-        ],
+        comment_list=None,
         comments_per_day=0,
-        tag_list=["cat", "car", "dog"],
+        tag_list=None,
         max_like_for_one_tag=5,
         unfollow_break_min=15,
         unfollow_break_max=30,
@@ -227,6 +203,43 @@ class InstaBot:
         unfollow_whitelist=[],
     ):
 
+        if tag_list is None:
+            tag_list = ["cat", "car", "dog"]
+        if comment_list is None:
+            comment_list = [
+                ["this", "the", "your"],
+                ["photo", "picture", "pic", "shot", "snapshot"],
+                ["is", "looks", "feels", "is really"],
+                [
+                    "great",
+                    "super",
+                    "good",
+                    "very good",
+                    "good",
+                    "wow",
+                    "WOW",
+                    "cool",
+                    "GREAT",
+                    "magnificent",
+                    "magical",
+                    "very cool",
+                    "stylish",
+                    "beautiful",
+                    "so beautiful",
+                    "so stylish",
+                    "so professional",
+                    "lovely",
+                    "so lovely",
+                    "very lovely",
+                    "glorious",
+                    "so glorious",
+                    "very glorious",
+                    "adorable",
+                    "excellent",
+                    "amazing",
+                ],
+                [".", "..", "...", "!", "!!", "!!!"],
+            ]
         self.session_file = session_file
 
         if database_name is not None:
@@ -306,6 +319,11 @@ class InstaBot:
         self.media_max_like = media_max_like
         # Don't like if media have less than n likes.
         self.media_min_like = media_min_like
+        # Don't follow if user have more than n followers.
+        self.user_max_follow = user_max_follow
+        # Don't follow if user have less than n followers.
+        self.user_min_follow = user_min_follow
+
         # Auto mod seting:
         # Default list of tag.
         self.tag_list = tag_list
@@ -794,6 +812,7 @@ class InstaBot:
                             ):
                                 self.write_log("Keep calm - It's your own media ;)")
                                 return False
+
                             if (
                                 check_already_liked(
                                     self, media_id=self.media_by_tag[i]["node"]["id"]
@@ -947,6 +966,8 @@ class InstaBot:
         """ Send http request to follow """
         if self.login_status:
             url_follow = self.url_follow % (user_id)
+            username = self.get_username_by_user_id(user_id=user_id)
+            user_check = get_user_info(self,username)
             try:
                 follow = self.s.post(url_follow)
                 if follow.status_code == 200:
@@ -1103,6 +1124,41 @@ class InstaBot:
             if self.media_by_tag[0]["node"]["owner"]["id"] == self.user_id:
                 self.write_log("Keep calm - It's your own profile ;)")
                 return
+
+            if self.user_min_follow != 0 or self.user_max_follow != 0:
+                try:
+                    _user_id = self.media_by_tag[0]["node"]["owner"]["id"]
+                    _user_name = self.get_username_by_user_id(_user_id)
+
+                    _url = self.url_user_detail % (_user_name)
+                    r = self.s.get(_url)
+                    soup = BeautifulSoup(r.content, "html.parser")
+                    _rs = soup.find("meta", property="og:description").prettify()
+                    _rs = _rs.split()
+
+
+                    # _output[0] = Followers
+                    # _output[1] = Following
+                    # _output[2] = Posts
+                    _output = []
+
+                    for i in _rs:
+                        match = re.search(r'\d+.?\d*', i)
+                        if match:
+                            _output.append(float(match.group()))
+                            if len(_output) == 3:
+                                break
+
+                    if _output[0] < self.user_min_follow:
+                        self.write_log(f'Not follow user {_user_name}, Followers < user_min_follow')
+                        return False
+
+                    if self.user_max_follow != 0 and _output[0] > self.user_max_follow:
+                        self.write_log(f'Not follow user {_user_name}, Followers > user_max_follow')
+                        return False
+
+                except Exception:
+                    pass
             if (
                 check_already_followed(
                     self, user_id=self.media_by_tag[0]["node"]["owner"]["id"]
