@@ -2,13 +2,6 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import print_function
-
-import fake_useragent
-import instaloader
-import requests
-from bs4 import BeautifulSoup
-
-from src.user_info import get_user_info
 from .sql_updates import check_and_insert_user_agent
 from .sql_updates import get_username_random, get_username_to_unfollow_random
 from .sql_updates import (
@@ -36,6 +29,7 @@ import importlib
 import os
 import sys
 import pickle
+from bs4 import BeautifulSoup
 
 
 python_version_test = f"If you are reading this error, you are not running Python 3.6 or greater. Check 'python --version' or 'python3 --version'."
