@@ -29,8 +29,6 @@ import importlib
 import os
 import sys
 import pickle
-from bs4 import BeautifulSoup
-
 
 python_version_test = f"If you are reading this error, you are not running Python 3.6 or greater. Check 'python --version' or 'python3 --version'."
 
@@ -1126,28 +1124,14 @@ class InstaBot:
 
                     _url = self.url_user_detail % (_user_name)
                     r = self.s.get(_url)
-                    soup = BeautifulSoup(r.content, "html.parser")
-                    _rs = soup.find("meta", property="og:description").prettify()
-                    _rs = _rs.split()
+                    _all_data = json.loads(re.search("window._sharedData = (.*?);</script>", r.text, re.DOTALL).group(1))
+                    _followers = _all_data["entry_data"]["ProfilePage"][0]["graphql"]["user"]["edge_followed_by"]["count"]
 
-
-                    # _output[0] = Followers
-                    # _output[1] = Following
-                    # _output[2] = Posts
-                    _output = []
-
-                    for i in _rs:
-                        match = re.search(r'\d+.?\d*', i)
-                        if match:
-                            _output.append(float(match.group()))
-                            if len(_output) == 3:
-                                break
-
-                    if _output[0] < self.user_min_follow:
+                    if _followers < self.user_min_follow:
                         self.write_log(f'Not follow user {_user_name}, Followers < user_min_follow')
                         return False
 
-                    if self.user_max_follow != 0 and _output[0] > self.user_max_follow:
+                    if self.user_max_follow != 0 and _followers > self.user_max_follow:
                         self.write_log(f'Not follow user {_user_name}, Followers > user_max_follow')
                         return False
 
