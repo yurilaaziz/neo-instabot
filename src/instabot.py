@@ -30,7 +30,6 @@ import os
 import sys
 import pickle
 
-
 python_version_test = f"If you are reading this error, you are not running Python 3.6 or greater. Check 'python --version' or 'python3 --version'."
 
 
@@ -169,6 +168,8 @@ class InstaBot:
         like_per_day=1000,
         media_max_like=150,
         media_min_like=0,
+        user_max_follow=0,
+        user_min_follow=0,
         follow_per_day=0,
         follow_time=5 * 60 * 60,  # Cannot be zero
         follow_time_enabled=True,
@@ -306,6 +307,11 @@ class InstaBot:
         self.media_max_like = media_max_like
         # Don't like if media have less than n likes.
         self.media_min_like = media_min_like
+        # Don't follow if user have more than n followers.
+        self.user_max_follow = user_max_follow
+        # Don't follow if user have less than n followers.
+        self.user_min_follow = user_min_follow
+
         # Auto mod seting:
         # Default list of tag.
         self.tag_list = tag_list
@@ -319,7 +325,7 @@ class InstaBot:
         # self.s.proxies = {"https" : "http://proxyip:proxyport"}
         # by @ageorgios
         if proxy != "":
-            proxies = {"http": f"http://{proxy}", "https": f"https://{proxy}"}
+            proxies = {"http": f"http://{proxy}", "https": f"http://{proxy}"}
             self.s.proxies.update(proxies)
             self.c.proxies.update(proxies)
         # convert login to lower
@@ -794,6 +800,7 @@ class InstaBot:
                             ):
                                 self.write_log("Keep calm - It's your own media ;)")
                                 return False
+
                             if (
                                 check_already_liked(
                                     self, media_id=self.media_by_tag[i]["node"]["id"]
@@ -943,17 +950,18 @@ class InstaBot:
                 logging.exception("Except on comment!")
         return False
 
-    def follow(self, user_id):
+    def follow(self, user_id, username=None):
         """ Send http request to follow """
         if self.login_status:
             url_follow = self.url_follow % (user_id)
+            if username is None:
+                username = self.get_username_by_user_id(user_id=user_id)
             try:
                 follow = self.s.post(url_follow)
                 if follow.status_code == 200:
                     self.follow_counter += 1
                     log_string = f"Followed: {user_id} #{self.follow_counter}."
                     self.write_log(log_string)
-                    username = self.get_username_by_user_id(user_id=user_id)
                     insert_username(self, user_id=user_id, username=username)
                 return follow
             except:
@@ -1093,6 +1101,7 @@ class InstaBot:
             print("Could not remove media")
 
     def new_auto_mod_follow(self):
+        username = None
         if time.time() < self.next_iteration["Follow"]:
             return
         if (
@@ -1103,6 +1112,37 @@ class InstaBot:
             if self.media_by_tag[0]["node"]["owner"]["id"] == self.user_id:
                 self.write_log("Keep calm - It's your own profile ;)")
                 return
+
+            if self.user_min_follow != 0 or self.user_max_follow != 0:
+                try:
+                    username = self.get_username_by_user_id(
+                        self.media_by_tag[0]["node"]["owner"]["id"]
+                    )
+                    url = self.url_user_detail % (username)
+                    r = self.s.get(url)
+                    all_data = json.loads(
+                        re.search(
+                            "window._sharedData = (.*?);</script>", r.text, re.DOTALL
+                        ).group(1)
+                    )
+                    followers = all_data["entry_data"]["ProfilePage"][0]["graphql"][
+                        "user"
+                    ]["edge_followed_by"]["count"]
+
+                    if followers < self.user_min_follow:
+                        self.write_log(
+                            f"Won't follow {username}: does not meet user_min_follow requirement"
+                        )
+                        return
+
+                    if self.user_max_follow != 0 and followers > self.user_max_follow:
+                        self.write_log(
+                            f"Won't follow {username}: does not meet user_max_follow requirement"
+                        )
+                        return
+
+                except Exception:
+                    pass
             if (
                 check_already_followed(
                     self, user_id=self.media_by_tag[0]["node"]["owner"]["id"]
@@ -1125,7 +1165,13 @@ class InstaBot:
                 self.follow_delay
             )
 
-            if self.follow(self.media_by_tag[0]["node"]["owner"]["id"]) is not False:
+            if (
+                self.follow(
+                    user_id=self.media_by_tag[0]["node"]["owner"]["id"],
+                    username=username,
+                )
+                is not False
+            ):
                 self.bot_follow_list.append(
                     [self.media_by_tag[0]["node"]["owner"]["id"], time.time()]
                 )
