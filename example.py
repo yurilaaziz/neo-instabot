@@ -24,7 +24,7 @@ bot = InstaBot(
     unfollow_break_min=15,
     unfollow_break_max=30,
     user_max_follow=0,
-    user_min_follow=100,
+    user_min_follow=0,
     log_mod=0,
     proxy="",
     # List of list of words, each of which will be used to generate comment
