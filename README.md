@@ -1,6 +1,6 @@
 # InstaBot
 
-Instabot is a toolkit written in Python for building Instagram bots using the undocumented private API. 
+Instabot is a toolkit written in Python for building Instagram bots using the undocumented private API.
 
 Please do not clone this repo and publish it as your own. Fork the repo if you wish to publish any changes.
 
@@ -48,6 +48,9 @@ Depending on your operating system and python installation, you might need to us
 | media_max_like       | int | Maximum number of likes on photos to like (set to 0 to disable) | 0    |
 | media_min_like       | int | Minimum number of likes on photos to like (set to 0 to disable) | 0    |
 | follow_per_day       | int | Users to follow per day                              | 0    |
+| follow_time          | int | Seconds to wait before unfollowing                   | 5 * 60 * 60 |
+| user_min_follow      | int | Check user before following them if they have X minimum of followers. Set 0 to disable                   | 0 |
+| user_max_follow      | int | Check user before following them if they have X maximum of followers. Set 0 to disable                   | 0 |
 | follow_time          | int | Seconds to wait before unfollowing                   | 5 * 60 * 60 |
 | follow_time_enabled  | bool| Whether to wait seconds set in follow_time before unfollowing | True |
 | unfollow_per_day     | int | Users to unfollow per day                            | 0    |

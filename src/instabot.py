@@ -181,9 +181,42 @@ class InstaBot:
         end_at_m=59,
         database_name=None,
         session_file=None,
-        comment_list=None,
+        comment_list=[
+            ["this", "the", "your"],
+            ["photo", "picture", "pic", "shot", "snapshot"],
+            ["is", "looks", "feels", "is really"],
+            [
+                "great",
+                "super",
+                "good",
+                "very good",
+                "good",
+                "wow",
+                "WOW",
+                "cool",
+                "GREAT",
+                "magnificent",
+                "magical",
+                "very cool",
+                "stylish",
+                "beautiful",
+                "so beautiful",
+                "so stylish",
+                "so professional",
+                "lovely",
+                "so lovely",
+                "very lovely",
+                "glorious",
+                "so glorious",
+                "very glorious",
+                "adorable",
+                "excellent",
+                "amazing",
+            ],
+            [".", "..", "...", "!", "!!", "!!!"],
+        ],
         comments_per_day=0,
-        tag_list=None,
+        tag_list=["cat", "car", "dog"],
         max_like_for_one_tag=5,
         unfollow_break_min=15,
         unfollow_break_max=30,
@@ -195,43 +228,6 @@ class InstaBot:
         unfollow_whitelist=[],
     ):
 
-        if tag_list is None:
-            tag_list = ["cat", "car", "dog"]
-        if comment_list is None:
-            comment_list = [
-                ["this", "the", "your"],
-                ["photo", "picture", "pic", "shot", "snapshot"],
-                ["is", "looks", "feels", "is really"],
-                [
-                    "great",
-                    "super",
-                    "good",
-                    "very good",
-                    "good",
-                    "wow",
-                    "WOW",
-                    "cool",
-                    "GREAT",
-                    "magnificent",
-                    "magical",
-                    "very cool",
-                    "stylish",
-                    "beautiful",
-                    "so beautiful",
-                    "so stylish",
-                    "so professional",
-                    "lovely",
-                    "so lovely",
-                    "very lovely",
-                    "glorious",
-                    "so glorious",
-                    "very glorious",
-                    "adorable",
-                    "excellent",
-                    "amazing",
-                ],
-                [".", "..", "...", "!", "!!", "!!!"],
-            ]
         self.session_file = session_file
 
         if database_name is not None:
@@ -329,7 +325,7 @@ class InstaBot:
         # self.s.proxies = {"https" : "http://proxyip:proxyport"}
         # by @ageorgios
         if proxy != "":
-            proxies = {"http": f"http://{proxy}", "https": f"https://{proxy}"}
+            proxies = {"http": f"http://{proxy}", "https": f"http://{proxy}"}
             self.s.proxies.update(proxies)
             self.c.proxies.update(proxies)
         # convert login to lower
@@ -954,19 +950,18 @@ class InstaBot:
                 logging.exception("Except on comment!")
         return False
 
-    def follow(self, user_id):
+    def follow(self, user_id, username=None):
         """ Send http request to follow """
         if self.login_status:
             url_follow = self.url_follow % (user_id)
-            username = self.get_username_by_user_id(user_id=user_id)
-            user_check = get_user_info(self,username)
+            if username is None:
+                username = self.get_username_by_user_id(user_id=user_id)
             try:
                 follow = self.s.post(url_follow)
                 if follow.status_code == 200:
                     self.follow_counter += 1
                     log_string = f"Followed: {user_id} #{self.follow_counter}."
                     self.write_log(log_string)
-                    username = self.get_username_by_user_id(user_id=user_id)
                     insert_username(self, user_id=user_id, username=username)
                 return follow
             except:
@@ -1106,6 +1101,7 @@ class InstaBot:
             print("Could not remove media")
 
     def new_auto_mod_follow(self):
+        username = None
         if time.time() < self.next_iteration["Follow"]:
             return
         if (
@@ -1119,21 +1115,31 @@ class InstaBot:
 
             if self.user_min_follow != 0 or self.user_max_follow != 0:
                 try:
-                    _user_id = self.media_by_tag[0]["node"]["owner"]["id"]
-                    _user_name = self.get_username_by_user_id(_user_id)
+                    username = self.get_username_by_user_id(
+                        self.media_by_tag[0]["node"]["owner"]["id"]
+                    )
+                    url = self.url_user_detail % (username)
+                    r = self.s.get(url)
+                    all_data = json.loads(
+                        re.search(
+                            "window._sharedData = (.*?);</script>", r.text, re.DOTALL
+                        ).group(1)
+                    )
+                    followers = all_data["entry_data"]["ProfilePage"][0]["graphql"][
+                        "user"
+                    ]["edge_followed_by"]["count"]
 
-                    _url = self.url_user_detail % (_user_name)
-                    r = self.s.get(_url)
-                    _all_data = json.loads(re.search("window._sharedData = (.*?);</script>", r.text, re.DOTALL).group(1))
-                    _followers = _all_data["entry_data"]["ProfilePage"][0]["graphql"]["user"]["edge_followed_by"]["count"]
+                    if followers < self.user_min_follow:
+                        self.write_log(
+                            f"Won't follow {username}: does not meet user_min_follow requirement"
+                        )
+                        return
 
-                    if _followers < self.user_min_follow:
-                        self.write_log(f'Not follow user {_user_name}, Followers < user_min_follow')
-                        return False
-
-                    if self.user_max_follow != 0 and _followers > self.user_max_follow:
-                        self.write_log(f'Not follow user {_user_name}, Followers > user_max_follow')
-                        return False
+                    if self.user_max_follow != 0 and followers > self.user_max_follow:
+                        self.write_log(
+                            f"Won't follow {username}: does not meet user_max_follow requirement"
+                        )
+                        return
 
                 except Exception:
                     pass
@@ -1159,7 +1165,13 @@ class InstaBot:
                 self.follow_delay
             )
 
-            if self.follow(self.media_by_tag[0]["node"]["owner"]["id"]) is not False:
+            if (
+                self.follow(
+                    user_id=self.media_by_tag[0]["node"]["owner"]["id"],
+                    username=username,
+                )
+                is not False
+            ):
                 self.bot_follow_list.append(
                     [self.media_by_tag[0]["node"]["owner"]["id"], time.time()]
                 )
