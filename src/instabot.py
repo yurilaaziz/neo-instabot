@@ -367,7 +367,7 @@ class InstaBot:
             self.write_log("Could not check for updates")
 
     def populate_user_blacklist(self):
-        for user in self.user_blacklist:
+                for user in self.user_blacklist:
             user_id_url = self.url_user_detail % (user)
             info = self.s.get(user_id_url)
 
@@ -375,14 +375,17 @@ class InstaBot:
             from json import JSONDecodeError
 
             try:
-                all_data = json.loads(info.text)
+                all_data = json.loads(
+                    re.search(
+                        "window._sharedData = (.*?);</script>", info.text, re.DOTALL
+                    ).group(1))
             except JSONDecodeError as e:
                 self.write_log(
                     f"Account of user {user} was deleted or link is " "invalid"
                 )
             else:
                 # prevent exception if user have no media
-                id_user = all_data["user"]["id"]
+                id_user = all_data["entry_data"]["ProfilePage"][0]["graphql"]["user"]["id"]
                 # Update the user_name with the user_id
                 self.user_blacklist[user] = id_user
                 log_string = f"Blacklisted user {user} added with ID: {id_user}"
