@@ -1060,7 +1060,7 @@ class InstaBot:
                 # ------------------- Comment -------------------
                 self.new_auto_mod_comments()
                 # Bot iteration in 1 sec
-                time.sleep(3)
+                time.sleep(1)
                 # print("Tic!")
             else:
                 print(
