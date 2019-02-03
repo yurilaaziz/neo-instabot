@@ -24,7 +24,6 @@ import itertools
 import datetime
 import atexit
 from .userinfo import UserInfo
-from .unfollow_protocol import unfollow_protocol
 import importlib
 import os
 import sys
@@ -1018,17 +1017,11 @@ class InstaBot:
                 logging.exception(log_string)
         return False
 
-    def auto_mod(self):
-        """ Star loop, that get media ID by your tag list, and like it """
-        if self.login_status:
-            while self.prog_run:
-                random.shuffle(self.tag_list)
-                self.get_media_id_by_tag(random.choice(self.tag_list))
-                self.like_all_exist_media(random.randint(1, self.max_like_for_one_tag))
-            self.write_log("Exit Program... GoodBye")
-            sys.exit(0)
-
+    # Backwards Compatibility for old example.py files
     def new_auto_mod(self):
+        self.mainloop()
+
+    def mainloop(self):
         while self.prog_run and self.login_status:
             now = datetime.datetime.now()
             if datetime.time(
@@ -1201,7 +1194,7 @@ class InstaBot:
                 return
             if get_username_row_count(self) < 20:
                 self.write_log(
-                    f"    >>>Waiting for database to populate before unfollowing (progress {str(get_username_row_count(self))} /20)"
+                    f"> Waiting for database to populate before unfollowing (progress {str(get_username_row_count(self))} /20)"
                 )
 
                 if self.unfollow_recent_feed is True:
@@ -1235,8 +1228,6 @@ class InstaBot:
                 self.next_iteration["Unfollow"] = time.time() + self.add_time(
                     self.unfollow_delay
                 )
-            if self.bot_mode == 1:
-                unfollow_protocol(self)
 
     def new_auto_mod_comments(self):
         if (
