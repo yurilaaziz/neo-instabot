@@ -217,6 +217,26 @@ def get_username_row_count(self):
         return False
 
 
+def get_medias_to_unlike(self):
+    """ Gets random medias that is older than unlike_time"""
+    now_time = datetime.now()
+    cut_off_time = now_time - timedelta(seconds=self.time_till_unlike)
+    media = self.follows_db_c.execute(
+        "SELECT media_id FROM medias WHERE \
+    DATETIME(datetime) < DATETIME('"
+        + str(cut_off_time)
+        + "') \
+    AND status=200 ORDER BY RANDOM() LIMIT 1"
+    ).fetchone()
+    if media:
+        return media[0]
+    return False
+
+def update_media_complete(self, media_id):
+    """ update media to medias """
+    qry = "UPDATE medias SET status='201' WHERE media_id ='"+media_id+"'"
+    self.follows_db_c.execute(qry)
+
 def check_if_userid_exists(self, userid):
     """ Checks if username exists """
     # print("select count(*) from usernames WHERE username_id = " + userid)

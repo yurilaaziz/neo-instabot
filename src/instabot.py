@@ -9,6 +9,8 @@ from .sql_updates import (
     get_usernames,
     get_username_row_count,
     check_if_userid_exists,
+    get_medias_to_unlike,
+    update_media_complete,
 )
 from .sql_updates import insert_media, insert_username, insert_unfollow_count
 from .sql_updates import check_already_followed, check_already_unfollowed
@@ -153,6 +155,7 @@ class InstaBot:
     # For new_auto_mod
     next_iteration = {
         "Like": 0,
+        "Unlike": 0,
         "Follow": 0,
         "Unfollow": 0,
         "Comments": 0,
@@ -165,11 +168,13 @@ class InstaBot:
         login,
         password,
         like_per_day=1000,
+        unlike_per_day=0,
         media_max_like=150,
         media_min_like=0,
         user_max_follow=0,
         user_min_follow=0,
         follow_per_day=0,
+        time_till_unlike=3 * 24 * 60 * 60,  # Cannot be zero
         follow_time=5 * 60 * 60,  # Cannot be zero
         follow_time_enabled=True,
         unfollow_per_day=0,
@@ -284,6 +289,12 @@ class InstaBot:
         self.like_per_day = like_per_day
         if self.like_per_day != 0:
             self.like_delay = self.time_in_day / self.like_per_day
+
+        # Unlike
+        self.time_till_unlike = time_till_unlike
+        self.unlike_per_day = unlike_per_day
+        if self.unlike_per_day != 0:
+            self.unlike_per_day = self.time_in_day / self.unlike_per_day
 
         # Follow
         self.follow_time = follow_time  # Cannot be zero
@@ -853,8 +864,10 @@ class InstaBot:
                                 logging.exception("Except on like_all_exist_media")
                                 return False
 
-                            log_string = "Trying to like media: %s" % (
-                                self.media_by_tag[i]["node"]["id"]
+                            log_string = "Trying to like media: %s\n    (%s)" % (
+                                self.media_by_tag[i]["node"]["id"],
+                                self.url_media
+                                % self.media_by_tag[i]["node"]["shortcode"],
                             )
                             self.write_log(log_string)
                             like = self.like(self.media_by_tag[i]["node"]["id"])
@@ -1042,6 +1055,8 @@ class InstaBot:
                     self.remove_already_liked()
                 # ------------------- Like -------------------
                 self.new_auto_mod_like()
+                # ------------------- Unlike -------------------
+                self.new_auto_mod_unlike()
                 # ------------------- Follow -------------------
                 self.new_auto_mod_follow()
                 # ------------------- Unfollow -------------------
@@ -1049,7 +1064,7 @@ class InstaBot:
                 # ------------------- Comment -------------------
                 self.new_auto_mod_comments()
                 # Bot iteration in 1 sec
-                time.sleep(3)
+                time.sleep(1)
                 # print("Tic!")
             else:
                 print(
@@ -1095,6 +1110,16 @@ class InstaBot:
             del self.media_by_tag[0]
         except:
             print("Could not remove media")
+
+    def new_auto_mod_unlike(self):
+        if time.time() > self.next_iteration["Unlike"] and self.unlike_per_day != 0:
+            media = get_medias_to_unlike(self)
+            if media:
+                self.write_log("Trying to unlike some medias")
+                self.auto_unlike()
+                self.next_iteration["Unlike"] = time.time() + self.add_time(
+                    self.unfollow_delay
+                )
 
     def new_auto_mod_follow(self):
         username = None
@@ -1335,6 +1360,21 @@ class InstaBot:
             self.write_log("Couldn't comment post, resuming.")
             del self.media_by_tag[0]
             return True
+
+    def auto_unlike(self):
+        checking = True
+        while checking:
+            media_to_unlike = get_medias_to_unlike(self)
+            if media_to_unlike:
+                request = self.unlike(media_to_unlike)
+                if request.status_code == 200:
+                    update_media_complete(self, media_to_unlike)
+                else:
+                    self.write_log("Couldn't unlike media, resuming.")
+                    checking = False
+            else:
+                self.write_log("no medias to unlike")
+                checking = False
 
     def auto_unfollow(self):
         checking = True
