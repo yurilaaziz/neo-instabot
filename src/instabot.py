@@ -367,7 +367,7 @@ class InstaBot:
             self.write_log("Could not check for updates")
 
     def populate_user_blacklist(self):
-                for user in self.user_blacklist:
+        for user in self.user_blacklist:
             user_id_url = self.url_user_detail % (user)
             info = self.s.get(user_id_url)
 
