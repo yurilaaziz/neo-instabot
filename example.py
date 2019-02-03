@@ -124,6 +124,8 @@ bot = InstaBot(
         "bags",
     ],
     unfollow_whitelist=["example_user_1", "example_user_2"],
+    end_at_h = 23,
+	start_at_h = 9
 )
 
 bot.mainloop()
