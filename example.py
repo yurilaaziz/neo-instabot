@@ -124,8 +124,11 @@ bot = InstaBot(
         "bags",
     ],
     unfollow_whitelist=["example_user_1", "example_user_2"],
-    end_at_h = 23,
-	start_at_h = 9
+    # Enable the following to schedule the bot. Uses 24H
+    # end_at_h = 23, # Hour you want the bot to stop
+    # end_at_h = 30, # Minute you want the bot stop, in this example 23:30
+    # start_at_h = 9, # Hour you want the bot to start
+    # start_at_m = 10, # Minute you want the bot to start, in this example 9:10 (am).
 )
 
 bot.mainloop()
