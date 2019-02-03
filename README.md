@@ -43,7 +43,7 @@ Depending on your operating system and python installation, you might need to us
 | end\_at\_h           | int | End program at the hour                              | 23   |
 | end\_at\_m           | int | End program at the min                               | 59   |
 | database\_name       | str | change the name of database file to use multiple account | "follows\_db.db"   |
-| session\_file        | str | change the name of session file so to avoid having to login every time | "username.session"   |
+| session\_file        | str | change the name of session file so to avoid having to login every time. Set 'False' to disable. | "username.session"   |
 | like_per_day         | int | Number of photos to like per day (over 1000 may cause throttling) | 1000 |
 | media_max_like       | int | Maximum number of likes on photos to like (set to 0 to disable) | 0    |
 | media_min_like       | int | Minimum number of likes on photos to like (set to 0 to disable) | 0    |

@@ -45,7 +45,7 @@ for modname in required_modules:
     except ImportError as e:
         if modname is not "fake_useragent":
             print(
-                f"Cannot continue without module {modname} Please install dependencies in requirements.txt. Exiting."
+                f"Failed to load module {modname}. Make sure you have installed correctly dependencies in requirements.txt."
             )
             quit()
 
@@ -184,7 +184,7 @@ class InstaBot:
         end_at_h=23,
         end_at_m=59,
         database_name=None,
-        session_file=None,
+        session_file=None,  # False = disabled, None = Will use default username.session notation, string = will use that as filename
         comment_list=[
             ["this", "the", "your"],
             ["photo", "picture", "pic", "shot", "snapshot"],
@@ -232,7 +232,12 @@ class InstaBot:
         unfollow_whitelist=[],
     ):
 
-        self.session_file = session_file
+        if session_file is not None and session_file is not False:
+            self.session_file = session_file
+        elif session_file is False:
+            self.session_file = None
+        else:
+            self.session_file = f"{login.lower()}.session"
 
         if database_name is not None:
             self.database_name = database_name
@@ -388,14 +393,17 @@ class InstaBot:
                 all_data = json.loads(
                     re.search(
                         "window._sharedData = (.*?);</script>", info.text, re.DOTALL
-                    ).group(1))
+                    ).group(1)
+                )
             except JSONDecodeError as e:
                 self.write_log(
                     f"Account of user {user} was deleted or link is " "invalid"
                 )
             else:
                 # prevent exception if user have no media
-                id_user = all_data["entry_data"]["ProfilePage"][0]["graphql"]["user"]["id"]
+                id_user = all_data["entry_data"]["ProfilePage"][0]["graphql"]["user"][
+                    "id"
+                ]
                 # Update the user_name with the user_id
                 self.user_blacklist[user] = id_user
                 log_string = f"Blacklisted user {user} added with ID: {id_user}"
@@ -1115,7 +1123,7 @@ class InstaBot:
         if time.time() > self.next_iteration["Unlike"] and self.unlike_per_day != 0:
             media = get_medias_to_unlike(self)
             if media:
-                self.write_log("Trying to unlike some medias")
+                self.write_log("Trying to unlike media")
                 self.auto_unlike()
                 self.next_iteration["Unlike"] = time.time() + self.add_time(
                     self.unfollow_delay

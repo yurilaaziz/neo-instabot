@@ -10,7 +10,7 @@ from src.follow_protocol import follow_protocol
 from src.unfollow_protocol import unfollow_protocol
 
 bot = InstaBot(
-    login="username",
+    login="username",  # Enter username (lowercase). Do not enter email!
     password="password",
     like_per_day=1000,
     comments_per_day=0,
@@ -26,6 +26,7 @@ bot = InstaBot(
     unfollow_break_min=15,
     unfollow_break_max=30,
     user_max_follow=0,
+    # session_file=False, # Set to False to disable persistent session, or specify custom session_file (ie ='myusername.session')
     user_min_follow=0,
     log_mod=0,
     proxy="",
@@ -33,8 +34,8 @@ bot = InstaBot(
     # For example: "This shot feels wow!"
     comment_list=[
         ["this", "the", "your"],
-        ["photo", "picture", "pic", "shot", "snapshot"],
-        ["is", "looks", "feels", "is really"],
+        ["photo", "picture", "pic", "shot"],
+        ["is", "looks", "is 👉", "is really"],
         [
             "great",
             "super",
@@ -63,7 +64,7 @@ bot = InstaBot(
             "excellent",
             "amazing",
         ],
-        [".", "..", "...", "!", "!!", "!!!"],
+        [".", "🙌", "... 👏", "!", "! 😍", "😎"],
     ],
     # Use unwanted_username_list to block usernames containing a string
     # Will do partial matches; i.e. 'mozart' will block 'legend_mozart'
