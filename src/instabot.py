@@ -51,23 +51,8 @@ for modname in required_modules:
 
 class InstaBot:
     """
-    Instagram bot v 1.2.2
-    like_per_day=1000 - How many likes set bot in one day.
+    Instabot.py version 1.2.2
 
-    media_max_like=0 - Don't like media (photo or video) if it have more than
-    media_max_like likes.
-
-    media_min_like=0 - Don't like media (photo or video) if it have less than
-    media_min_like likes.
-
-    tag_list = ['cat', 'car', 'dog'] - Tag list to like.
-
-    max_like_for_one_tag=5 - Like 1 to max_like_for_one_tag times by row.
-
-    log_mod = 0 - Log mod: log_mod = 0 log to console, log_mod = 1 log to file,
-    log_mod = 2 no log.
-
-    https://github.com/LevPasha/instabot.py
     """
 
     database_name = None
@@ -101,7 +86,7 @@ class InstaBot:
     # If you have 3 400 error in row - looks like you banned.
     error_400_to_ban = 3
     # If InstaBot think you are banned - going to sleep.
-    ban_sleep_time = 2 * 60 * 60
+    ban_sleep_time = 3 * 60 * 60
 
     # All counter.
     bot_mode = 0
@@ -416,8 +401,7 @@ class InstaBot:
                 ]
                 # Update the user_name with the user_id
                 self.user_blacklist[user] = id_user
-                log_string = f"Blacklisted user {user} added with ID: {id_user}"
-                self.write_log(log_string)
+                self.write_log(f"Blacklisted user {user} added with ID: {id_user}")
                 time.sleep(5 * random.random())
 
     def login(self):
@@ -585,8 +569,7 @@ class InstaBot:
             if finder != -1:
                 self.user_id = self.get_user_id_by_username(self.user_login)
                 self.login_status = True
-                log_string = f"{self.user_login} login success!\n"
-                self.write_log(log_string)
+                self.write_log(f"{self.user_login} login success!\n")
                 if self.session_file is not None:
                     self.write_log(
                         f"Saving cookies to session file {self.session_file}"
@@ -621,8 +604,7 @@ class InstaBot:
         )
         self.write_log(log_string)
         work_time = datetime.datetime.now() - self.bot_start
-        log_string = "Bot work time: %s" % (work_time)
-        self.write_log(log_string)
+        self.write_log(f"Bot work time: {work_time}")
 
         try:
             logout_post = {"csrfmiddlewaretoken": self.csrftoken}
@@ -668,8 +650,7 @@ class InstaBot:
             if tag.startswith("l:"):
                 tag = tag.replace("l:", "")
                 self.by_location = True
-                log_string = "Get Media by location: %s" % (tag)
-                self.write_log(log_string)
+                self.write_log(f"Get Media by location: {tag}")
                 if self.login_status == 1:
                     url_location = self.url_location % (tag)
                     try:
@@ -688,9 +669,8 @@ class InstaBot:
                     return 0
 
             else:
-                log_string = "Get Media by tag: %s" % (tag)
                 self.by_location = False
-                self.write_log(log_string)
+                self.write_log(f"Get Media by tag: {tag}")
                 if self.login_status == 1:
                     url_tag = self.url_tag % (tag)
                     try:
@@ -903,8 +883,7 @@ class InstaBot:
                                     )
                                     self.write_log(log_string)
                                 elif like.status_code == 400:
-                                    log_string = f"Not liked: {like.status_code}"
-                                    self.write_log(log_string)
+                                    self.write_log(f"Not liked: {like.status_code}")
                                     insert_media(
                                         self,
                                         media_id=self.media_by_tag[i]["node"]["id"],
@@ -917,13 +896,12 @@ class InstaBot:
                                     else:
                                         self.error_400 += 1
                                 else:
-                                    log_string = f"Not liked: {like.status_code}"
                                     insert_media(
                                         self,
                                         media_id=self.media_by_tag[i]["node"]["id"],
                                         status=str(like.status_code),
                                     )
-                                    self.write_log(log_string)
+                                    self.write_log(f"Not liked: {like.status_code}")
                                     return False
                                     # Some error.
                                 i += 1
@@ -1029,7 +1007,7 @@ class InstaBot:
                     insert_unfollow_count(self, user_id=user_id)
                 else:
                     log_string = (
-                        "Slow Down - Pausing for 5 minutes so we don't get banned!"
+                        "Slow Down - Pausing for 5 minutes to avoid getting banned"
                     )
                     self.write_log(log_string)
                     time.sleep(300)
@@ -1046,8 +1024,7 @@ class InstaBot:
                     return False
                 return unfollow
             except:
-                log_string = "Except on unfollow... Looks like a network error"
-                logging.exception(log_string)
+                logging.exception("Except on unfollow.")
         return False
 
     # Backwards Compatibility for old example.py files
