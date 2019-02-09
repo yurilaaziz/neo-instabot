@@ -1031,6 +1031,9 @@ class InstaBot:
         return False
 
     # Backwards Compatibility for old example.py files
+    def auto_mod(self):
+        self.mainloop()
+
     def new_auto_mod(self):
         self.mainloop()
 
