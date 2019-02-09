@@ -861,10 +861,13 @@ class InstaBot:
                                 logging.exception("Except on like_all_exist_media")
                                 return False
 
-                            log_string = "Trying to like media: %s\n    (%s)" % (
-                                self.media_by_tag[i]["node"]["id"],
-                                self.url_media
-                                % self.media_by_tag[i]["node"]["shortcode"],
+                            log_string = (
+                                "Trying to like media: %s\n                 %s"
+                                % (
+                                    self.media_by_tag[i]["node"]["id"],
+                                    self.url_media
+                                    % self.media_by_tag[i]["node"]["shortcode"],
+                                )
                             )
                             self.write_log(log_string)
                             like = self.like(self.media_by_tag[i]["node"]["id"])
