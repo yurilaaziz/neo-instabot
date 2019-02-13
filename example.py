@@ -22,6 +22,7 @@ bot = InstaBot(
     follow_time=1 * 60 * 60,
     unfollow_per_day=300,
     unlike_per_day=0,
+    unfollow_recent_feed=True,  # If True, the bot will also unfollow people who dont follow you using the recent feed. Default: True
     time_till_unlike=3 * 24 * 60 * 60,  # 3 days
     unfollow_break_min=15,
     unfollow_break_max=30,
