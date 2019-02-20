@@ -886,7 +886,7 @@ class InstaBot:
                                     )
                                     self.write_log(log_string)
                                 elif like.status_code == 400:
-                                    self.write_log(f"Not liked: {like.status_code}")
+                                    self.write_log(f"Not liked: {like.status_code} message {like.text}")
                                     insert_media(
                                         self,
                                         media_id=self.media_by_tag[i]["node"]["id"],
@@ -904,7 +904,7 @@ class InstaBot:
                                         media_id=self.media_by_tag[i]["node"]["id"],
                                         status=str(like.status_code),
                                     )
-                                    self.write_log(f"Not liked: {like.status_code}")
+                                    self.write_log(f"Not liked: {like.status_code} message {like.text}")
                                     return False
                                     # Some error.
                                 i += 1
