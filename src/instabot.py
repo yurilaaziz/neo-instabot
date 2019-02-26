@@ -1171,47 +1171,48 @@ class InstaBot:
                     pass
 
             if self.keywords and len(self.keywords) > 0:
-                founded = False
+                keyword_found = False
 
-                if not username:
+                if username is None:
                     username = self.get_username_by_user_id(
                         self.media_by_tag[0]["node"]["owner"]["id"]
                     )
 
                 for keyword in self.keywords:
                     if username.find(keyword) >= 0:
-                        founded = True
+                        keyword_found = True
                         break
 
-                if not founded:
+                if keyword_found is False:
                     if all_data is None:
                         try:
                             url = self.url_user_detail % (username)
                             r = self.s.get(url)
                             all_data = json.loads(
                                 re.search(
-                                    "window._sharedData = (.*?);</script>", r.text, re.DOTALL
+                                    "window._sharedData = (.*?);</script>",
+                                    r.text,
+                                    re.DOTALL,
                                 ).group(1)
                             )
                         except Exception:
                             pass
-
-                    if all_data is not None:
+                    else:
                         biography = None
                         try:
-                            biography = all_data["entry_data"]["ProfilePage"][0]["graphql"][
-                                "user"
-                            ]["biography"]
+                            biography = all_data["entry_data"]["ProfilePage"][0][
+                                "graphql"
+                            ]["user"]["biography"]
                         except Exception:
                             pass
 
-                        if biography:
+                        if biography is not None:
                             for keyword in self.keywords:
                                 if biography.find(keyword) >= 0:
-                                    founded = True
+                                    keyword_found = True
                                     break
 
-                    if not founded:
+                    if keyword_found is False:
                         self.write_log(
                             f"Won't follow {username}: does not meet keywords requirement. Keywords not found."
                         )
