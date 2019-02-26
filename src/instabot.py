@@ -205,6 +205,7 @@ class InstaBot:
         ],
         comments_per_day=0,
         tag_list=["cat", "car", "dog"],
+        keywords=[],
         max_like_for_one_tag=5,
         unfollow_break_min=15,
         unfollow_break_max=30,
@@ -314,6 +315,8 @@ class InstaBot:
         # Auto mod seting:
         # Default list of tag.
         self.tag_list = tag_list
+        # Default keywords.
+        self.keywords = keywords
         # Get random tag, from tag_list, and like (1 to n) times.
         self.max_like_for_one_tag = max_like_for_one_tag
         # log_mod 0 to console, 1 to file
@@ -1134,6 +1137,8 @@ class InstaBot:
                 self.write_log("Keep calm - It's your own profile ;)")
                 return
 
+            all_data = None
+
             if self.user_min_follow != 0 or self.user_max_follow != 0:
                 try:
                     username = self.get_username_by_user_id(
@@ -1164,6 +1169,54 @@ class InstaBot:
 
                 except Exception:
                     pass
+
+            if self.keywords and len(self.keywords) > 0:
+                founded = False
+
+                if not username:
+                    username = self.get_username_by_user_id(
+                        self.media_by_tag[0]["node"]["owner"]["id"]
+                    )
+
+                for keyword in self.keywords:
+                    if username.find(keyword) >= 0:
+                        founded = True
+                        break
+
+                if not founded:
+                    if all_data is None:
+                        try:
+                            url = self.url_user_detail % (username)
+                            r = self.s.get(url)
+                            all_data = json.loads(
+                                re.search(
+                                    "window._sharedData = (.*?);</script>", r.text, re.DOTALL
+                                ).group(1)
+                            )
+                        except Exception:
+                            pass
+
+                    if all_data is not None:
+                        biography = None
+                        try:
+                            biography = all_data["entry_data"]["ProfilePage"][0]["graphql"][
+                                "user"
+                            ]["biography"]
+                        except Exception:
+                            pass
+
+                        if biography:
+                            for keyword in self.keywords:
+                                if biography.find(keyword) >= 0:
+                                    founded = True
+                                    break
+
+                    if not founded:
+                        self.write_log(
+                            f"Won't follow {username}: does not meet keywords requirement. Keywords not found."
+                        )
+                        return
+
             if (
                 check_already_followed(
                     self, user_id=self.media_by_tag[0]["node"]["owner"]["id"]

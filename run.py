@@ -41,6 +41,7 @@ def setupinteractive(config, config_location="config.ini"):
         "unfollow_break_min": "opt",
         "unfollow_break_max": "opt",
         "tag_list": "opt",
+        "keywords": "opt",
     }
 
     config["DEFAULT"] = {
@@ -205,6 +206,11 @@ def setupinteractive(config, config_location="config.ini"):
                         "\n\nAttention!\n\nEnter the hashtags you would like to target separated with commas.\n For example:\n      follow4follow, instagood, f2f, instalifo\n\n"
                     )
                     confvar = input("Enter tags (or skip to defaults): ")
+                elif setting == "keywords":
+                    print(
+                        "\n\nAttention!\n\nEnter the keywords you would like to target separated with commas.\n For example:\n      follow4follow, instagood, f2f, instalifo\n\n"
+                    )
+                    confvar = input("Enter keywords (or skip to defaults): ")
                 else:
                     confvar = input(
                         f"Enter value for '{setting} ({prompt_text}{config[section][setting]}):"
@@ -214,9 +220,14 @@ def setupinteractive(config, config_location="config.ini"):
                     confvar = re.sub(r"#", "", confvar)
                     tags_list = confvar.split(",")
                     config[confusername][setting] = str(json.dumps(tags_list))
+                elif setting == "keywords" and confvar != "":
+                    confvar = re.sub(r"\s+", "", confvar)
+                    confvar = re.sub(r"#", "", confvar)
+                    keywords = confvar.split(",")
+                    config[confusername][setting] = str(json.dumps(keywords))
                 elif confvar == "":
                     # print('Entering default: '+ config[section][setting])
-                    if setting != "tag_list":
+                    if setting != "tag_list" and setting != "keywords":
                         config[confusername][setting] = config[section][setting]
                 else:
                     config[confusername][setting] = str(confvar)
@@ -291,6 +302,7 @@ bot = InstaBot(
     comments_per_day=int(config[usrconfig]["comments_per_day"]),
     tag_list=json.loads(config[usrconfig]["tag_list"]),
     tag_blacklist=json.loads(config[usrconfig]["tag_blacklist"]),
+    keywords=json.loads(config[usrconfig]["keywords"]),
     user_blacklist={},
     max_like_for_one_tag=int(config[usrconfig]["max_like_for_one_tag"]),
     follow_per_day=int(config[usrconfig]["follow_per_day"]),
