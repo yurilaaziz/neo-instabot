@@ -2,8 +2,9 @@
 # -*- coding: utf-8 -*-
 
 import json
-import requests
 import re
+
+import requests
 
 
 class UserInfo:

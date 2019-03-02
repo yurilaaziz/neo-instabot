@@ -1,18 +1,14 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 from __future__ import print_function
-from instabot_py.unfollow_protocol import unfollow_protocol
-from instabot_py.follow_protocol import follow_protocol
-from instabot_py.feed_scanner import feed_scanner
-from instabot_py.check_status import check_status
-from instabot_py import InstaBot
+
 import configparser
-import os
-import sys
-import time
 import json
-import sys
+import os
 import re
+import sys
+
+from instabot_py import InstaBot
 
 python_version_test = f"If you are reading this error, you are not running Python 3.6 or greater. Check 'python --version' or 'python3 --version'."
 
@@ -20,7 +16,6 @@ try:
     from pip._internal import main
 except:
     print(">>> Please install the latest version of pip")
-
 
 config_location = "config.ini"
 config = configparser.ConfigParser()
@@ -274,7 +269,7 @@ elif askusername in config:
 
 else:
     if "yes" in input(
-        "Could not find user in settings. Would you like to add now? (yes/no): "
+            "Could not find user in settings. Would you like to add now? (yes/no): "
     ):
         setupinteractive(config, config_location)
     else:

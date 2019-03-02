@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
-import sqlite3
-from datetime import datetime, time, timedelta
+from datetime import datetime, timedelta
 
 
 def check_and_update(self):
@@ -61,12 +60,12 @@ def check_and_update(self):
 def check_already_liked(self, media_id):
     """ controls if media already liked before """
     if (
-        self.follows_db_c.execute(
-            "SELECT EXISTS(SELECT 1 FROM medias WHERE media_id='"
-            + media_id
-            + "' LIMIT 1)"
-        ).fetchone()[0]
-        > 0
+            self.follows_db_c.execute(
+                "SELECT EXISTS(SELECT 1 FROM medias WHERE media_id='"
+                + media_id
+                + "' LIMIT 1)"
+            ).fetchone()[0]
+            > 0
     ):
         return 1
     return 0
@@ -75,12 +74,12 @@ def check_already_liked(self, media_id):
 def check_already_followed(self, user_id):
     """ controls if user already followed before """
     if (
-        self.follows_db_c.execute(
-            "SELECT EXISTS(SELECT 1 FROM usernames WHERE username_id='"
-            + user_id
-            + "' LIMIT 1)"
-        ).fetchone()[0]
-        > 0
+            self.follows_db_c.execute(
+                "SELECT EXISTS(SELECT 1 FROM usernames WHERE username_id='"
+                + user_id
+                + "' LIMIT 1)"
+            ).fetchone()[0]
+            > 0
     ):
         return 1
     return 0
@@ -89,12 +88,12 @@ def check_already_followed(self, user_id):
 def check_already_unfollowed(self, user_id):
     """ controls if user was already unfollowed before """
     if (
-        self.follows_db_c.execute(
-            "SELECT EXISTS(SELECT 1 FROM usernames WHERE username_id='"
-            + user_id
-            + "' AND unfollow_count > 0 LIMIT 1)"
-        ).fetchone()[0]
-        > 0
+            self.follows_db_c.execute(
+                "SELECT EXISTS(SELECT 1 FROM usernames WHERE username_id='"
+                + user_id
+                + "' AND unfollow_count > 0 LIMIT 1)"
+            ).fetchone()[0]
+            > 0
     ):
         return 1
     return 0
@@ -133,20 +132,20 @@ def insert_unfollow_count(self, user_id=False, username=False):
     """ track unfollow count for new futures """
     if user_id:
         qry = (
-            "UPDATE usernames \
-              SET unfollow_count = unfollow_count + 1 \
-              WHERE username_id ='"
-            + user_id
-            + "'"
+                "UPDATE usernames \
+                  SET unfollow_count = unfollow_count + 1 \
+                  WHERE username_id ='"
+                + user_id
+                + "'"
         )
         self.follows_db_c.execute(qry)
     elif username:
         qry = (
-            "UPDATE usernames \
-              SET unfollow_count = unfollow_count + 1 \
-              WHERE username ='"
-            + username
-            + "'"
+                "UPDATE usernames \
+                  SET unfollow_count = unfollow_count + 1 \
+                  WHERE username ='"
+                + username
+                + "'"
         )
         self.follows_db_c.execute(qry)
     else:
@@ -232,10 +231,12 @@ def get_medias_to_unlike(self):
         return media[0]
     return False
 
+
 def update_media_complete(self, media_id):
     """ update media to medias """
-    qry = "UPDATE medias SET status='201' WHERE media_id ='"+media_id+"'"
+    qry = "UPDATE medias SET status='201' WHERE media_id ='" + media_id + "'"
     self.follows_db_c.execute(qry)
+
 
 def check_if_userid_exists(self, userid):
     """ Checks if username exists """
@@ -261,11 +262,11 @@ def check_and_insert_user_agent(self, user_agent):
         return result_get
     else:
         qry_insert = (
-            """
-                    INSERT INTO settings (settings_name, settings_val)
-                    VALUES ('USERAGENT', '%s')
-                     """
-            % user_agent
+                """
+                        INSERT INTO settings (settings_name, settings_val)
+                        VALUES ('USERAGENT', '%s')
+                         """
+                % user_agent
         )
         self.follows_db_c.execute(qry_insert)
         return check_and_insert_user_agent(self, user_agent)

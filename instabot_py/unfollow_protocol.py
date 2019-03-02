@@ -29,10 +29,10 @@ def unfollow_protocol(self):
             self.like_counter = 0
             self.media_by_user = []
             if (
-                self.is_selebgram is not False
-                or self.is_fake_account is not False
-                or self.is_active_user is not True
-                or self.is_follower is not True
+                    self.is_selebgram is not False
+                    or self.is_fake_account is not False
+                    or self.is_active_user is not True
+                    or self.is_follower is not True
             ):
                 new_auto_mod_unfollow2(self)
                 try:

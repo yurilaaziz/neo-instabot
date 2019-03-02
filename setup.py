@@ -1,9 +1,16 @@
+import os
+
 from setuptools import setup, find_packages
 
-with open("requirements.txt") as f:
-    required = [l.strip('\n') for l in f if
-                l.strip('\n') and not l.startswith('#')]
-
+try:
+    here = os.path.abspath(os.path.dirname(__file__))
+    README = open(os.path.join(here, "README.md")).read()
+    with open(os.path.join(here, "requirements/base.txt")) as f:
+        required = [l.strip('\n') for l in f if
+                    l.strip('\n') and not l.startswith('#')]
+except IOError:
+    required = []
+    README = ""
 
 """
 Building python Wheels:
@@ -11,12 +18,15 @@ Building python Wheels:
 2 : python setup.py sdist bdist_wheel
 3 : twine upload dist/*
 """
+
 setup(
     name="instabot-py",
     packages=find_packages(),
     version='0.2',
     license='MIT',
     description="Instagram python Bot",
+    long_description=README,
+    long_description_content_type="text/markdown",
     author="Pasha Lev",
     author_email="levpasha@gmail.com",
     url="https://github.com/instabot-py/instabot.py",
@@ -29,8 +39,7 @@ setup(
         'Topic :: Software Development :: Build Tools',
         'License :: OSI Approved :: MIT License',
         'Programming Language :: Python :: 3',
-#        'Programming Language :: Python :: 3.4', # It's higly recommended to support 3.4 and 3.5
-#        'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
     ],
 )
