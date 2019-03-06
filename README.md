@@ -18,7 +18,7 @@ Please do not clone this repo and publish it as your own. Fork the repo if you w
 - pip v18 or greater
 - Install requirements.txt (requests, fake-useragent, instaloader)
 
-## Install 
+## Install
 
 **From sources:**  (Bleeding edge)
 
@@ -35,7 +35,7 @@ Please do not clone this repo and publish it as your own. Fork the repo if you w
 
 - Head into your virtual environment and use `pip` or `pip3` depending on your installation:
 ```
-pip3 install -e . 
+pip3 install -e .
 ```
 
 - For a quick & dirty test run, use `run.py`
@@ -80,6 +80,10 @@ Depending on your operating system and python installation, you might need to us
 | unfollow_break_max   | int | Maximum seconds to break between unfollows           | 30 |
 | log_mod              | int | Logging target (0 log to console, 1 log to file, 2 no log.) | 0 |
 | proxy                | str | Access instagram through a proxy. (host:port or user:password@host:port) | |
+| unfollow_not_following   | bool | Unfollow Condition: Unfollow those who do not follow you back | True |
+| unfollow_inactive   | bool | Unfollow Condition: Unfollow those who have not posted in a while (inactive) | True |
+| unfollow_probably_fake  | bool | Unfollow Condition: Unfollow accounts which skewed follow/follower ratio (probably fake) | True |
+| unfollow_selebgram  | bool | Unfollow Condition: Unfollow (celebrity) accounts with too many followers and not enough following | False |
 
 ## Methods
 | Method | Description |
