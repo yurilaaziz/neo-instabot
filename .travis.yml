@@ -1,0 +1,12 @@
+sudo: false
+language: python
+python:
+- '3.6'
+- 3.7-dev
+install: pip install tox-travis coverage
+script: tox
+after_success:
+- bash <(curl -s https://codecov.io/bash)
+notifications:
+  slack:
+    secure: R437kqbJa+M0qyo7phRPBPQWjafOpsd+AHSHLWX3rFWB2avPNqcCUao+4ZQTzWrifGgWvG98jARt08RziJye8RiZ9lDwcAUTHfEYFPwJywnLLudL9c99M00BXqEAwL156oBkH8Dkj2EyQr1PKtS/6uUJpJpUqH0eHKW/kbQWNMqQiET6aqv0xFoeLvY7It3x/ov3pfIcwz1LaHvqERxUe/cti//jIEv+RT6BfGvy0YJIou8qT9a4AeO23lHpiXbSAN7nxAKJFr+E7IyCyvRbzRliKTZqQg8uxBt5by/f7pAX7u3TEKMUcP5lDQKmWCOGqDHFHK03+gGLHz11OqtxJ6nfRTPgmQFydU49RjSAur6efxmwJNBiDp3J6mr/x4xi+pS/Jg6o/kGySsYNQ3690Csduc7UbijzVf2rZwQv+16/265c7cqn87NDPO2PFTVHkLXzbFdzR0DNeXrf7Go+aV68dnoXnxlQFjgBy0Aq4C1A5m9RNmGm/11srFcd8/+/13pnZWeKw/GXRq32xAMaM980+cuV4khedkdVAE7IWNeE3ndbySyCaAotLq5xfXi7N6O8VJErdWqQySpH03S9IYOvBXdXveZNqiZEJcyHhRVflaxrlxY//5LbTTquOkOgnIuqnwMtzEtcLXvF37E53tyDYqgy3MHKGM/tPVeMBcg=

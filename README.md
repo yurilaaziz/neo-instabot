@@ -7,6 +7,9 @@ Please do not clone this repo and publish it as your own. Fork the repo if you w
 [![Donate](https://img.shields.io/badge/PayPal-Donate%20to%20Author-blue.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=7BMM6JGE73322&lc=US)
 [![Chat on Telegram](https://img.shields.io/badge/Chat%20on-Telegram-brightgreen.svg)](https://t.me/joinchat/DYKH-0G_8hsDDoN_iE8ZlA)
 [![Chat on IRC](https://img.shields.io/badge/Chat%20on%20IRC-freenode.net%23instabot-brightgreen.svg)](https://kiwiirc.com/nextclient/irc.freenode.net/?nick=insta?#instabot)
+[![Latest version on](https://badge.fury.io/py/instabot-py.svg)](https://badge.fury.io/py/instabot-py)
+[![Supported Python versions](https://img.shields.io/pypi/pyversions/instabot-py.svg)](https://pypi.org/project/instabot-py/)
+[![Travis Pipelines build status](https://img.shields.io/travis/com/yurilaaziz/instabot-py.svg)](https://travis-ci.com/yurilaaziz/instabot-py/)
 
 
 ## Requirements
@@ -15,13 +18,24 @@ Please do not clone this repo and publish it as your own. Fork the repo if you w
 - pip v18 or greater
 - Install requirements.txt (requests, fake-useragent, instaloader)
 
+## Install 
+
+**From sources:**  (Bleeding edge)
+
+`pip install git+https://github.com/instabot-py/instabot.py`
+
+**From PyPi:** (Stable)
+
+`pip install instabot-py`
+
+
 ## Getting started
 
 - `git clone https://github.com/instabot-py/instabot.py.git && cd instabot.py` or [download zip](https://github.com/instabot-py/instabot.py/archive/master.zip).
 
 - Head into your virtual environment and use `pip` or `pip3` depending on your installation:
 ```
-pip3 install -r requirements.txt
+pip3 install -e . 
 ```
 
 - For a quick & dirty test run, use `run.py`

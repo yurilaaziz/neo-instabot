@@ -1,13 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-import os
-import time
 
-from src import InstaBot
-from src.check_status import check_status
-from src.feed_scanner import feed_scanner
-from src.follow_protocol import follow_protocol
-from src.unfollow_protocol import unfollow_protocol
+from instabot_py import InstaBot
 
 bot = InstaBot(
     login="username",  # Enter username (lowercase). Do not enter email!
@@ -22,7 +16,8 @@ bot = InstaBot(
     follow_time=1 * 60 * 60,
     unfollow_per_day=300,
     unlike_per_day=0,
-    unfollow_recent_feed=True,  # If True, the bot will also unfollow people who dont follow you using the recent feed. Default: True
+    unfollow_recent_feed=True,
+    # If True, the bot will also unfollow people who dont follow you using the recent feed. Default: True
     time_till_unlike=3 * 24 * 60 * 60,  # 3 days
     unfollow_break_min=15,
     unfollow_break_max=30,
