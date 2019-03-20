@@ -54,7 +54,7 @@ for modname in required_modules:
 
 class InstaBot:
     """
-    Instabot.py version 1.2.3
+    Instabot.py version 1.2.4
 
     """
 
@@ -267,7 +267,7 @@ class InstaBot:
             fake_ua = random.sample(list_of_ua, 1)
             self.user_agent = check_and_insert_user_agent(self, str(fake_ua[0]))
 
-        self.current_version = 1_553_082_751
+        self.current_version = 1_553_104_875
 
         self.bot_start = datetime.datetime.now()
         self.bot_start_ts = time.time()
@@ -353,7 +353,7 @@ class InstaBot:
         self.unwanted_username_list = unwanted_username_list
         now_time = datetime.datetime.now()
         self.check_for_bot_update()
-        log_string = "Instabot v1.2.3/0 started at %s:" % (
+        log_string = "Instabot v1.2.4/0 started at %s:" % (
             now_time.strftime("%d.%m.%Y %H:%M")
         )
         self.write_log(log_string)
@@ -1070,7 +1070,9 @@ class InstaBot:
         sys.exit(0)
 
     def remove_already_liked(self):
-        self.write_log("Removing already liked medias..")
+        # This logstring has caused TOO many questions, it serves no good telling them
+        # duplicates are removed -- this is expected behaviour after all
+        # self.write_log("Removing already liked medias..")
         x = 0
         while x < len(self.media_by_tag):
             if (
