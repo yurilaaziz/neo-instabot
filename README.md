@@ -15,7 +15,6 @@
 
 ## Install
 
-
 **Recommended: From PyPi:** (Stable)
 
 - `python3 -m pip install instabot-py`
@@ -24,7 +23,7 @@
 
 - `python3 -m pip install git+https://github.com/instabot-py/instabot.py`
 
-## Upgrade 🆕
+## Upgrade ⬆️
 
 - `python3 -m pip install instabot-py --no-cache-dir --upgrade`
 
@@ -47,10 +46,20 @@ On Windows you might have to use `python` without the version (`3`) suffix. Expe
   - `python3 -m pip install instabot-py`
 
 - **Start the bot** 🏁
+
   - `instabot-py`
   - or `python3 -m instabot_py`
   - For more advanced parameters and configurations download and edit [example.py](https://raw.githubusercontent.com/instabot-py/instabot.py/master/example.py) and run `python3 example.py`
 
+- **Config** ⚙️
+
+When you first run `instabot-py` a file called `config.ini` will be created in your current directory, along with an SQLite DB, and an error.log.
+
+After the initial configuration, you can manually edit `config.ini` with a text editor. Restart the bot for changes to take effect.
+
+The `%username%.db` file contains a record of the posts the bot has liked, and the users it has followed/unfollowed.
+
+The `%username%.session` file stores your session with Instagram to avoid re-logins each time you start the bot.
 
 
 ## Parameters
