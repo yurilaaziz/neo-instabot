@@ -48,7 +48,7 @@ On Windows you might have to use `python` without the version (`3`) suffix. Expe
 
 - **Start the bot** 🏁
   - `instabot-py`
-  - or `python3 -m instabot-py`
+  - or `python3 -m instabot_py`
   - For more advanced parameters and configurations download and edit [example.py](https://raw.githubusercontent.com/instabot-py/instabot.py/master/example.py) and run `python3 example.py`
 
 
