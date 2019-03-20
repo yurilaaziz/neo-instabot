@@ -32,7 +32,6 @@ setup(
     download_url="https://github.com/instabot-py/instabot.py/tarball/master",
     keywords="instagram bot, Instagram API hack",
     install_requires=required,
-    python_requires=">3.6.0",
     entry_points={"console_scripts": ["instabot-py = instabot_py.__main__:main"]},
     classifiers=[
         "Development Status :: 5 - Production/Stable",
