@@ -41,10 +41,14 @@ for modname in required_modules:
         # try to import the module normally and put it in globals
         globals()[modname] = importlib.import_module(modname)
     except ImportError as e:
-        if modname is not "fake_useragent":
+        if modname != "fake_useragent":
             print(
-                f"Failed to load module {modname}. Make sure you have installed correctly dependencies in requirements.txt."
+                f"Failed to load module {modname}. Make sure you have installed correctly all dependencies."
             )
+            if modname == "instaloader":
+                print(
+                    f"If instaloader keeps failing and you are running this script on a Raspberry, please visit this project's Wiki on GitHub (https://github.com/instabot-py/instabot.py/wiki) for more information."
+                )
             quit()
 
 
@@ -262,6 +266,9 @@ class InstaBot:
         except:
             fake_ua = random.sample(list_of_ua, 1)
             self.user_agent = check_and_insert_user_agent(self, str(fake_ua[0]))
+
+        self.current_version = 1_553_082_751
+
         self.bot_start = datetime.datetime.now()
         self.bot_start_ts = time.time()
         self.start_at_h = start_at_h
@@ -363,10 +370,9 @@ class InstaBot:
         try:
             # CHANGE THIS TO OFFICIAL REPO IF KEPT
             updated_timestamp = self.c.get(self.instabot_repo_update)
-            current_version_timestamp = open("version.txt", "r")
-            if int(updated_timestamp.text) > int(current_version_timestamp.read()):
+            if int(updated_timestamp.text) > self.current_version:
                 self.write_log(
-                    ">>> UPDATE AVAILABLE <<< Please update Instabot. You are running an older version."
+                    "> UPDATE AVAILABLE Please update Instabot 'python3 -m pip install instabot-py --upgrade' "
                 )
             else:
                 self.write_log("You are running the latest stable version")
@@ -1439,41 +1445,41 @@ class InstaBot:
                         if self.unfollow_selebgram is True:
                             self.is_selebgram = True
                             self.is_fake_account = False
-                            self.write_log("   >>>This is probably Selebgram account")
+                            self.write_log("   >This is probably Selebgram account")
 
                     elif follower == 0 or follows / follower > 2:
                         if self.unfollow_probably_fake is True:
                             self.is_fake_account = True
                             self.is_selebgram = False
-                            self.write_log("   >>>This is probably Fake account")
+                            self.write_log("   >This is probably Fake account")
                     else:
                         self.is_selebgram = False
                         self.is_fake_account = False
-                        self.write_log("   >>>This is a normal account")
+                        self.write_log("   >This is a normal account")
 
                     if media > 0 and follows / media < 25 and follower / media < 25:
                         self.is_active_user = True
-                        self.write_log("   >>>This user is active")
+                        self.write_log("   >This user is active")
                     else:
                         if self.unfollow_inactive is True:
                             self.is_active_user = False
-                            self.write_log("   >>>This user is passive")
+                            self.write_log("   >This user is passive")
 
                     if follow_viewer or has_requested_viewer:
                         self.is_follower = True
-                        self.write_log("   >>>This account is following you")
+                        self.write_log("   >This account is following you")
                     else:
                         if self.unfollow_not_following is True:
                             self.is_follower = False
-                            self.write_log("   >>>This account is NOT following you")
+                            self.write_log("   >This account is NOT following you")
 
                     if followed_by_viewer or requested_by_viewer:
                         self.is_following = True
-                        self.write_log("   >>>You are following this account")
+                        self.write_log("   >You are following this account")
 
                     else:
                         self.is_following = False
-                        self.write_log("   >>>You are NOT following this account")
+                        self.write_log("   >You are NOT following this account")
 
                 except:
                     logging.exception("Except on auto_unfollow!")
@@ -1562,38 +1568,38 @@ class InstaBot:
                     if follows == 0 or follower / follows > 2:
                         self.is_selebgram = True
                         self.is_fake_account = False
-                        self.write_log("   >>>This is probably Selebgram account")
+                        self.write_log("   >This is probably Selebgram account")
 
                     elif follower == 0 or follows / follower > 2:
                         self.is_fake_account = True
                         self.is_selebgram = False
-                        self.write_log("   >>>This is probably Fake account")
+                        self.write_log("   >This is probably Fake account")
                     else:
                         self.is_selebgram = False
                         self.is_fake_account = False
-                        self.write_log("   >>>This is a normal account")
+                        self.write_log("   >This is a normal account")
 
                     if media > 0 and follows / media < 25 and follower / media < 25:
                         self.is_active_user = True
-                        self.write_log("   >>>This user is active")
+                        self.write_log("   >This user is active")
                     else:
                         self.is_active_user = False
-                        self.write_log("   >>>This user is passive")
+                        self.write_log("   >This user is passive")
 
                     if follow_viewer or has_requested_viewer:
                         self.is_follower = True
-                        self.write_log("   >>>This account is following you")
+                        self.write_log("   >This account is following you")
                     else:
                         self.is_follower = False
-                        self.write_log("   >>>This account is NOT following you")
+                        self.write_log("   >This account is NOT following you")
 
                     if followed_by_viewer or requested_by_viewer:
                         self.is_following = True
-                        self.write_log("   >>>You are following this account")
+                        self.write_log("   >You are following this account")
 
                     else:
                         self.is_following = False
-                        self.write_log("   >>>You are NOT following this account")
+                        self.write_log("   >You are NOT following this account")
 
                 except:
                     logging.exception("Except on auto_unfollow!")
