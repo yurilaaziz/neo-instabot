@@ -26,7 +26,7 @@
 
 ## Upgrade 🆕
 
-- `python3 -m pip install instabot-py --upgrade`
+- `python3 -m pip install instabot-py --no-cache-dir --upgrade`
 
 ## Quick Start 🚀
 
