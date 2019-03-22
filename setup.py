@@ -21,9 +21,9 @@ Building python Wheels:
 setup(
     name="instabot-py",
     packages=find_packages(),
-    version="0.4.2",
+    version="0.4.3",
     license="MIT",
-    description="Instagram python Bot",
+    description="Instagram Python Bot",
     long_description=README,
     long_description_content_type="text/markdown",
     author="Pasha Lev",

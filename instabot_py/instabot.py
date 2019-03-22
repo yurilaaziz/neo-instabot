@@ -176,6 +176,7 @@ class InstaBot:
         unfollow_inactive=True,
         unfollow_probably_fake=True,
         unfollow_selebgram=False,
+        unfollow_everyone=False,
         # False = disabled, None = Will use default username.session notation, string = will use that as filename
         comment_list=[
             ["this", "the", "your"],
@@ -282,11 +283,14 @@ class InstaBot:
         self.unfollow_whitelist = unfollow_whitelist
         self.comment_list = comment_list
         self.instaloader = instaloader.Instaloader()
+
+        # Unfollow Criteria & Options
         self.unfollow_recent_feed = unfollow_recent_feed
         self.unfollow_not_following = unfollow_not_following
         self.unfollow_inactive = unfollow_inactive
         self.unfollow_probably_fake = unfollow_probably_fake
         self.unfollow_selebgram = unfollow_selebgram
+        self.unfollow_everyone = unfollow_everyone
 
         self.time_in_day = 24 * 60 * 60
         # Like
@@ -1500,6 +1504,9 @@ class InstaBot:
                 self.unfollow(current_id)
                 # don't insert unfollow count as it is done now inside unfollow()
                 # insert_unfollow_count(self, user_id=current_id)
+            elif self.unfollow_everyone is True:
+                self.write_log(current_user)
+                self.unfollow(current_id)
             elif self.is_following is not True:
                 # we are not following this account, hence we unfollowed it, let's keep track
                 insert_unfollow_count(self, user_id=current_id)

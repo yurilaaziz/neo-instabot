@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-from __future__ import print_function
 
 import configparser
 import json
 import os
 import re
 import sys
+from blessings import Terminal
+
 
 from instabot_py import InstaBot
 
@@ -14,11 +15,49 @@ python_version_test = f"If you are reading this error, you are not running Pytho
 
 config_location = "config.ini"
 config = configparser.ConfigParser()
+term = Terminal()
 
 
-def setupinteractive(config, config_location="config.ini"):
+def ask_question(_q, label="", tip="", prepend="", header=" Instabot Configurator "):
+    with term.fullscreen():
+        with term.location(int((term.width / 2) - (len(header) / 2)), 1):
+            print(term.white_on_blue(header))
+        with term.location(1, term.height - 5):
+            print(term.italic(term.white_on_black(label)))
+
+        with term.location(
+            int((term.width / 2) - (len(tip) / 2)), int((term.height / 2) + 3)
+        ):
+            print(term.italic(term.white_on_black(tip)))
+
+        with term.location(
+            int(term.width - ((term.width / 2) + (len(_q) / 2))),
+            int(term.height / 2) - 2,
+        ):
+            print(term.bold(_q))
+
+        with term.location(
+            int((term.width / 2) - (len(_q) / 2)), int(term.height / 2) + 1
+        ):
+            i = 0
+            while i < len(_q):
+                print("-", end="")
+                i += 1
+
+        with term.location(
+            int(term.width - ((term.width / 2) + (len(_q) / 2))), int((term.height / 2))
+        ):
+            print(prepend, end="")
+            _input = input()
+        term.clear_eos()
+        return _input
+
+
+def setupinteractive(config, config_location="instabot.config.ini"):
     if os.path.isfile(config_location):
         config.read(config_location)
+    elif os.path.isfile("config.ini"):
+        config.read("config.ini")
 
     configsettings = {
         "password": "req",
@@ -36,14 +75,14 @@ def setupinteractive(config, config_location="config.ini"):
     }
 
     configsettings_labels = {
-        "like_per_day": "Sets the like interval (speed, max ~1200)",
-        "follow_per_day": "Sets the follow interval (speed, max ~290)",
-        "follow_time": "Seconds to wait before checking if an account has followed back (Default Recommended)",
-        "unfollow_per_day": "Sets Unfollow interval (speed, Max ~250 per day)",
-        "unfollow_selebgram": "(Criteria) Unfollow possible celebrities/influencers (True/False)",
-        "unfollow_probably_fake": "(Criteria) Unfollow accounts w/ few followers and high following (True/False)",
-        "unfollow_inactive": "(Criteria) Unfollow accounts that seem to be inactive (True/False)",
-        "unfollow_recent_feed": "Unfollows accounts that appear in your feed and meet Criteria (True/False)",
+        "like_per_day": "The bot will adjust its speed to LIKE this amount of posts in a 24H period (max ~1200)",
+        "follow_per_day": "The bot will adjust its speed to FOLLOW this amount of accounts in a 24H period (max ~290)",
+        "follow_time": "After following an account, the bot will wait this amount of SECONDS before it checks if an account should be unfollowed (if it meets the unfollow criteria)",
+        "unfollow_per_day": "The bot will adjust its speed to UNFOLLOW this amount of accounts in a 24H period (max ~250)",
+        "unfollow_selebgram": "(Unfollow Criteria) Unfollow accounts that are possibly celebrities/influencers (True/False)",
+        "unfollow_probably_fake": "(Unfollow Criteria) Unfollow accounts w/ few followers and high following (True/False)",
+        "unfollow_inactive": "(Unfollow Criteria) Unfollow accounts that seem to be inactive (True/False)",
+        "unfollow_recent_feed": "Fetches acounts from your recent feed and queues them for unfollow if they meet the (Unfollow Criteria) (True/False)",
     }
 
     config["DEFAULT"] = {
@@ -169,20 +208,23 @@ def setupinteractive(config, config_location="config.ini"):
         ["example_user_1", "example_user_2"]
     )
 
-    print(
-        "\n\n     >>> Setup Wizard >>>\n________________________________________________"
-    )
     confusername = None
     while confusername is None or len(confusername) < 3:
-        confusername = str(input("Please enter the username you wish to configure: "))
+        confusername = str(
+            ask_question(
+                "Please enter the username you wish to configure:",
+                prepend="@",
+                tip="Your username is NOT your email or your phone number!",
+            )
+        )
         confusername.lower()
         if confusername[0] == "@":
             confusername = confusername[1:]
-        if confusername is None or len(confusername) < 3:
-            print("This field is required.")
+        # if confusername is None or len(confusername) < 3:
+        # print("This field is required.")
 
     if confusername in config:
-        print("User already configured. Modifying...")
+        # print("User already configured. Modifying...")
         existing_user = True
     else:
         config.add_section(confusername)
@@ -190,38 +232,43 @@ def setupinteractive(config, config_location="config.ini"):
 
     config[confusername]["username"] = confusername
 
-    print("    >>> TIP: Press Enter to skip and set default values")
+    # print("    >>> TIP: Press Enter to skip and set default values")
     for setting, reqset in configsettings.items():
 
         requiredset = None
         if existing_user:
-            prompt_text = "Previous set value: "
+            prompt_text = f"Press Enter for previous value: "
             section = confusername
         else:
-            prompt_text = "Enter for default: "
+            prompt_text = f"Press Enter for default: "
             section = "DEFAULT"
 
         while requiredset is None:
             if reqset is "req":
-                confvar = input(f"Enter value for '{setting}' (Required): ")
-                if confvar == "":
+                confvar = ask_question(
+                    f"Enter value for '{setting}':", tip="This field is required"
+                )
+                if confvar == "" or len(confvar) < 3:
                     print("This field is required")
                 else:
                     config[confusername][setting] = str(confvar)
                     requiredset = "done"
             else:
                 if setting == "tag_list":
-                    print(
-                        "\n\nEnter the hashtags you would like to target separated with commas.\n For example:\n      follow4follow, instagood, f2f, instalifo\n\n"
+                    confvar = ask_question(
+                        "Enter tags (or skip to defaults):",
+                        tip="Enter the hashtags you would like to target separated with commas",
+                        label="Example: follow4follow, instagood, f2f, instalifo",
                     )
-                    confvar = input("Enter tags (or skip to defaults): ")
                 else:
                     if setting in configsettings_labels:
-                        _label = f"\n|{setting}| : {configsettings_labels[setting]}\n"
+                        _label = f"{term.underline(setting)} : {configsettings_labels[setting]}"
                     else:
-                        _label = "\n"
-                    confvar = input(
-                        f"{_label}Enter value for '{setting}' ({prompt_text}{config[section][setting]}):"
+                        _label = ""
+                    confvar = ask_question(
+                        f"Enter value for '{setting}':",
+                        label=_label,
+                        tip=f"{prompt_text}{config[section][setting]}",
                     )
                 if setting == "tag_list" and confvar != "":
                     confvar = re.sub(r"\s+", "", confvar)
@@ -249,7 +296,7 @@ def main():
     if not os.path.isfile(config_location):
         overwrite_answer = None
         while overwrite_answer not in ("yes", "no", "n", "y"):
-            overwrite_answer = input(
+            overwrite_answer = ask_question(
                 "Config file does not exist. Would you like to setup now? (yes/no): "
             )
             overwrite_answer = overwrite_answer.lower()
@@ -271,13 +318,15 @@ def main():
     config.read(config_location)
 
     while askusername is None:
-        askusername = input(
-            '     _____Instabot Login_____\n     (To change user settings, type "config")\n     Please enter your username: '
+        askusername = ask_question(
+            "Please enter your username:",
+            tip='To change user settings, type "config"',
+            header=" Instabot Login",
+            prepend="@",
         )
         askusername = askusername.lower()
         if len(askusername) < 3:
             askusername = None
-            print("     Please enter your username:")
 
     if askusername[0] == "@":
         askusername = askusername[1:]
@@ -298,7 +347,7 @@ def main():
                 )
 
     else:
-        if "yes" in input(
+        if "yes" in ask_question(
             "Could not find user in settings. Would you like to add now? (yes/no): "
         ):
             setupinteractive(config, config_location)
