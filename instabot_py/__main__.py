@@ -13,7 +13,7 @@ from instabot_py import InstaBot
 
 python_version_test = f"If you are reading this error, you are not running Python 3.6 or greater. Check 'python --version' or 'python3 --version'."
 
-config_location = "config.ini"
+config_location = "instabot.config.ini"
 config = configparser.ConfigParser()
 term = Terminal()
 
@@ -293,7 +293,7 @@ def setupinteractive(config, config_location="instabot.config.ini"):
 
 
 def main():
-    if not os.path.isfile(config_location):
+    if not os.path.isfile(config_location) and not os.path.isfile("config.ini"):
         overwrite_answer = None
         while overwrite_answer not in ("yes", "no", "n", "y"):
             overwrite_answer = ask_question(
@@ -315,7 +315,10 @@ def main():
     except:
         askusername = None
 
-    config.read(config_location)
+    if os.path.isfile(config_location):
+        config.read(config_location)
+    elif os.path.isfile("config.ini"):
+        config.read("config.ini")
 
     while askusername is None:
         askusername = ask_question(
@@ -335,7 +338,10 @@ def main():
         setupinteractive(config, config_location)
     elif askusername in config:
         print(f"     Loading settings for {askusername}!")
-        print(f"     Config: {os.path.abspath(config_location)} ")
+        if os.path.isfile(config_location):
+            print(f"     Config: {os.path.abspath(config_location)} ")
+        else:
+            print(f"     Config: {os.path.abspath('config.ini')} ")
         if loaded_with_argv is False:
             try:
                 print(
