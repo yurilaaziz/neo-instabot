@@ -1,26 +1,16 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 from __future__ import print_function
-from src.unfollow_protocol import unfollow_protocol
-from src.follow_protocol import follow_protocol
-from src.feed_scanner import feed_scanner
-from src.check_status import check_status
-from src import InstaBot
+
 import configparser
-import os
-import sys
-import time
 import json
-import sys
+import os
 import re
+import sys
+
+from instabot_py import InstaBot
 
 python_version_test = f"If you are reading this error, you are not running Python 3.6 or greater. Check 'python --version' or 'python3 --version'."
-
-try:
-    from pip._internal import main
-except:
-    print(">>> Please install the latest version of pip")
-
 
 config_location = "config.ini"
 config = configparser.ConfigParser()
@@ -38,10 +28,23 @@ def setupinteractive(config, config_location="config.ini"):
         "follow_per_day": "opt",
         "follow_time": "opt",
         "unfollow_per_day": "opt",
-        "unfollow_break_min": "opt",
-        "unfollow_break_max": "opt",
         "tag_list": "opt",
         "keywords": "opt",
+        "unfollow_selebgram": "opt",
+        "unfollow_probably_fake": "opt",
+        "unfollow_inactive": "opt",
+        "unfollow_recent_feed": "opt",
+    }
+
+    configsettings_labels = {
+        "like_per_day": "Sets the like interval (speed, max ~1200)",
+        "follow_per_day": "Sets the follow interval (speed, max ~290)",
+        "follow_time": "Seconds to wait before checking if an account has followed back (Default Recommended)",
+        "unfollow_per_day": "Sets Unfollow interval (speed, Max ~250 per day)",
+        "unfollow_selebgram": "(Criteria) Unfollow possible celebrities/influencers (True/False)",
+        "unfollow_probably_fake": "(Criteria) Unfollow accounts w/ few followers and high following (True/False)",
+        "unfollow_inactive": "(Criteria) Unfollow accounts that seem to be inactive (True/False)",
+        "unfollow_recent_feed": "Unfollows accounts that appear in your feed and meet Criteria (True/False)",
     }
 
     config["DEFAULT"] = {
@@ -50,13 +53,17 @@ def setupinteractive(config, config_location="config.ini"):
         "like_per_day": 709,
         "comments_per_day": 31,
         "max_like_for_one_tag": 36,
-        "follow_per_day": 310,
-        "follow_time": 3600,
-        "unfollow_per_day": 297,
+        "follow_per_day": 260,
+        "follow_time": 36000,
+        "unfollow_per_day": 247,
         "unfollow_break_min": 3,
         "unfollow_break_max": 17,
         "log_mod": 0,
         "proxy": "",
+        "unfollow_selebgram": "False",
+        "unfollow_probably_fake": "True",
+        "unfollow_inactive": "True",
+        "unfollow_recent_feed": "False",
     }
 
     config["DEFAULT"]["comment_list"] = json.dumps(
@@ -169,6 +176,9 @@ def setupinteractive(config, config_location="config.ini"):
     confusername = None
     while confusername is None or len(confusername) < 3:
         confusername = str(input("Please enter the username you wish to configure: "))
+        confusername.lower()
+        if confusername[0] == "@":
+            confusername = confusername[1:]
         if confusername is None or len(confusername) < 3:
             print("This field is required.")
 
@@ -189,7 +199,7 @@ def setupinteractive(config, config_location="config.ini"):
             prompt_text = "Previous set value: "
             section = confusername
         else:
-            prompt_text = "Enter for defaults: "
+            prompt_text = "Enter for default: "
             section = "DEFAULT"
 
         while requiredset is None:
@@ -203,7 +213,7 @@ def setupinteractive(config, config_location="config.ini"):
             else:
                 if setting == "tag_list":
                     print(
-                        "\n\nAttention!\n\nEnter the hashtags you would like to target separated with commas.\n For example:\n      follow4follow, instagood, f2f, instalifo\n\n"
+                        "\n\nEnter the hashtags you would like to target separated with commas.\n For example:\n      follow4follow, instagood, f2f, instalifo\n\n"
                     )
                     confvar = input("Enter tags (or skip to defaults): ")
                 elif setting == "keywords":
@@ -212,8 +222,12 @@ def setupinteractive(config, config_location="config.ini"):
                     )
                     confvar = input("Enter keywords (or skip to defaults): ")
                 else:
+                    if setting in configsettings_labels:
+                        _label = f"\n|{setting}| : {configsettings_labels[setting]}\n"
+                    else:
+                        _label = "\n"
                     confvar = input(
-                        f"Enter value for '{setting} ({prompt_text}{config[section][setting]}):"
+                        f"{_label}Enter value for '{setting}' ({prompt_text}{config[section][setting]}):"
                     )
                 if setting == "tag_list" and confvar != "":
                     confvar = re.sub(r"\s+", "", confvar)
@@ -242,87 +256,95 @@ def setupinteractive(config, config_location="config.ini"):
     exit()
 
 
-if not os.path.isfile(config_location):
-    overwrite_answer = None
-    while overwrite_answer not in ("yes", "no", "n", "y"):
-        overwrite_answer = input(
-            "Config file does not exist. Would you like to setup now? (yes/no): "
-        )
-        if overwrite_answer == "no" or overwrite_answer == "n":
-            exit()
-    setupinteractive(config, config_location)
-
-askusername = None
-loaded_with_argv = False
-
-try:
-    if len(sys.argv[1]) > 3:
-        askusername = sys.argv[1]
-        loaded_with_argv = True
-except:
-    askusername = None
-
-config.read(config_location)
-
-if askusername is None:
-    askusername = input(
-        '     _________LOGIN_________\n     (To change user settings, type "config")\n\n     Please enter your username: '
-    )
-
-if askusername == "config":
-    setupinteractive(config, config_location)
-elif askusername in config:
-    print(f"     Loading settings for {askusername}!")
-    if loaded_with_argv is False:
-        try:
-            print(
-                f"     (Tip: Log in directly by running '{sys.argv[0]} {askusername}')'"
+def main():
+    if not os.path.isfile(config_location):
+        overwrite_answer = None
+        while overwrite_answer not in ("yes", "no", "n", "y"):
+            overwrite_answer = input(
+                "Config file does not exist. Would you like to setup now? (yes/no): "
             )
-        except:
-            print(
-                "     (Tip: Log in directly by appending your username at the end of the script)"
-            )
-
-else:
-    if "yes" in input(
-        "Could not find user in settings. Would you like to add now? (yes/no): "
-    ):
+            overwrite_answer = overwrite_answer.lower()
+            if overwrite_answer == "no" or overwrite_answer == "n":
+                exit()
         setupinteractive(config, config_location)
+
+    askusername = None
+    loaded_with_argv = False
+
+    try:
+        if len(sys.argv[1]) > 3:
+            askusername = sys.argv[1]
+            askusername = askusername.lower()
+            loaded_with_argv = True
+    except:
+        askusername = None
+
+    config.read(config_location)
+
+    while askusername is None:
+        askusername = input(
+            '     _____Instabot Login_____\n     (To change user settings, type "config")\n     Please enter your username: '
+        )
+        askusername = askusername.lower()
+        if len(askusername) < 3:
+            askusername = None
+            print("     Please enter your username:")
+
+    if askusername[0] == "@":
+        askusername = askusername[1:]
+
+    if askusername == "config":
+        setupinteractive(config, config_location)
+    elif askusername in config:
+        print(f"     Loading settings for {askusername}!")
+        print(f"     Config: {os.path.abspath(config_location)} ")
+        if loaded_with_argv is False:
+            try:
+                print(
+                    f"     (Tip: Log in directly by running '{sys.argv[0]} {askusername}')'"
+                )
+            except:
+                print(
+                    "     (Tip: Log in directly by appending your username at the end of the script)"
+                )
+
     else:
-        exit()
+        if "yes" in input(
+            "Could not find user in settings. Would you like to add now? (yes/no): "
+        ):
+            setupinteractive(config, config_location)
+        else:
+            exit()
 
-usrconfig = askusername
+    print("\n     ______Starting bot_____")
 
-print("\n\n     >>> Starting bot >>>\n________________________________________________")
+    configdict = dict(config.items(askusername))
 
-bot = InstaBot(
-    login=config[usrconfig]["username"],
-    password=config[usrconfig]["password"],
-    like_per_day=int(config[usrconfig]["like_per_day"]),
-    comments_per_day=int(config[usrconfig]["comments_per_day"]),
-    tag_list=json.loads(config[usrconfig]["tag_list"]),
-    tag_blacklist=json.loads(config[usrconfig]["tag_blacklist"]),
-    keywords=json.loads(config[usrconfig]["keywords"]),
-    user_blacklist={},
-    max_like_for_one_tag=int(config[usrconfig]["max_like_for_one_tag"]),
-    follow_per_day=int(config[usrconfig]["follow_per_day"]),
-    follow_time=int(config[usrconfig]["follow_time"]),
-    unfollow_per_day=int(config[usrconfig]["unfollow_per_day"]),
-    unfollow_break_min=int(config[usrconfig]["unfollow_break_min"]),
-    unfollow_break_max=int(config[usrconfig]["unfollow_break_max"]),
-    log_mod=int(config[usrconfig]["log_mod"]),
-    proxy=config[usrconfig]["proxy"],
-    # List of list of words, each of which will be used to generate comment
-    # For example: "This shot feels wow!"
-    comment_list=json.loads(config[usrconfig]["comment_list"]),
-    # Use unwanted_username_list to block usernames containing a string
-    # Will do partial matches; i.e. 'mozart' will block 'legend_mozart'
-    # 'free_followers' will be blocked because it contains 'free'
-    unwanted_username_list=json.loads(config[usrconfig]["unwanted_username_list"]),
-    unfollow_whitelist=json.loads(config[usrconfig]["unfollow_whitelist"]),
-    database_name=f"{usrconfig}.db",
-    session_file=f"{usrconfig}.session",
-)
+    for _setting, _value in configdict.items():
 
-while True:
-    bot.new_auto_mod()
+        try:
+            if "{" in _value or "[" in _value:
+                json.loads(_value)
+                configdict[_setting] = json.loads(_value)
+            else:
+                raise ValueError
+        except ValueError:
+            if _value.isdigit() is True:
+                configdict[_setting] = int(_value)
+            if _value.lower == "true":
+                configdict[_setting] = True
+            if _value.lower == "false":
+                configdict[_setting] = False
+            if _value.lower == "none":
+                configdict[_setting] = None
+            pass
+
+    configdict["login"] = configdict.pop("username")
+
+    bot = InstaBot(**configdict)
+    while True:
+        bot.new_auto_mod()
+
+
+if __name__ == "__main__":
+    main()

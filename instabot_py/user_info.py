@@ -1,10 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-import datetime
 import json
-import random
-import time
 import re
+import time
 
 
 def get_user_info(self, username):
@@ -16,13 +14,13 @@ def get_user_info(self, username):
         if self.login_status == 1:
             r = self.s.get(url_tag)
             if (
-                r.text.find(
-                    "The link you followed may be broken, or the page may have been removed."
-                )
-                != -1
+                    r.text.find(
+                        "The link you followed may be broken, or the page may have been removed."
+                    )
+                    != -1
             ):
                 log_string = (
-                    "Looks like account was deleted, skipping : %s" % current_user
+                        "Looks like account was deleted, skipping : %s" % current_user
                 )
                 self.write_log(log_string)
                 insert_unfollow_count(self, user_id=current_id)
