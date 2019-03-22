@@ -6,7 +6,9 @@ import json
 import os
 import re
 import sys
-from blessings import Terminal
+
+if os.name != "nt":
+    from blessings import Terminal
 
 
 from instabot_py import InstaBot
@@ -15,10 +17,18 @@ python_version_test = f"If you are reading this error, you are not running Pytho
 
 config_location = "instabot.config.ini"
 config = configparser.ConfigParser()
-term = Terminal()
+
+if os.name != "nt":
+    term = Terminal()
 
 
 def ask_question(_q, label="", tip="", prepend="", header=" Instabot Configurator "):
+    if os.name == "nt" or True:
+        print(f"\n")
+        print(f"=============\n{label}")
+        print(f"{tip}")
+        return input(f"{_q} : {prepend}")
+
     with term.fullscreen():
         with term.location(int((term.width / 2) - (len(header) / 2)), 1):
             print(term.white_on_blue(header))
@@ -262,7 +272,10 @@ def setupinteractive(config, config_location="instabot.config.ini"):
                     )
                 else:
                     if setting in configsettings_labels:
-                        _label = f"{term.underline(setting)} : {configsettings_labels[setting]}"
+                        if os.name != "nt":
+                            _label = f"{setting} : {configsettings_labels[setting]}"
+                        else:
+                            _label = f"{term.underline(setting)} : {configsettings_labels[setting]}"
                     else:
                         _label = ""
                     confvar = ask_question(

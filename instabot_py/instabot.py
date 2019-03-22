@@ -268,7 +268,7 @@ class InstaBot:
             fake_ua = random.sample(list_of_ua, 1)
             self.user_agent = check_and_insert_user_agent(self, str(fake_ua[0]))
 
-        self.current_version = 1_553_104_875
+        self.current_version = 1_553_282_075
 
         self.bot_start = datetime.datetime.now()
         self.bot_start_ts = time.time()
@@ -357,7 +357,7 @@ class InstaBot:
         self.unwanted_username_list = unwanted_username_list
         now_time = datetime.datetime.now()
         self.check_for_bot_update()
-        log_string = "Instabot v1.2.4/0 started at %s:" % (
+        log_string = "Instabot v1.2.5/0 started at %s:" % (
             now_time.strftime("%d.%m.%Y %H:%M")
         )
         self.write_log(log_string)
