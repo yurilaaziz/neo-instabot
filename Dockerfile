@@ -8,4 +8,4 @@ RUN python3 -m pip install instabot-py && rm -rf /app/*
 
 VOLUME ["/app"]
 
-CMD [ "python3", "run.py" ]
+CMD [ "python3", "__main__.py" ]
