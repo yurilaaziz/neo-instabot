@@ -4,7 +4,7 @@ RUN apk update && rm -rf /var/cache/apk/*
 
 WORKDIR /app
 
-RUN python3 -m pip install instabot-py && rm -rf /app/*
+RUN python3 -m pip install instabot-py
 
 VOLUME ["/app"]
 
