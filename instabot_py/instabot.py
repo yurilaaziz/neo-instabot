@@ -268,7 +268,7 @@ class InstaBot:
             fake_ua = random.sample(list_of_ua, 1)
             self.user_agent = check_and_insert_user_agent(self, str(fake_ua[0]))
 
-        self.current_version = 1_553_282_075
+        self.current_version = 1_553_611_447
 
         self.bot_start = datetime.datetime.now()
         self.bot_start_ts = time.time()
