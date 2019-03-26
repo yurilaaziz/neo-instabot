@@ -23,7 +23,7 @@ if os.name != "nt":
 
 
 def ask_question(_q, label="", tip="", prepend="", header=" Instabot Configurator "):
-    if os.name == "nt" or True:
+    if os.name == "nt":
         print(f"\n")
         print(f"=============\n{label}")
         print(f"{tip}")
@@ -85,7 +85,7 @@ def setupinteractive(config, config_location="instabot.config.ini"):
     }
 
     configsettings_labels = {
-        "like_per_day": "The bot will adjust its speed to LIKE this amount of posts in a 24H period (max ~1200)",
+        "like_per_day": "The bot will adjust its speed to LIKE this amount of posts in a 24H period (max ~1200, new accounts accounts ~250)",
         "follow_per_day": "The bot will adjust its speed to FOLLOW this amount of accounts in a 24H period (max ~290)",
         "follow_time": "After following an account, the bot will wait this amount of SECONDS before it checks if an account should be unfollowed (if it meets the unfollow criteria)",
         "unfollow_per_day": "The bot will adjust its speed to UNFOLLOW this amount of accounts in a 24H period (max ~250)",
@@ -272,7 +272,7 @@ def setupinteractive(config, config_location="instabot.config.ini"):
                     )
                 else:
                     if setting in configsettings_labels:
-                        if os.name != "nt":
+                        if os.name == "nt":
                             _label = f"{setting} : {configsettings_labels[setting]}"
                         else:
                             _label = f"{term.underline(setting)} : {configsettings_labels[setting]}"
@@ -356,15 +356,9 @@ def main():
         else:
             print(f"     Config: {os.path.abspath('config.ini')} ")
         if loaded_with_argv is False:
-            try:
-                print(
-                    f"     (Tip: Log in directly by running '{sys.argv[0]} {askusername}')'"
-                )
-            except:
-                print(
-                    "     (Tip: Log in directly by appending your username at the end of the script)"
-                )
-
+            print(
+                f"     (Tip: Log in directly by running 'instabot-py {askusername}')'"
+            )
     else:
         if "yes" in ask_question(
             "Could not find user in settings. Would you like to add now? (yes/no): "
