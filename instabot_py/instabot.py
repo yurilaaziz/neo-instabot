@@ -1116,7 +1116,7 @@ class InstaBot:
                 self.write_log("Trying to unlike media")
                 self.auto_unlike()
                 self.next_iteration["Unlike"] = time.time() + self.add_time(
-                    self.unfollow_delay
+                    self.unlike_per_day
                 )
 
     def new_auto_mod_follow(self):
