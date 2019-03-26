@@ -354,6 +354,7 @@ class InstaBot:
         self.media_on_feed = []
         self.media_by_user = []
         self.current_user_info = ""
+        self.current_owner = ""
         self.unwanted_username_list = unwanted_username_list
         now_time = datetime.datetime.now()
         self.check_for_bot_update()
@@ -1264,6 +1265,9 @@ class InstaBot:
             is False
         ):
             comment_text = self.generate_comment()
+            if "@username@" in comment_text:
+                comment_text = comment_text.replace("@username@", self.current_owner)
+
             log_string = f"Trying to comment: {self.media_by_tag[0]['node']['id']}"
             self.write_log(log_string)
             if (
@@ -1307,6 +1311,11 @@ class InstaBot:
                 )["entry_data"]["PostPage"][
                     0
                 ]  # window._sharedData = (.*?);
+
+                self.current_owner = all_data["graphql"]["shortcode_media"]["owner"][
+                    "username"
+                ]
+
                 if (
                     all_data["graphql"]["shortcode_media"]["owner"]["id"]
                     == self.user_id
