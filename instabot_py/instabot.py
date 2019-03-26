@@ -1364,7 +1364,7 @@ class InstaBot:
                 self.media_by_tag.remove(self.media_by_tag[0])
                 return True
         except:
-            self.write_log("Couldn't comment post, resuming.")
+            self.write_log(f"Couldn't comment post, resuming. {url_check}")
             del self.media_by_tag[0]
             return True
 
