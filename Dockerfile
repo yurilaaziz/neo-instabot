@@ -1,10 +1,11 @@
-FROM python:3
+FROM python:3.7.2-alpine3.9
+
+RUN apk update && rm -rf /var/cache/apk/*
 
 WORKDIR /app
 
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN python3 -m pip install instabot-py
 
-COPY . .
+VOLUME ["/app"]
 
-CMD [ "python", "example.py" ]
+CMD [ "python3", "instabot_py/__main__.py" ]

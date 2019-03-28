@@ -176,6 +176,7 @@ class InstaBot:
         unfollow_inactive=True,
         unfollow_probably_fake=True,
         unfollow_selebgram=False,
+        unfollow_everyone=False,
         # False = disabled, None = Will use default username.session notation, string = will use that as filename
         comment_list=[
             ["this", "the", "your"],
@@ -268,7 +269,7 @@ class InstaBot:
             fake_ua = random.sample(list_of_ua, 1)
             self.user_agent = check_and_insert_user_agent(self, str(fake_ua[0]))
 
-        self.current_version = 1_553_104_875
+        self.current_version = 1_553_611_447
 
         self.bot_start = datetime.datetime.now()
         self.bot_start_ts = time.time()
@@ -283,11 +284,14 @@ class InstaBot:
         self.unfollow_whitelist = unfollow_whitelist
         self.comment_list = comment_list
         self.instaloader = instaloader.Instaloader()
+
+        # Unfollow Criteria & Options
         self.unfollow_recent_feed = unfollow_recent_feed
         self.unfollow_not_following = unfollow_not_following
         self.unfollow_inactive = unfollow_inactive
         self.unfollow_probably_fake = unfollow_probably_fake
         self.unfollow_selebgram = unfollow_selebgram
+        self.unfollow_everyone = unfollow_everyone
 
         self.time_in_day = 24 * 60 * 60
         # Like
@@ -353,10 +357,11 @@ class InstaBot:
         self.media_on_feed = []
         self.media_by_user = []
         self.current_user_info = ""
+        self.current_owner = ""
         self.unwanted_username_list = unwanted_username_list
         now_time = datetime.datetime.now()
         self.check_for_bot_update()
-        log_string = "Instabot v1.2.4/0 started at %s:" % (
+        log_string = "Instabot v1.2.5/0 started at %s:" % (
             now_time.strftime("%d.%m.%Y %H:%M")
         )
         self.write_log(log_string)
@@ -1115,7 +1120,7 @@ class InstaBot:
                 self.write_log("Trying to unlike media")
                 self.auto_unlike()
                 self.next_iteration["Unlike"] = time.time() + self.add_time(
-                    self.unfollow_delay
+                    self.unlike_per_day
                 )
 
     def new_auto_mod_follow(self):
@@ -1314,6 +1319,9 @@ class InstaBot:
             is False
         ):
             comment_text = self.generate_comment()
+            if "@username@" in comment_text:
+                comment_text = comment_text.replace("@username@", self.current_owner)
+
             log_string = f"Trying to comment: {self.media_by_tag[0]['node']['id']}"
             self.write_log(log_string)
             if (
@@ -1357,6 +1365,11 @@ class InstaBot:
                 )["entry_data"]["PostPage"][
                     0
                 ]  # window._sharedData = (.*?);
+
+                self.current_owner = all_data["graphql"]["shortcode_media"]["owner"][
+                    "username"
+                ]
+
                 if (
                     all_data["graphql"]["shortcode_media"]["owner"]["id"]
                     == self.user_id
@@ -1405,7 +1418,7 @@ class InstaBot:
                 self.media_by_tag.remove(self.media_by_tag[0])
                 return True
         except:
-            self.write_log("Couldn't comment post, resuming.")
+            self.write_log(f"Couldn't comment post, resuming. {url_check}")
             del self.media_by_tag[0]
             return True
 
@@ -1441,11 +1454,11 @@ class InstaBot:
                 log_string = "api limit reached from instagram. Will try later"
                 self.write_log(log_string)
                 return False
-            for wluser in self.unfollow_whitelist:
-                if wluser == current_user:
-                    log_string = "found whitelist user, starting search again"
-                    self.write_log(log_string)
-                    break
+            if current_user in self.unfollow_whitelist:
+                log_string = "found whitelist user, not unfollowing"
+                # problem, if just one user in unfollowlist -> might create inf. loop. therefore just skip round
+                self.write_log(log_string)
+                return False
             else:
                 checking = False
 
@@ -1554,6 +1567,9 @@ class InstaBot:
                 self.unfollow(current_id)
                 # don't insert unfollow count as it is done now inside unfollow()
                 # insert_unfollow_count(self, user_id=current_id)
+            elif self.unfollow_everyone is True:
+                self.write_log(current_user)
+                self.unfollow(current_id)
             elif self.is_following is not True:
                 # we are not following this account, hence we unfollowed it, let's keep track
                 insert_unfollow_count(self, user_id=current_id)
