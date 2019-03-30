@@ -13,19 +13,6 @@
 - Python v3.6 or greater
 - Pip v18 or greater
 
-## Install
-
-**Recommended: From PyPi:** (Stable)
-
-- `python3 -m pip install instabot-py`
-
-**From sources:**  (Bleeding edge)
-
-- `python3 -m pip install git+https://github.com/instabot-py/instabot.py`
-
-## Upgrade ⬆️
-
-- `python3 -m pip install instabot-py --no-cache-dir --upgrade`
 
 ## Quick Start 🚀
 
@@ -61,6 +48,20 @@ The `%username%.db` file contains a record of the posts the bot has liked, and t
 
 The `%username%.session` file stores your session with Instagram to avoid re-logins each time you start the bot.
 
+
+## Upgrade ⬆️
+
+- `python3 -m pip install instabot-py --no-cache-dir --upgrade`
+
+## Install methods
+
+**Recommended: From PyPi:** (Stable)
+
+- `python3 -m pip install instabot-py`
+
+**From sources:**  (Bleeding edge)
+
+- `python3 -m pip install git+https://github.com/instabot-py/instabot.py`
 
 ## Parameters
 | Parameter            | Type|                Description                           |        Default value             |
