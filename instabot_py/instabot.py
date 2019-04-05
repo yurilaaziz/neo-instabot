@@ -1716,7 +1716,7 @@ class InstaBot:
         from_time + result == to_time
 
         Args:
-            to_time: date.time() object.
+            to_time: datetime.time() object.
             from_time: datetime.time() object.
 
         Returns: int
