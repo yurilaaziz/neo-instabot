@@ -1044,7 +1044,7 @@ class InstaBot:
             # distance between end time and now
             dne = self.time_dist(datetime.time(self.end_at_h,
                                                self.end_at_m),
-                                 now.time())
+                                 now.time()) 
             if (dns == 0 or dne < dns) and dne != 0:
                 # ------------------- Get media_id -------------------
                 if len(self.media_by_tag) == 0:
@@ -1728,4 +1728,4 @@ class InstaBot:
         to_t = to_time.hour * 60 + to_time.minute
         from_t = from_time.hour * 60 + from_time.minute
         midnight_t = 24 * 60
-        return (midnight_t - to_t) + from_t if from_t < to_t else from_t - to_t
+        return (midnight_t - from_t) + to_t if to_t < from_t else to_t - from_t
