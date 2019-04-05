@@ -1703,3 +1703,25 @@ class InstaBot:
                 self.logger.info(log_text)
             except UnicodeEncodeError:
                 print("Your text has unicode problem!")
+
+    @staticmethod
+    def time_dist(to_time, from_time):
+        """
+        Method to compare time.
+        In terms of minutes result is
+        from_time + result == to_time
+
+        Args:
+            to_time: date.time() object.
+            from_time: datetime.time() object.
+
+        Returns: int
+            how much minutes between from_time and to_time
+            if to_time < from_time then it means that
+                to_time is on the next day.
+
+        """
+        to_t = to_time.hour * 60 + to_time.minute
+        from_t = from_time.hour * 60 + from_time.minute
+        midnight_t = 24 * 60
+        return (midnight_t - to_t) + from_t if from_t < to_t else from_t - to_t
