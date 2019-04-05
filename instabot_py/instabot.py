@@ -1037,11 +1037,15 @@ class InstaBot:
     def mainloop(self):
         while self.prog_run and self.login_status:
             now = datetime.datetime.now()
-            if datetime.time(
-                self.start_at_h, self.start_at_m
-            ) <= now.time() and now.time() <= datetime.time(
-                self.end_at_h, self.end_at_m
-            ):
+            # distance between start time and now
+            dns = self.time_dist(datetime.time(self.start_at_h,
+                                               self.start_at_m),
+                                 now.time())
+            # distance between end time and now
+            dne = self.time_dist(datetime.time(self.end_at_h,
+                                               self.end_at_m),
+                                 now.time())
+            if (dns == 0 or dne < dns) and dne != 0:
                 # ------------------- Get media_id -------------------
                 if len(self.media_by_tag) == 0:
                     self.get_media_id_by_tag(random.choice(self.tag_list))
