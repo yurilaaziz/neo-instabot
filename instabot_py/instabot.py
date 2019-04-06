@@ -1037,11 +1037,15 @@ class InstaBot:
     def mainloop(self):
         while self.prog_run and self.login_status:
             now = datetime.datetime.now()
-            if datetime.time(
-                self.start_at_h, self.start_at_m
-            ) <= now.time() and now.time() <= datetime.time(
-                self.end_at_h, self.end_at_m
-            ):
+            # distance between start time and now
+            dns = self.time_dist(datetime.time(self.start_at_h,
+                                               self.start_at_m),
+                                 now.time())
+            # distance between end time and now
+            dne = self.time_dist(datetime.time(self.end_at_h,
+                                               self.end_at_m),
+                                 now.time()) 
+            if (dns == 0 or dne < dns) and dne != 0:
                 # ------------------- Get media_id -------------------
                 if len(self.media_by_tag) == 0:
                     self.get_media_id_by_tag(random.choice(self.tag_list))
@@ -1703,3 +1707,25 @@ class InstaBot:
                 self.logger.info(log_text)
             except UnicodeEncodeError:
                 print("Your text has unicode problem!")
+
+    @staticmethod
+    def time_dist(to_time, from_time):
+        """
+        Method to compare time.
+        In terms of minutes result is
+        from_time + result == to_time
+
+        Args:
+            to_time: datetime.time() object.
+            from_time: datetime.time() object.
+
+        Returns: int
+            how much minutes between from_time and to_time
+            if to_time < from_time then it means that
+                to_time is on the next day.
+
+        """
+        to_t = to_time.hour * 60 + to_time.minute
+        from_t = from_time.hour * 60 + from_time.minute
+        midnight_t = 24 * 60
+        return (midnight_t - from_t) + to_t if to_t < from_t else to_t - from_t
