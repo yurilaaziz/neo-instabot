@@ -113,6 +113,38 @@ The following video tutorials demo setting up and running the bot:
 -->
 
 
+## Instabot with yaml config
+By default, instabot looks for configuration file (instabot.config.yml)
+it could be changed by exporting environement varibale with the full path
+````bash
+export INSTABOT_CONFIG_FILE=instabot2.config.yml
+````
+
+
+````yaml
+
+---
+login : "username"
+password : "password"
+debug: 1
+#Send INFO notification to Telegram channel 
+logging.handlers.telegram:
+  level: INFO
+  class: telegram_handler.TelegramHandler
+  token: __YOUR__CHANNEL__TOKEN__
+  chat_id: __CHAT_ID__
+logging.loggers.InstaBot.handlers:
+  - telegram
+  - console
+
+follow_time: 1200
+unfollow_per_day: 1000
+follow_per_day: 1000
+
+````
+
+[Create Telegram bot for instabot](https://core.telegram.org/bots#3-how-do-i-create-a-bot)
+
 
 ## Community
 
