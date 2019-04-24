@@ -268,7 +268,7 @@ class InstaBot:
             fake_ua = random.sample(list_of_ua, 1)
             self.user_agent = check_and_insert_user_agent(self, str(fake_ua[0]))
 
-        self.current_version = 1_553_611_447
+        self.current_version = 1556087528
 
         self.bot_start = datetime.datetime.now()
         self.bot_start_ts = time.time()
@@ -1044,7 +1044,7 @@ class InstaBot:
             # distance between end time and now
             dne = self.time_dist(datetime.time(self.end_at_h,
                                                self.end_at_m),
-                                 now.time()) 
+                                 now.time())
             if (dns == 0 or dne < dns) and dne != 0:
                 # ------------------- Get media_id -------------------
                 if len(self.media_by_tag) == 0:
