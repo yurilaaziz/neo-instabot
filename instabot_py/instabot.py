@@ -14,22 +14,11 @@ import pickle
 import random
 import re
 import signal
-import sqlite3
 import sys
 import time
 
-from .config import config
-from .sql_updates import check_already_followed
-from .sql_updates import check_and_insert_user_agent
-from .sql_updates import check_and_update, check_already_liked
-from .sql_updates import (
-    get_username_row_count,
-    check_if_userid_exists,
-    get_medias_to_unlike,
-    update_media_complete,
-)
-from .sql_updates import get_username_to_unfollow_random
-from .sql_updates import insert_media, insert_username, insert_unfollow_count
+from instabot_py.config import config
+from instabot_py.persistence.manager import PersistenceManager
 
 python_version_test = f"If you are reading this error, you are not running Python 3.6 or greater. Check 'python --version' or 'python3 --version'."
 
@@ -89,23 +78,14 @@ class InstaBot:
         if login is None or password is None:
             raise Exception("Account details are missing")
 
-        config.set("session_file", f"{login.lower()}.session")
-        config.set("database_name", f"{login.lower()}.db")
+        config.set("session_file", f"{login.lower()}.session", default=True)
+
+        self.persistence = PersistenceManager(config.get('database'))
 
         self.session_file = config.get("session_file")
-        self.follows_db = sqlite3.connect(
-            config.get("database_name"), timeout=0, isolation_level=None
-        )
-        self.follows_db_c = self.follows_db.cursor()
-        check_and_update(self)
 
         fake_ua = random.sample(config.get("list_of_ua"), 1)[0]
-        try:
-            fake_ua = fake_useragent.UserAgent(fallback=fake_ua)
-        except:
-            pass
-
-        self.user_agent = check_and_insert_user_agent(self, str(fake_ua))
+        self.user_agent = fake_ua
 
         self.current_version = 1556087528
 
@@ -667,10 +647,9 @@ class InstaBot:
                                 return False
 
                             if (
-                                    check_already_liked(
-                                        self, media_id=self.media_by_tag[i]["node"]["id"]
+                                    self.persistence.check_already_liked(
+                                        media_id=self.media_by_tag[i]["node"]["id"]
                                     )
-                                    == 1
                             ):
                                 self.logger.info("Keep calm - It's already liked ;)")
                                 return False
@@ -735,8 +714,8 @@ class InstaBot:
                                     self.like_counter += 1
                                     log_string = f"Liked: {self.media_by_tag[i]['node']['id']}. Like #{self.like_counter} {self.url_media % self.media_by_tag[i]['node']['shortcode']}."
 
-                                    insert_media(
-                                        self,
+                                    self.persistence.insert_media(
+
                                         media_id=self.media_by_tag[i]["node"]["id"],
                                         status="200",
                                     )
@@ -745,8 +724,8 @@ class InstaBot:
                                     self.logger.info(
                                         f"Not liked: {like.status_code} message {like.text}"
                                     )
-                                    insert_media(
-                                        self,
+                                    self.persistence.insert_media(
+
                                         media_id=self.media_by_tag[i]["node"]["id"],
                                         status="400",
                                     )
@@ -757,8 +736,8 @@ class InstaBot:
                                     else:
                                         self.error_400 += 1
                                 else:
-                                    insert_media(
-                                        self,
+                                    self.persistence.insert_media(
+
                                         media_id=self.media_by_tag[i]["node"]["id"],
                                         status=str(like.status_code),
                                     )
@@ -835,7 +814,7 @@ class InstaBot:
                     self.follow_counter += 1
                     log_string = f"Followed: {user_id} #{self.follow_counter}."
                     self.logger.info(log_string)
-                    insert_username(self, user_id=user_id, username=username)
+                    self.persistence.insert_username(user_id=user_id, username=username)
                 return follow
             except:
                 logging.exception("Except on follow!")
@@ -851,7 +830,7 @@ class InstaBot:
                     self.unfollow_counter += 1
                     log_string = f"Unfollowed: {user_id} #{self.unfollow_counter}."
                     self.logger.info(log_string)
-                    insert_unfollow_count(self, user_id=user_id)
+                    self.persistence.insert_unfollow_count(user_id=user_id)
                 return unfollow
             except:
                 logging.exception("Exept on unfollow!")
@@ -867,7 +846,7 @@ class InstaBot:
                     self.unfollow_counter += 1
                     log_string = f"Unfollow: {user_id} #{self.unfollow_counter} of {self.follow_counter}."
                     self.logger.info(log_string)
-                    insert_unfollow_count(self, user_id=user_id)
+                    self.persistence.insert_unfollow_count(user_id=user_id)
                 else:
                     log_string = (
                         "Slow Down - Pausing for 5 minutes to avoid getting banned"
@@ -879,7 +858,7 @@ class InstaBot:
                         self.unfollow_counter += 1
                         log_string = f"Unfollow: {user_id} #{self.unfollow_counter} of {self.follow_counter}."
                         self.logger.info(log_string)
-                        insert_unfollow_count(self, user_id=user_id)
+                        self.persistence.insert_unfollow_count(user_id=user_id)
                     else:
                         log_string = "Still no good :( Skipping and pausing for another 5 minutes"
                         self.logger.debug(log_string)
@@ -947,8 +926,8 @@ class InstaBot:
         x = 0
         while x < len(self.media_by_tag):
             if (
-                    check_already_liked(self, media_id=self.media_by_tag[x]["node"]["id"])
-                    == 1
+                    self.persistence.check_already_liked(media_id=self.media_by_tag[x]["node"]["id"])
+
             ):
                 self.media_by_tag.remove(self.media_by_tag[x])
             else:
@@ -978,7 +957,7 @@ class InstaBot:
 
     def new_auto_mod_unlike(self):
         if time.time() > self.next_iteration["Unlike"] and self.unlike_per_day != 0:
-            media = get_medias_to_unlike(self)
+            media = self.persistence.get_medias_to_unlike()
             if media:
                 self.logger.debug("Trying to unlike media")
                 self.auto_unlike()
@@ -1030,10 +1009,9 @@ class InstaBot:
                 except Exception:
                     pass
             if (
-                    check_already_followed(
-                        self, user_id=self.media_by_tag[0]["node"]["owner"]["id"]
+                    self.persistence.check_already_followed(
+                        user_id=self.media_by_tag[0]["node"]["owner"]["id"]
                     )
-                    == 1
             ):
                 self.logger.debug(
                     f"Already followed before {self.media_by_tag[0]['node']['owner']['id']}"
@@ -1072,9 +1050,9 @@ class InstaBot:
             for mediafeed_user in self.media_on_feed:
                 feed_username = mediafeed_user["node"]["owner"]["username"]
                 feed_user_id = mediafeed_user["node"]["owner"]["id"]
-                # print(check_if_userid_exists(self, userid=feed_user_id))
-                if check_if_userid_exists(self, userid=feed_user_id) is False:
-                    insert_username(self, user_id=feed_user_id, username=feed_username)
+                # print(self.persistence.check_if_userid_exists( userid=feed_user_id))
+                if not self.persistence.check_if_userid_exists(userid=feed_user_id):
+                    self.persistence.insert_username(user_id=feed_user_id, username=feed_username)
                     self.logger.info(f"Inserted user {feed_username} from recent feed")
         except Exception as exc:
             self.logger.warning("Notice: could not populate from recent feed")
@@ -1086,9 +1064,9 @@ class InstaBot:
             if (time.time() - self.bot_start_ts) < 30:
                 # let bot initialize
                 return
-            if get_username_row_count(self) < 20:
+            if self.persistence.get_username_row_count() < 20:
                 self.logger.info(
-                    f"> Waiting for database to populate before unfollowing (progress {str(get_username_row_count(self))} /20)"
+                    f"> Waiting for database to populate before unfollowing (progress {str(self.persistence.get_username_row_count())} /20)"
                 )
 
                 if self.unfollow_recent_feed is True:
@@ -1216,8 +1194,8 @@ class InstaBot:
                         return True
                 return False
             elif check_comment.status_code == 404:
-                insert_media(
-                    self,
+                self.persistence.insert_media(
+
                     self.media_by_tag[0]["node"]["id"],
                     str(check_comment.status_code),
                 )
@@ -1227,8 +1205,8 @@ class InstaBot:
                 del self.media_by_tag[0]
                 return True
             else:
-                insert_media(
-                    self,
+                self.persistence.insert_media(
+
                     self.media_by_tag[0]["node"]["id"],
                     str(check_comment.status_code),
                 )
@@ -1243,11 +1221,11 @@ class InstaBot:
     def auto_unlike(self):
         checking = True
         while checking:
-            media_to_unlike = get_medias_to_unlike(self)
+            media_to_unlike = self.persistence.get_medias_to_unlike()
             if media_to_unlike:
                 request = self.unlike(media_to_unlike)
                 if request.status_code == 200:
-                    update_media_complete(self, media_to_unlike)
+                    self.persistence.update_media_complete(media_to_unlike)
                 else:
                     self.logger.info("Couldn't unlike media, resuming.")
                     checking = False
@@ -1258,7 +1236,7 @@ class InstaBot:
     def auto_unfollow(self):
         checking = True
         while checking:
-            username_row = get_username_to_unfollow_random(self)
+            username_row = self.persistence.get_username_to_unfollow_random()
             if not username_row:
                 self.logger.debug("Looks like there is nobody to unfollow.")
                 return False
@@ -1297,7 +1275,7 @@ class InstaBot:
                             f"Looks like account was deleted, skipping : {current_user}"
                         )
                         self.logger.info(log_string)
-                        insert_unfollow_count(self, user_id=current_id)
+                        self.persistence.insert_unfollow_count(user_id=current_id)
                         time.sleep(3)
                         return False
                     all_data = json.loads(
@@ -1384,13 +1362,13 @@ class InstaBot:
                 self.logger.info(current_user)
                 self.unfollow(current_id)
                 # don't insert unfollow count as it is done now inside unfollow()
-                # insert_unfollow_count(self, user_id=current_id)
+                # self.persistence.insert_unfollow_count( user_id=current_id)
             elif self.unfollow_everyone is True:
                 self.logger.debug(f"current_user :{current_user}")
                 self.unfollow(current_id)
             elif self.is_following is not True:
                 # we are not following this account, hence we unfollowed it, let's keep track
-                insert_unfollow_count(self, user_id=current_id)
+                self.persistence.insert_unfollow_count(user_id=current_id)
 
     def unfollow_recent_feed(self):
 
@@ -1428,7 +1406,7 @@ class InstaBot:
                             f"Looks like account was deleted, skipping : {current_user}"
                         )
                         self.logger.info(log_string)
-                        insert_unfollow_count(self, user_id=current_id)
+                        self.persistence.insert_unfollow_count(user_id=current_id)
                         time.sleep(3)
                         return False
                     all_data = json.loads(
@@ -1511,10 +1489,10 @@ class InstaBot:
                     self.unfollow_delay
                 )
                 # don't insert unfollow count as it is done now inside unfollow()
-                # insert_unfollow_count(self, user_id=current_id)
+                # self.persistence.insert_unfollow_count( user_id=current_id)
             elif self.is_following is not True:
                 # we are not following this account, hence we unfollowed it, let's keep track
-                insert_unfollow_count(self, user_id=current_id)
+                self.persistence.insert_unfollow_count(user_id=current_id)
         time.sleep(8)
 
     def get_media_id_recent_feed(self):

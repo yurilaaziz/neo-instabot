@@ -40,8 +40,8 @@ DEFAULT_CONFIG = {
     "logging": LOGGING_CONFIG,
     "debug": 0,
     "database": {
-        "type": "sqlite3",
-        "directory": "."
+        "type": "sql",
+        "connection_string": "sqlite:///sqlite.db"
 
     },
     'unfollow_selebgram': False,

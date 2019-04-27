@@ -10,6 +10,7 @@ import sys
 if os.name != "nt":
     from blessings import Terminal
 
+
 from instabot_py import InstaBot
 
 python_version_test = f"If you are reading this error, you are not running Python 3.6 or greater. Check 'python --version' or 'python3 --version'."
@@ -35,18 +36,18 @@ def ask_question(_q, label="", tip="", prepend="", header=" Instabot Configurato
             print(term.italic(term.white_on_black(label)))
 
         with term.location(
-                int((term.width / 2) - (len(tip) / 2)), int((term.height / 2) + 3)
+            int((term.width / 2) - (len(tip) / 2)), int((term.height / 2) + 3)
         ):
             print(term.italic(term.white_on_black(tip)))
 
         with term.location(
-                int(term.width - ((term.width / 2) + (len(_q) / 2))),
-                int(term.height / 2) - 2,
+            int(term.width - ((term.width / 2) + (len(_q) / 2))),
+            int(term.height / 2) - 2,
         ):
             print(term.bold(_q))
 
         with term.location(
-                int((term.width / 2) - (len(_q) / 2)), int(term.height / 2) + 1
+            int((term.width / 2) - (len(_q) / 2)), int(term.height / 2) + 1
         ):
             i = 0
             while i < len(_q):
@@ -54,7 +55,7 @@ def ask_question(_q, label="", tip="", prepend="", header=" Instabot Configurato
                 i += 1
 
         with term.location(
-                int(term.width - ((term.width / 2) + (len(_q) / 2))), int((term.height / 2))
+            int(term.width - ((term.width / 2) + (len(_q) / 2))), int((term.height / 2))
         ):
             print(prepend, end="")
             _input = input()
@@ -360,7 +361,7 @@ def main():
             )
     else:
         if "yes" in ask_question(
-                "Could not find user in settings. Would you like to add now? (yes/no): "
+            "Could not find user in settings. Would you like to add now? (yes/no): "
         ):
             setupinteractive(config, config_location)
         else:
