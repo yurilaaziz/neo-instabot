@@ -5,7 +5,6 @@ from __future__ import print_function
 
 import atexit
 import datetime
-import importlib
 import itertools
 import json
 import logging
@@ -17,33 +16,11 @@ import signal
 import sys
 import time
 
+import instaloader
+import requests
+
 from instabot_py.config import config
 from instabot_py.persistence.manager import PersistenceManager
-
-python_version_test = f"If you are reading this error, you are not running Python 3.6 or greater. Check 'python --version' or 'python3 --version'."
-
-# Required Dependencies and Modules, offer to install them automatically
-# Keep fake_useragent last, quirk for pythonanywhere
-required_modules = ["requests", "instaloader", "threading", "fake_useragent"]
-
-for modname in required_modules:
-    try:
-        # try to import the module normally and put it in globals
-        globals()[modname] = importlib.import_module(modname)
-    except ImportError as e:
-        if modname != "fake_useragent":
-            print(
-                f"Failed to load module {modname}. Make sure you have installed correctly all dependencies."
-            )
-            if modname == "instaloader":
-                print(
-                    f"If instaloader keeps failing and you are running this script on a Raspberry, please visit this project's Wiki on GitHub (https://github.com/instabot-py/instabot.py/wiki) for more information."
-                )
-            quit()
-
-
-def str2bool(value):
-    return str(value).lower() in ["yes", "no", "true", "false"]
 
 
 class InstaBot:
@@ -81,11 +58,10 @@ class InstaBot:
         config.set("session_file", f"{login.lower()}.session", default=True)
 
         self.persistence = PersistenceManager(config.get('database'))
-
+        self.persistence.bot = self
         self.session_file = config.get("session_file")
 
-        fake_ua = random.sample(config.get("list_of_ua"), 1)[0]
-        self.user_agent = fake_ua
+        self.user_agent = random.sample(config.get("list_of_ua"), 1)[0]
 
         self.current_version = 1556087528
 
@@ -105,12 +81,12 @@ class InstaBot:
         self.instaloader = instaloader.Instaloader()
 
         # Unfollow Criteria & Options
-        self.unfollow_recent_feed = str2bool(config.get("unfollow_recent_feed"))
-        self.unfollow_not_following = str2bool(config.get("unfollow_not_following"))
-        self.unfollow_inactive = str2bool(config.get("unfollow_inactive"))
-        self.unfollow_probably_fake = str2bool(config.get("unfollow_probably_fake"))
-        self.unfollow_selebgram = str2bool(config.get("unfollow_selebgram"))
-        self.unfollow_everyone = str2bool(config.get("unfollow_everyone"))
+        self.unfollow_recent_feed = self.str2bool(config.get("unfollow_recent_feed"))
+        self.unfollow_not_following = self.str2bool(config.get("unfollow_not_following"))
+        self.unfollow_inactive = self.str2bool(config.get("unfollow_inactive"))
+        self.unfollow_probably_fake = self.str2bool(config.get("unfollow_probably_fake"))
+        self.unfollow_selebgram = self.str2bool(config.get("unfollow_selebgram"))
+        self.unfollow_everyone = self.str2bool(config.get("unfollow_everyone"))
 
         self.time_in_day = 24 * 60 * 60
         # Like
@@ -127,7 +103,7 @@ class InstaBot:
 
         # Follow
         self.follow_time = config.get("follow_time")  # Cannot be zero
-        self.follow_time_enabled = str2bool(config.get("follow_time_enabled"))
+        self.follow_time_enabled = self.str2bool(config.get("follow_time_enabled"))
         self.follow_per_day = config.get("follow_per_day")
         if self.follow_per_day > 0:
             self.follow_delay = self.time_in_day / self.follow_per_day
@@ -196,8 +172,6 @@ class InstaBot:
         self.is_self_checking = False
         self.is_by_tag = False
         self.is_follower_number = 0
-        self.self_following = 0
-        self.self_follower = 0
 
         self.user_id = 0
         self.login_status = False
@@ -235,6 +209,9 @@ class InstaBot:
         signal.signal(signal.SIGTERM, self.cleanup)
         atexit.register(self.cleanup)
         self.instaload = instaloader.Instaloader()
+
+    def url_user(self, username):
+        return self.url_user_detail % username
 
     def check_for_bot_update(self):
         self.logger.info("Checking for updates...")
@@ -571,33 +548,6 @@ class InstaBot:
             else:
                 return f"instagram.com/p/{shortened_id}/"
 
-    def get_username_by_media_id(self, media_id):
-        """ Get username by media ID Thanks to Nikished """
-
-        if self.login_status:
-            if self.login_status == 1:
-                media_id_url = self.get_instagram_url_from_media_id(
-                    int(media_id), only_code=True
-                )
-                url_media = self.url_media_detail % (media_id_url)
-                try:
-                    r = self.s.get(url_media)
-                    all_data = json.loads(r.text)
-
-                    username = str(
-                        all_data["graphql"]["shortcode_media"]["owner"]["username"]
-                    )
-                    self.logger.debug(
-                        f"media_id={media_id}, media_id_url={media_id_url}, username_by_media_id={username}"
-                    )
-                    return username
-                except Exception as exc:
-                    self.logger.warning("Got exception in func:get_username_by_media_id")
-                    self.logger.exception(exc)
-                    return False
-            else:
-                return ""
-
     def get_username_by_user_id(self, user_id):
         if self.login_status:
             try:
@@ -635,7 +585,7 @@ class InstaBot:
                                         self.media_by_tag[i]["node"]["owner"]["id"]
                                         == blacklisted_user_id
                                 ):
-                                    self.logger.info(
+                                    self.logger.debug(
                                         f"Not liking media owned by blacklisted user: {blacklisted_user_name}"
                                     )
                                     return False
@@ -643,7 +593,7 @@ class InstaBot:
                                     self.media_by_tag[i]["node"]["owner"]["id"]
                                     == self.user_id
                             ):
-                                self.logger.info("Keep calm - It's your own media ;)")
+                                self.logger.debug("Keep calm - It's your own media ;)")
                                 return False
 
                             if (
@@ -741,7 +691,7 @@ class InstaBot:
                                         media_id=self.media_by_tag[i]["node"]["id"],
                                         status=str(like.status_code),
                                     )
-                                    self.logger.info(
+                                    self.logger.debug(
                                         f"Not liked: {like.status_code} message {like.text}"
                                     )
                                     return False
@@ -761,7 +711,7 @@ class InstaBot:
                     else:
                         return False
             else:
-                self.logger.info("No media to like!")
+                self.logger.debug("No media to like!")
 
     def like(self, media_id):
         """ Send http request to like media by ID """
@@ -812,7 +762,7 @@ class InstaBot:
                 follow = self.s.post(url_follow)
                 if follow.status_code == 200:
                     self.follow_counter += 1
-                    log_string = f"Followed: {user_id} #{self.follow_counter}."
+                    log_string = f"Followed: {self.url_user(username)} #{self.follow_counter}."
                     self.logger.info(log_string)
                     self.persistence.insert_username(user_id=user_id, username=username)
                 return follow
@@ -828,45 +778,12 @@ class InstaBot:
                 unfollow = self.s.post(url_unfollow)
                 if unfollow.status_code == 200:
                     self.unfollow_counter += 1
-                    log_string = f"Unfollowed: {user_id} #{self.unfollow_counter}."
+                    log_string = f"Unfollowed: {self.url_user(username)} #{self.unfollow_counter}."
                     self.logger.info(log_string)
                     self.persistence.insert_unfollow_count(user_id=user_id)
                 return unfollow
             except:
                 logging.exception("Exept on unfollow!")
-        return False
-
-    def unfollow_on_cleanup(self, user_id):
-        """ Unfollow on cleanup by @rjmayott """
-        if self.login_status:
-            url_unfollow = self.url_unfollow % (user_id)
-            try:
-                unfollow = self.s.post(url_unfollow)
-                if unfollow.status_code == 200:
-                    self.unfollow_counter += 1
-                    log_string = f"Unfollow: {user_id} #{self.unfollow_counter} of {self.follow_counter}."
-                    self.logger.info(log_string)
-                    self.persistence.insert_unfollow_count(user_id=user_id)
-                else:
-                    log_string = (
-                        "Slow Down - Pausing for 5 minutes to avoid getting banned"
-                    )
-                    self.logger.debug(log_string)
-                    time.sleep(300)
-                    unfollow = self.s.post(url_unfollow)
-                    if unfollow.status_code == 200:
-                        self.unfollow_counter += 1
-                        log_string = f"Unfollow: {user_id} #{self.unfollow_counter} of {self.follow_counter}."
-                        self.logger.info(log_string)
-                        self.persistence.insert_unfollow_count(user_id=user_id)
-                    else:
-                        log_string = "Still no good :( Skipping and pausing for another 5 minutes"
-                        self.logger.debug(log_string)
-                        time.sleep(300)
-                    return False
-                return unfollow
-            except:
-                logging.exception("Except on unfollow.")
         return False
 
     # Backwards Compatibility for old example.py files
@@ -1053,7 +970,7 @@ class InstaBot:
                 # print(self.persistence.check_if_userid_exists( userid=feed_user_id))
                 if not self.persistence.check_if_userid_exists(userid=feed_user_id):
                     self.persistence.insert_username(user_id=feed_user_id, username=feed_username)
-                    self.logger.info(f"Inserted user {feed_username} from recent feed")
+                    self.logger.debug(f"Inserted user {feed_username} from recent feed")
         except Exception as exc:
             self.logger.warning("Notice: could not populate from recent feed")
             self.logger.exception(exc)
@@ -1065,7 +982,7 @@ class InstaBot:
                 # let bot initialize
                 return
             if self.persistence.get_username_row_count() < 20:
-                self.logger.info(
+                self.logger.debug(
                     f"> Waiting for database to populate before unfollowing (progress {str(self.persistence.get_username_row_count())} /20)"
                 )
 
@@ -1227,7 +1144,7 @@ class InstaBot:
                 if request.status_code == 200:
                     self.persistence.update_media_complete(media_to_unlike)
                 else:
-                    self.logger.info("Couldn't unlike media, resuming.")
+                    self.logger.critical("Couldn't unlike media, resuming.")
                     checking = False
             else:
                 self.logger.debug("no medias to unlike")
@@ -1253,14 +1170,14 @@ class InstaBot:
             if current_user in self.unfollow_whitelist:
                 log_string = "found whitelist user, not unfollowing"
                 # problem, if just one user in unfollowlist -> might create inf. loop. therefore just skip round
-                self.logger.info(log_string)
+                self.logger.debug(log_string)
                 return False
             else:
                 checking = False
 
         if self.login_status:
             log_string = f"Getting user info : {current_user}"
-            self.logger.info(log_string)
+            self.logger.debug(log_string)
             if self.login_status == 1:
                 url_tag = self.url_user_detail % (current_user)
                 try:
@@ -1274,7 +1191,7 @@ class InstaBot:
                         log_string = (
                             f"Looks like account was deleted, skipping : {current_user}"
                         )
-                        self.logger.info(log_string)
+                        self.logger.debug(log_string)
                         self.persistence.insert_unfollow_count(user_id=current_id)
                         time.sleep(3)
                         return False
@@ -1287,7 +1204,7 @@ class InstaBot:
                     user_info = all_data["graphql"]["user"]
                     i = 0
                     log_string = "Checking user info.."
-                    self.logger.info(log_string)
+                    self.logger.debug(log_string)
 
                     follows = user_info["edge_follow"]["count"]
                     follower = user_info["edge_followed_by"]["count"]
@@ -1297,11 +1214,11 @@ class InstaBot:
                     requested_by_viewer = user_info["requested_by_viewer"]
                     has_requested_viewer = user_info["has_requested_viewer"]
                     log_string = f"Follower : {follower}"
-                    self.logger.info(log_string)
+                    self.logger.debug(log_string)
                     log_string = f"Following : {follows}"
-                    self.logger.info(log_string)
+                    self.logger.debug(log_string)
                     log_string = f"Media : {media}"
-                    self.logger.info(log_string)
+                    self.logger.debug(log_string)
                     self.is_selebgram = False
                     self.is_fake_account = False
                     self.is_active_user = True
@@ -1310,41 +1227,41 @@ class InstaBot:
                         if self.unfollow_selebgram is True:
                             self.is_selebgram = True
                             self.is_fake_account = False
-                            self.logger.info("   >This is probably Selebgram account")
+                            self.logger.debug("   >This is probably Selebgram account")
 
                     elif follower == 0 or follows / follower > 2:
                         if self.unfollow_probably_fake is True:
                             self.is_fake_account = True
                             self.is_selebgram = False
-                            self.logger.info("   >This is probably Fake account")
+                            self.logger.debug("   >This is probably Fake account")
                     else:
                         self.is_selebgram = False
                         self.is_fake_account = False
-                        self.logger.info("   >This is a normal account")
+                        self.logger.debug("   >This is a normal account")
 
                     if media > 0 and follows / media < 25 and follower / media < 25:
                         self.is_active_user = True
-                        self.logger.info("   >This user is active")
+                        self.logger.debug("   >This user is active")
                     else:
                         if self.unfollow_inactive is True:
                             self.is_active_user = False
-                            self.logger.info("   >This user is passive")
+                            self.logger.debug("   >This user is passive")
 
                     if follow_viewer or has_requested_viewer:
                         self.is_follower = True
-                        self.logger.info("   >This account is following you")
+                        self.logger.debug("   >This account is following you")
                     else:
                         if self.unfollow_not_following is True:
                             self.is_follower = False
-                            self.logger.info("   >This account is NOT following you")
+                            self.logger.debug("   >This account is NOT following you")
 
                     if followed_by_viewer or requested_by_viewer:
                         self.is_following = True
-                        self.logger.info("   >You are following this account")
+                        self.logger.debug("   >You are following this account")
 
                     else:
                         self.is_following = False
-                        self.logger.info("   >You are NOT following this account")
+                        self.logger.debug("   >You are NOT following this account")
 
                 except:
                     logging.exception("Except on auto_unfollow!")
@@ -1359,7 +1276,6 @@ class InstaBot:
                     or self.is_active_user is not True
                     or self.is_follower is not True
             ):
-                self.logger.info(current_user)
                 self.unfollow(current_id)
                 # don't insert unfollow count as it is done now inside unfollow()
                 # self.persistence.insert_unfollow_count( user_id=current_id)
@@ -1391,7 +1307,7 @@ class InstaBot:
 
             if self.login_status:
                 log_string = f"Getting user info : {current_user}"
-                self.logger.info(log_string)
+                self.logger.debug(log_string)
             if self.login_status == 1:
                 url_tag = self.url_user_detail % (current_user)
                 try:
@@ -1405,7 +1321,7 @@ class InstaBot:
                         log_string = (
                             f"Looks like account was deleted, skipping : {current_user}"
                         )
-                        self.logger.info(log_string)
+                        self.logger.debug(log_string)
                         self.persistence.insert_unfollow_count(user_id=current_id)
                         time.sleep(3)
                         return False
@@ -1418,7 +1334,7 @@ class InstaBot:
                     user_info = all_data["graphql"]["user"]
                     i = 0
                     log_string = "Checking user info.."
-                    self.logger.info(log_string)
+                    self.logger.debug(log_string)
 
                     follows = user_info["edge_follow"]["count"]
                     follower = user_info["edge_followed_by"]["count"]
@@ -1428,46 +1344,46 @@ class InstaBot:
                     requested_by_viewer = user_info["requested_by_viewer"]
                     has_requested_viewer = user_info["has_requested_viewer"]
                     log_string = f"Follower : {follower}"
-                    self.logger.info(log_string)
+                    self.logger.debug(log_string)
                     log_string = f"Following : {follows}"
-                    self.logger.info(log_string)
+                    self.logger.debug(log_string)
                     log_string = f"Media : {media}"
-                    self.logger.info(log_string)
+                    self.logger.debug(log_string)
                     if follows == 0 or follower / follows > 2:
                         self.is_selebgram = True
                         self.is_fake_account = False
-                        self.logger.info("   >This is probably Selebgram account")
+                        self.logger.debug("   >This is probably Selebgram account")
 
                     elif follower == 0 or follows / follower > 2:
                         self.is_fake_account = True
                         self.is_selebgram = False
-                        self.logger.info("   >This is probably Fake account")
+                        self.logger.debug("   >This is probably Fake account")
                     else:
                         self.is_selebgram = False
                         self.is_fake_account = False
-                        self.logger.info("   >This is a normal account")
+                        self.logger.debug("   >This is a normal account")
 
                     if media > 0 and follows / media < 25 and follower / media < 25:
                         self.is_active_user = True
-                        self.logger.info("   >This user is active")
+                        self.logger.debug("   >This user is active")
                     else:
                         self.is_active_user = False
-                        self.logger.info("   >This user is passive")
+                        self.logger.debug("   >This user is passive")
 
                     if follow_viewer or has_requested_viewer:
                         self.is_follower = True
-                        self.logger.info("   >This account is following you")
+                        self.logger.debug("   >This account is following you")
                     else:
                         self.is_follower = False
-                        self.logger.info("   >This account is NOT following you")
+                        self.logger.debug("   >This account is NOT following you")
 
                     if followed_by_viewer or requested_by_viewer:
                         self.is_following = True
-                        self.logger.info("   >You are following this account")
+                        self.logger.debug("   >You are following this account")
 
                     else:
                         self.is_following = False
-                        self.logger.info("   >You are NOT following this account")
+                        self.logger.debug("   >You are NOT following this account")
 
                 except Exception as exc:
                     self.logger.warning("Except on auto_unfollow!")
@@ -1499,7 +1415,7 @@ class InstaBot:
         if self.login_status:
             now_time = datetime.datetime.now()
             log_string = f"{self.user_login} : Get media id on recent feed"
-            self.logger.info(log_string)
+            self.logger.debug(log_string)
             if self.login_status == 1:
                 url_tag = "https://www.instagram.com/"
                 try:
@@ -1515,7 +1431,7 @@ class InstaBot:
                     )
 
                     log_string = f"Media in recent feed = {len(self.media_on_feed)}"
-                    self.logger.info(log_string)
+                    self.logger.debug(log_string)
                 except:
                     logging.exception("get_media_id_recent_feed")
                     self.media_on_feed = []
@@ -1542,3 +1458,7 @@ class InstaBot:
         from_t = from_time.hour * 60 + from_time.minute
         midnight_t = 24 * 60
         return (midnight_t - from_t) + to_t if to_t < from_t else to_t - from_t
+
+    @staticmethod
+    def str2bool(value):
+        return str(value).lower() in ["yes", "no", "true", "false"]

@@ -10,6 +10,10 @@ import sys
 if os.name != "nt":
     from blessings import Terminal
 
+    OS_IS_NT = False
+    TERM = Terminal()
+else:
+    OS_IS_NT = True
 
 from instabot_py import InstaBot
 
@@ -17,9 +21,6 @@ python_version_test = f"If you are reading this error, you are not running Pytho
 
 config_location = "instabot.config.ini"
 config = configparser.ConfigParser()
-
-if os.name != "nt":
-    term = Terminal()
 
 
 def ask_question(_q, label="", tip="", prepend="", header=" Instabot Configurator "):
@@ -29,37 +30,34 @@ def ask_question(_q, label="", tip="", prepend="", header=" Instabot Configurato
         print(f"{tip}")
         return input(f"{_q} : {prepend}")
 
-    with term.fullscreen():
-        with term.location(int((term.width / 2) - (len(header) / 2)), 1):
-            print(term.white_on_blue(header))
-        with term.location(1, term.height - 5):
-            print(term.italic(term.white_on_black(label)))
+    with TERM.fullscreen():
+        with TERM.location(int((TERM.width / 2) - (len(header) / 2)), 1):
+            print(TERM.white_on_blue(header))
+        with TERM.location(1, TERM.height - 5):
+            print(TERM.italic(TERM.white_on_black(label)))
 
-        with term.location(
-            int((term.width / 2) - (len(tip) / 2)), int((term.height / 2) + 3)
+        with TERM.location(
+                int((TERM.width / 2) - (len(tip) / 2)), int((TERM.height / 2) + 3)
         ):
-            print(term.italic(term.white_on_black(tip)))
+            print(TERM.italic(TERM.white_on_black(tip)))
 
-        with term.location(
-            int(term.width - ((term.width / 2) + (len(_q) / 2))),
-            int(term.height / 2) - 2,
+        with TERM.location(
+                int(TERM.width - ((TERM.width / 2) + (len(_q) / 2))),
+                int(TERM.height / 2) - 2,
         ):
-            print(term.bold(_q))
+            print(TERM.bold(_q))
 
-        with term.location(
-            int((term.width / 2) - (len(_q) / 2)), int(term.height / 2) + 1
+        with TERM.location(
+                int((TERM.width / 2) - (len(_q) / 2)), int(TERM.height / 2) + 1
         ):
-            i = 0
-            while i < len(_q):
-                print("-", end="")
-                i += 1
+            print("-" * len(_q), end="")
 
-        with term.location(
-            int(term.width - ((term.width / 2) + (len(_q) / 2))), int((term.height / 2))
+        with TERM.location(
+                int(TERM.width - ((TERM.width / 2) + (len(_q) / 2))), int((TERM.height / 2))
         ):
             print(prepend, end="")
             _input = input()
-        term.clear_eos()
+        TERM.clear_eos()
         return _input
 
 
@@ -275,7 +273,7 @@ def setupinteractive(config, config_location="instabot.config.ini"):
                         if os.name == "nt":
                             _label = f"{setting} : {configsettings_labels[setting]}"
                         else:
-                            _label = f"{term.underline(setting)} : {configsettings_labels[setting]}"
+                            _label = f"{TERM.underline(setting)} : {configsettings_labels[setting]}"
                     else:
                         _label = ""
                     confvar = ask_question(
@@ -305,7 +303,7 @@ def setupinteractive(config, config_location="instabot.config.ini"):
     exit()
 
 
-def main():
+def interactive(askusername=None, loaded_with_argv=False):
     if not os.path.isfile(config_location) and not os.path.isfile("config.ini"):
         overwrite_answer = None
         while overwrite_answer not in ("yes", "no", "n", "y"):
@@ -316,17 +314,6 @@ def main():
             if overwrite_answer == "no" or overwrite_answer == "n":
                 exit()
         setupinteractive(config, config_location)
-
-    askusername = None
-    loaded_with_argv = False
-
-    try:
-        if len(sys.argv[1]) > 3:
-            askusername = sys.argv[1]
-            askusername = askusername.lower()
-            loaded_with_argv = True
-    except:
-        askusername = None
 
     if os.path.isfile(config_location):
         config.read(config_location)
@@ -361,7 +348,7 @@ def main():
             )
     else:
         if "yes" in ask_question(
-            "Could not find user in settings. Would you like to add now? (yes/no): "
+                "Could not find user in settings. Would you like to add now? (yes/no): "
         ):
             setupinteractive(config, config_location)
         else:
@@ -391,11 +378,18 @@ def main():
             pass
 
     configdict["login"] = configdict.pop("username")
-
-    bot = InstaBot(**configdict)
-    while True:
-        bot.new_auto_mod()
+    return configdict
 
 
 if __name__ == "__main__":
-    main()
+    if len(sys.argv) > 1:
+        param = sys.argv[1].lower()
+        if param == "--":
+            configdict = {}
+        else:
+            configdict = interactive(param, loaded_with_argv=True)
+    else:
+        configdict = interactive()
+
+    bot = InstaBot(**configdict)
+    bot.mainloop()

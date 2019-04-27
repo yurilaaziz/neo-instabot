@@ -1,7 +1,4 @@
 class PersistenceBase:
-    def __init__(self):
-        self.follows_db_c = None
-
     def check_already_liked(self, media_id):
         """ controls if media already liked before """
         raise NotImplementedError()

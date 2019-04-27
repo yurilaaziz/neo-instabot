@@ -89,7 +89,7 @@ class Persistence(PersistenceBase):
     def get_username_to_unfollow_random(self):
         """ Gets random username that is older than follow_time and has zero unfollow_count """
         now_time = datetime.now()
-        cut_off_time = now_time - timedelta(seconds=self.follow_time)
+        cut_off_time = now_time - timedelta(seconds=self.bot.follow_time)
         return self._session.query(Follower) \
             .filter(Follower.last_followed < cut_off_time) \
             .order_by(func.random()).first()
@@ -102,7 +102,7 @@ class Persistence(PersistenceBase):
     def get_medias_to_unlike(self):
         """ Gets random media id that is older than unlike_time"""
         now_time = datetime.now()
-        cut_off_time = now_time - timedelta(seconds=self.time_till_unlike)
+        cut_off_time = now_time - timedelta(seconds=self.bot.time_till_unlike)
 
         media = self._session.query(Media) \
             .filter(Media.created < cut_off_time) \

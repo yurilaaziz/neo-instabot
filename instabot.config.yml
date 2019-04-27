@@ -1,0 +1,34 @@
+---
+login : "username"
+password : "password"
+database:
+  type: sql
+  connection_string: sqlite:///username.db
+
+debug: 0
+logging.formatters.telegram.format: "%(name)s - %(levelname)s - %(message)s"
+logging.handlers.telegram:
+  level: INFO
+  formatter: telegram
+  class: telegram_handler.TelegramHandler
+  token: TELEGRAM_BOT_TOKEN
+  chat_id: TELEGRAM_CHAT_ID
+
+logging.loggers.InstaBot.handlers:
+  - telegram
+  - console
+
+follow_time: 604800
+
+like_per_day: 709
+comments_per_day: 31
+max_like_for_one_tag: 36
+follow_per_day: 260
+follow_time: 36000
+unfollow_per_day: 247
+unfollow_break_min: 3
+unfollow_break_max: 17
+unfollow_selebgram: false
+unfollow_probably_fake: true
+unfollow_inactive: true
+unfollow_recent_feed: false
