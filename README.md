@@ -102,50 +102,10 @@ The `%username%.session` file stores your session with Instagram to avoid re-log
 | unfollow_selebgram  | bool | Unfollow Condition: Unfollow (celebrity) accounts with too many followers and not enough following | False |
 | unfollow_everyone  | bool | Unfollow Condition: Will unfollow everyone in unfollow queue (wildcard condition) | False |
 
-## Methods
-| Method | Description |
-|:------:|:-----------:|
-| get_media_id_by_tag(tag) | Add photos with a given tag to like queue |
-| like_all_exist_media(num) | Like some number of media in queue |
-| auto_mod() | Automatically loop through tags and like photos |
-| unlike(id) | Unlike media, given its ID. |
-| comment(id, comment) | Write a comment on the media with a given ID. |
-| follow(id) | Follow the user with the given ID. |
-| unfollow(id) | Unfollow the user with the given ID. |
-| logout() | Log out of Instagram. |
+## Contributing
+Please feel free to contribute and submit PR requests. All help is appreciated. Look for issues with the label [needs help](https://github.com/instabot-py/instabot.py/labels/needs%20help).
 
-<!-- ## Usage examples
-Basic bot implementation:
-```py
-bot = InstaBot('login', 'password')
-bot.auto_mod()
-```
-
-Standard use with custom tags:
-```py
-bot = InstaBot('login', 'password', tag_list=['with', 'your', 'tag'])
-bot.auto_mod()
-```
-
-Standard use with change default settings (you should know what you do!):
-```py
-bot = InstaBot('login', 'password',
-               like_per_day=1000,
-               media_max_like=50,
-               media_min_like=5,
-               tag_list=['like', 'follow', 'f4f'],
-               max_like_for_one_tag=50,
-               log_mod=1)
-bot.auto_mod()
-```
-
-Get media by one tag `'python'` and like 4 of them:
-```py
-bot = InstaBot('login', 'password')
-bot.get_media_id_by_tag('python')
-bot.like_all_exist_media(4)
-```
-
+<!-- 
 ## Video Tutorials
 The following video tutorials demo setting up and running the bot:
 * [Windows](https://www.youtube.com/watch?v=V8P0UCrACA0)
