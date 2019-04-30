@@ -1272,7 +1272,9 @@ class InstaBot:
             if "@username@" in comment_text:
                 comment_text = comment_text.replace("@username@", self.current_owner)
 
-            log_string = f"Trying to comment: {self.media_by_tag[0]['node']['id']}"
+            media_id = self.media_by_tag[0]["node"]["id"]
+            log_string = f"Trying to comment: {media_id}\n                 " \
+                         f"https://www.{self.get_instagram_url_from_media_id(media_id)}"
             self.write_log(log_string)
             if (
                 self.comment(self.media_by_tag[0]["node"]["id"], comment_text)
