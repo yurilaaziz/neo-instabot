@@ -24,7 +24,7 @@ config = configparser.ConfigParser()
 
 
 def ask_question(_q, label="", tip="", prepend="", header=" Instabot Configurator "):
-    if os.name == "nt":
+    if OS_IS_NT:
         print(f"\n")
         print(f"=============\n{label}")
         print(f"{tip}")
@@ -270,7 +270,7 @@ def setupinteractive(config, config_location="instabot.config.ini"):
                     )
                 else:
                     if setting in configsettings_labels:
-                        if os.name == "nt":
+                        if OS_IS_NT:
                             _label = f"{setting} : {configsettings_labels[setting]}"
                         else:
                             _label = f"{TERM.underline(setting)} : {configsettings_labels[setting]}"
