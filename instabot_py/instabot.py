@@ -770,7 +770,7 @@ class InstaBot:
                 logging.exception("Except on follow!")
         return False
 
-    def unfollow(self, user_id):
+    def unfollow(self, user_id, username=""):
         """ Send http request to unfollow """
         if self.login_status:
             url_unfollow = self.url_unfollow % (user_id)
@@ -1274,12 +1274,12 @@ class InstaBot:
                     or self.is_active_user is not True
                     or self.is_follower is not True
             ):
-                self.unfollow(current_id)
+                self.unfollow(current_id, current_user)
                 # don't insert unfollow count as it is done now inside unfollow()
                 # self.persistence.insert_unfollow_count( user_id=current_id)
             elif self.unfollow_everyone is True:
                 self.logger.debug(f"current_user :{current_user}")
-                self.unfollow(current_id)
+                self.unfollow(current_id, current_user)
             elif self.is_following is not True:
                 # we are not following this account, hence we unfollowed it, let's keep track
                 self.persistence.insert_unfollow_count(user_id=current_id)
@@ -1398,7 +1398,7 @@ class InstaBot:
                     or self.is_follower is not True
             ):
                 self.logger.debug(f"current_user: {current_user}")
-                self.unfollow(current_id)
+                self.unfollow(current_id, current_user)
                 self.next_iteration["Unfollow"] = time.time() + self.add_time(
                     self.unfollow_delay
                 )
