@@ -1153,14 +1153,12 @@ class InstaBot:
     def auto_unfollow(self):
         checking = True
         while checking:
-            username_row = self.persistence.get_username_to_unfollow_random()
-            if not username_row:
+            follower = self.persistence.get_username_to_unfollow_random()
+            if not follower:
                 self.logger.debug("Looks like there is nobody to unfollow.")
                 return False
-            current_id = username_row[0]
-            current_user = username_row[1]
-            unfollow_count = username_row[2]
-
+            current_id = follower.id
+            current_user = follower.username
             if not current_user:
                 current_user = self.get_username_by_user_id(user_id=current_id)
             if not current_user:
