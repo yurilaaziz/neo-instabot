@@ -3,3 +3,4 @@ instaloader==4.2.1
 requests==2.21.0
 blessings==1.7.0
 config42==0.3.1
+sqlalchemy
