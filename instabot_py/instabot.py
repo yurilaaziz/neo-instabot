@@ -81,12 +81,12 @@ class InstaBot:
         self.instaloader = instaloader.Instaloader()
 
         # Unfollow Criteria & Options
-        self.unfollow_recent_feed = config.get("unfollow_recent_feed")
-        self.unfollow_not_following = config.get("unfollow_not_following")
-        self.unfollow_inactive = config.get("unfollow_inactive")
-        self.unfollow_probably_fake = config.get("unfollow_probably_fake")
-        self.unfollow_selebgram = config.get("unfollow_selebgram")
-        self.unfollow_everyone = config.get("unfollow_everyone")
+        self.unfollow_recent_feed = self.str2bool(config.get("unfollow_recent_feed"))
+        self.unfollow_not_following = self.str2bool(config.get("unfollow_not_following"))
+        self.unfollow_inactive = self.str2bool(config.get("unfollow_inactive"))
+        self.unfollow_probably_fake = self.str2bool(config.get("unfollow_probably_fake"))
+        self.unfollow_selebgram = self.str2bool(config.get("unfollow_selebgram"))
+        self.unfollow_everyone = self.str2bool(config.get("unfollow_everyone"))
 
         self.time_in_day = 24 * 60 * 60
         # Like
@@ -1459,5 +1459,4 @@ class InstaBot:
 
     @staticmethod
     def str2bool(value):
-        return True if str(value).lower() in ["yes", "true"] else \
-            False if str(value).lower() in ["no", "false"] else None
+        return str(value).lower() in ["yes", "true"]
