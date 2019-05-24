@@ -1,5 +1,5 @@
 fake-useragent==0.1.11
-instaloader==4.2.1
+instaloader==4.2.7
 requests==2.21.0
 blessings==1.7.0
 config42==0.3.1
