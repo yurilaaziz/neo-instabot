@@ -193,7 +193,7 @@ class InstaBot:
         self.unwanted_username_list = config.get("unwanted_username_list")
         now_time = datetime.datetime.now()
         self.check_for_bot_update()
-        log_string = "Instabot v1.2.5/0 started at %s:" % (
+        log_string = "Instabot v1.2.6/0 started at %s:" % (
             now_time.strftime("%d.%m.%Y %H:%M")
         )
         self.logger.info(log_string)
@@ -828,7 +828,7 @@ class InstaBot:
                 self.new_auto_mod_comments()
                 # Bot iteration in 1 sec
                 time.sleep(1)
-                self.logger.debug("Tic!")
+                # self.logger.debug("Tic!")
             else:
                 self.logger.debug(
                     "Sleeping until {hour}:{min}".format(
