@@ -22,6 +22,7 @@ setup(
     name="instabot-py",
     packages=find_packages(),
     version="0.4.8",
+    python_requires=">3.6.1",
     license="MIT",
     description="Instagram Python Bot",
     long_description=README,
