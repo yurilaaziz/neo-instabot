@@ -37,23 +37,23 @@ def ask_question(_q, label="", tip="", prepend="", header=" Instabot Configurato
             print(TERM.italic(TERM.white_on_black(label)))
 
         with TERM.location(
-                int((TERM.width / 2) - (len(tip) / 2)), int((TERM.height / 2) + 3)
+            int((TERM.width / 2) - (len(tip) / 2)), int((TERM.height / 2) + 3)
         ):
             print(TERM.italic(TERM.white_on_black(tip)))
 
         with TERM.location(
-                int(TERM.width - ((TERM.width / 2) + (len(_q) / 2))),
-                int(TERM.height / 2) - 2,
+            int(TERM.width - ((TERM.width / 2) + (len(_q) / 2))),
+            int(TERM.height / 2) - 2,
         ):
             print(TERM.bold(_q))
 
         with TERM.location(
-                int((TERM.width / 2) - (len(_q) / 2)), int(TERM.height / 2) + 1
+            int((TERM.width / 2) - (len(_q) / 2)), int(TERM.height / 2) + 1
         ):
             print("-" * len(_q), end="")
 
         with TERM.location(
-                int(TERM.width - ((TERM.width / 2) + (len(_q) / 2))), int((TERM.height / 2))
+            int(TERM.width - ((TERM.width / 2) + (len(_q) / 2))), int((TERM.height / 2))
         ):
             print(prepend, end="")
             _input = input()
@@ -348,7 +348,7 @@ def interactive(askusername=None, loaded_with_argv=False):
             )
     else:
         if "yes" in ask_question(
-                "Could not find user in settings. Would you like to add now? (yes/no): "
+            "Could not find user in settings. Would you like to add now? (yes/no): "
         ):
             setupinteractive(config, config_location)
         else:
@@ -381,7 +381,7 @@ def interactive(askusername=None, loaded_with_argv=False):
     return configdict
 
 
-if __name__ == "__main__":
+def main():
     if len(sys.argv) > 1:
         param = sys.argv[1].lower()
         if param == "--":
@@ -393,3 +393,7 @@ if __name__ == "__main__":
 
     bot = InstaBot(**configdict)
     bot.mainloop()
+
+
+if __name__ == "__main__":
+    main()
