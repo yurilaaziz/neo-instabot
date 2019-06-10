@@ -145,6 +145,8 @@ follow_per_day: 1000
 
 [Create Telegram bot for instabot](https://core.telegram.org/bots#3-how-do-i-create-a-bot)
 
+## Blogs
+- [Instabot-Py Rework](https://medium.com/@asker_amine/instabot-py-rework-7fa68a6cadab)
 
 ## Community
 
