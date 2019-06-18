@@ -116,7 +116,7 @@ The following video tutorials demo setting up and running the bot:
 
 ## Instabot with yaml config
 By default, instabot looks for configuration file (instabot.config.yml)
-it could be changed by exporting environement varibale with the full path
+it could be changed by exporting environment varibale with the full path
 ````bash
 export INSTABOT_CONFIG_FILE=instabot2.config.yml
 ````
