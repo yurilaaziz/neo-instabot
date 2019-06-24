@@ -76,6 +76,7 @@ def setupinteractive(config, config_location="instabot.config.ini"):
         "follow_time": "opt",
         "unfollow_per_day": "opt",
         "tag_list": "opt",
+        "keywords": "opt",
         "unfollow_selebgram": "opt",
         "unfollow_probably_fake": "opt",
         "unfollow_inactive": "opt",
@@ -268,6 +269,11 @@ def setupinteractive(config, config_location="instabot.config.ini"):
                         tip="Enter the hashtags you would like to target separated with commas",
                         label="Example: follow4follow, instagood, f2f, instalifo",
                     )
+                elif setting == "keywords":
+                    print(
+                        "\n\nAttention!\n\nEnter the keywords you would like to target separated with commas.\n For example:\n      follow4follow, instagood, f2f, instalifo\n\n"
+                    )
+                    confvar = input("Enter keywords (or skip to defaults): ")
                 else:
                     if setting in configsettings_labels:
                         if OS_IS_NT:
@@ -286,9 +292,14 @@ def setupinteractive(config, config_location="instabot.config.ini"):
                     confvar = re.sub(r"#", "", confvar)
                     tags_list = confvar.split(",")
                     config[confusername][setting] = str(json.dumps(tags_list))
+                elif setting == "keywords" and confvar != "":
+                    confvar = re.sub(r"\s+", "", confvar)
+                    confvar = re.sub(r"#", "", confvar)
+                    keywords = confvar.split(",")
+                    config[confusername][setting] = str(json.dumps(keywords))
                 elif confvar == "":
                     # print('Entering default: '+ config[section][setting])
-                    if setting != "tag_list":
+                    if setting != "tag_list" and setting != "keywords":
                         config[confusername][setting] = config[section][setting]
                 else:
                     config[confusername][setting] = str(confvar)
