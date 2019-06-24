@@ -543,18 +543,19 @@ class InstaBot:
         media_id = int(media_id)
         if url_flag is False:
             return ""
-        else:
-            alphabet = (
-                "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_"
-            )
-            shortened_id = ""
-            while media_id > 0:
-                media_id, idx = divmod(media_id, 64)
-                shortened_id = alphabet[idx] + shortened_id
-            if only_code:
-                return shortened_id
-            else:
-                return f"instagram.com/p/{shortened_id}/"
+
+        alphabet = (
+            "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_"
+        )
+        shortened_id = ""
+        while media_id > 0:
+            media_id, idx = divmod(media_id, 64)
+            shortened_id = alphabet[idx] + shortened_id
+
+        if only_code:
+            return shortened_id
+
+        return f"instagram.com/p/{shortened_id}/"
 
     def get_username_by_user_id(self, user_id):
         if self.login_status:
@@ -564,9 +565,8 @@ class InstaBot:
                 return username
             except:
                 logging.exception("Except on get_username_by_user_id")
-                return False
-        else:
-            return False
+
+        return False
 
     def like_all_exist_media(self, media_size=-1, delay=True):
         """ Like all media ID that have self.media_by_tag """
