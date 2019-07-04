@@ -23,7 +23,7 @@ DEFAULT_CONFIG = {
     "config": {"file": "instabot.config.yml"},
     "logging": LOGGING_CONFIG,
     "debug": 0,
-    "database": {"type": "sql", "connection_string": "sqlite:///sqlite.db"},
+    "database": {"type": "sql", "connection_string": "sqlite:///{{login}}.db"},
     "unfollow_selebgram": False,
     "user_blacklist": {},
     "unfollow_probably_fake": True,
