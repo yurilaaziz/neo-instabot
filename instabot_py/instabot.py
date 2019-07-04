@@ -497,46 +497,33 @@ class InstaBot:
         """ Get media ID set, by your hashtag or location """
 
         if self.login_status:
-            if tag.startswith("l:"):
-                tag = tag.replace("l:", "")
-                self.by_location = True
-                self.logger.info(f"Get Media by location: {tag}")
-                if self.login_status == 1:
+            try:
+                if tag.startswith("l:"):
+                    tag = tag.replace("l:", "")
+                    self.logger.info(f"Get Media by location: {tag}")
                     url_location = self.url_location % (tag)
-                    try:
-                        r = self.s.get(url_location)
-                        all_data = json.loads(r.text)
-                        self.media_by_tag = list(
-                            all_data["graphql"]["location"]["edge_location_to_media"][
-                                "edges"
-                            ]
-                        )
-                    except Exception as exc:
-                        self.media_by_tag = []
-                        self.logger.warning("Except on get_media!")
-                        self.logger.exception(exc)
-                else:
-                    return 0
+                    r = self.s.get(url_location)
+                    all_data = json.loads(r.text)
+                    self.media_by_tag = list(
+                        all_data["graphql"]["location"]["edge_location_to_media"][
+                            "edges"
+                        ]
+                    )
 
-            else:
-                self.by_location = False
-                self.logger.debug(f"Get Media by tag: {tag}")
-                if self.login_status == 1:
-                    url_tag = self.url_tag % (tag)
-                    try:
-                        r = self.s.get(url_tag)
-                        all_data = json.loads(r.text)
-                        self.media_by_tag = list(
-                            all_data["graphql"]["hashtag"]["edge_hashtag_to_media"][
-                                "edges"
-                            ]
-                        )
-                    except:
-                        self.media_by_tag = []
-                        self.logger.warning("Except on get_media!")
-                        self.logger.exception("get_media_id_by_tag")
                 else:
-                    return 0
+                    self.logger.debug(f"Get Media by tag: {tag}")
+                    url_tag = self.url_tag % (tag)
+                    r = self.s.get(url_tag)
+                    all_data = json.loads(r.text)
+                    self.media_by_tag = list(
+                        all_data["graphql"]["hashtag"]["edge_hashtag_to_media"][
+                            "edges"
+                        ]
+                    )
+            except Exception as exc:
+                self.media_by_tag = []
+                self.logger.warning("Except on get_media!")
+                self.logger.exception(exc)
 
     def get_instagram_url_from_media_id(self, media_id, url_flag=True, only_code=None):
         """ Get Media Code or Full Url from Media ID Thanks to Nikished """
