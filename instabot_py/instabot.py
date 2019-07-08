@@ -1168,26 +1168,22 @@ class InstaBot:
             return True
 
     def auto_unlike(self):
-        checking = True
-        while checking:
-            media_to_unlike = self.persistence.get_medias_to_unlike()
-            if media_to_unlike:
-                request = self.unlike(media_to_unlike)
-                media_to_unlike_url = f"https://www.{self.get_instagram_url_from_media_id(media_to_unlike)}"
-                if request.status_code == 200:
-                    self.persistence.update_media_complete(media_to_unlike)
-                    self.logger.info(f"Unliked media: id: {media_to_unlike}, url: {media_to_unlike_url}")
-                elif request.status_code == 400 and request.text == 'missing media':
-                    self.persistence.update_media_complete(media_to_unlike)
-                    self.logger.info(f"Couldn't unlike media: id: {media_to_unlike}, url: {media_to_unlike_url}. "
-                                     f"It seems this media is no longer exist.")
-                else:
-                    self.logger.critical(f"Couldn't unlike media: id: {media_to_unlike}, url: {media_to_unlike_url}. "
-                                         f"Reason: {request.text}")
-                    checking = False
+        media_to_unlike = self.persistence.get_medias_to_unlike()
+        if media_to_unlike:
+            request = self.unlike(media_to_unlike)
+            media_to_unlike_url = f"https://www.{self.get_instagram_url_from_media_id(media_to_unlike)}"
+            if request.status_code == 200:
+                self.persistence.update_media_complete(media_to_unlike)
+                self.logger.info(f"Unliked media: id: {media_to_unlike}, url: {media_to_unlike_url}")
+            elif request.status_code == 400 and request.text == 'missing media':
+                self.persistence.update_media_complete(media_to_unlike)
+                self.logger.info(f"Could not unlike media: id: {media_to_unlike}, url: {media_to_unlike_url}. It seems "
+                                 f"this media is no longer exist.")
             else:
-                self.logger.debug("There are no medias left to unlike right now.")
-                checking = False
+                self.logger.critical(f"Could not unlike media: id: {media_to_unlike}, url: {media_to_unlike_url}. "
+                                     f"Reason: {request.text}")
+        else:
+            self.logger.debug("There are no medias left to unlike right now.")
 
     def auto_unfollow(self):
         checking = True
