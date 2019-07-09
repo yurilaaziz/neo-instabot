@@ -630,23 +630,20 @@ class InstaBot:
                                 self.logger.exception(exc)
                                 return False
 
-                            self.logger.debug(
-                                "Trying to like media: %s, %s"
-                                % (
-                                    self.media_by_tag[i]["node"]["id"],
-                                    self.url_media
-                                    % self.media_by_tag[i]["node"]["shortcode"],
-                                )
-                            )
-                            like = self.like(self.media_by_tag[i]["node"]["id"])
+                            media_to_like = self.media_by_tag[i]['node']['id']
+                            media_to_like_url = self.url_media % self.media_by_tag[i]['node']['shortcode']
+                            self.logger.debug(f"Trying to like media: id: {media_to_like}, url: {media_to_like_url}")
+
+                            like = self.like(media_to_like)
                             # comment = self.comment(self.media_by_tag[i]['id'], 'Cool!')
-                            # follow = self.follow(self.media_by_tag[i]["owner"]["id"])
-                            if like != 0:
+                            # follow = self.follow(self.media_by_tag[i]['owner']['id'])
+                            if like:
                                 if like.status_code == 200:
-                                    # Like, all ok!
+                                    # Like is successful, all is ok!
                                     self.error_400 = 0
                                     self.like_counter += 1
-                                    log_string = f"Liked: {self.media_by_tag[i]['node']['id']}. Like #{self.like_counter} {self.url_media % self.media_by_tag[i]['node']['shortcode']}."
+                                    log_string = f"Liked media #{self.like_counter}: id: {media_to_like}, " \
+                                        f"url: {media_to_like_url}"
 
                                     self.persistence.insert_media(
                                         media_id=self.media_by_tag[i]["node"]["id"],
@@ -654,16 +651,15 @@ class InstaBot:
                                     )
                                     self.logger.info(log_string)
                                 elif like.status_code == 400:
-                                    self.logger.info(
-                                        f"Not liked: {like.status_code} message {like.text}"
-                                    )
+                                    self.logger.info(f"Could not like media: id: {media_to_like}, "
+                                                     f"url: {media_to_like_url}. Reason: {like.text}")
                                     self.persistence.insert_media(
                                         media_id=self.media_by_tag[i]["node"]["id"],
                                         status="400",
                                     )
-                                    # Some error. If repeated - can be ban!
+                                    # Some error appeared. If it repeats - could be ban!
                                     if self.error_400 >= config.get("error_400_to_ban"):
-                                        # Look like you banned!
+                                        # Looks like you are banned!
                                         time.sleep(config.get("ban_sleep_time"))
                                     else:
                                         self.error_400 += 1
@@ -672,11 +668,11 @@ class InstaBot:
                                         media_id=self.media_by_tag[i]["node"]["id"],
                                         status=str(like.status_code),
                                     )
-                                    self.logger.debug(
-                                        f"Not liked: {like.status_code} message {like.text}"
-                                    )
+                                    self.logger.debug(f"Could not like media: id: {media_to_like}, "
+                                                      f"url: {media_to_like_url}, status code: {like.status_code}. "
+                                                      f"Reason: {like.text}")
                                     return False
-                                    # Some error.
+                                    # Some error
                                 i += 1
                                 if delay:
                                     time.sleep(
@@ -692,7 +688,7 @@ class InstaBot:
                     else:
                         return False
             else:
-                self.logger.debug("No media to like!")
+                self.logger.debug("There are no medias found to like right now.")
 
     def like(self, media_id):
         """ Send http request to like media by ID """
