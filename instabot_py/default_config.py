@@ -2,8 +2,7 @@ LOGGING_CONFIG = {
     "version": 1,
     "disable_existing_loggers": False,
     "formatters": {
-        "simple": {"format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s"},
-        "user": {"format": "%(login)s - %(asctime)s - %(levelname)s - %(message)s"},
+        "simple": {"format": "%(asctime)s - {{login}} - %(name)s - %(levelname)s - %(message)s"},
     },
     "handlers": {
         "console": {
@@ -14,7 +13,8 @@ LOGGING_CONFIG = {
         }
     },
     "loggers": {
-        "InstaBot": {"level": "DEBUG", "handlers": ["console"], "propagate": "no"}
+        "InstaBot": {"level": "DEBUG", "handlers": ["console"], "propagate": "no"},
+        "Persistence": {"level": "DEBUG", "handlers": ["console"], "propagate": "no"}
     },
     "root": {"level": "INFO"},
 }
@@ -23,7 +23,7 @@ DEFAULT_CONFIG = {
     "config": {"file": "instabot.config.yml"},
     "logging": LOGGING_CONFIG,
     "debug": 0,
-    "database": {"type": "sql", "connection_string": "sqlite:///{{login}}.db"},
+    "database": {"type": "sql", "path": "{{login}}.db", "connection_string": "sqlite:///{{database.path}}"},
     "unfollow_selebgram": False,
     "user_blacklist": {},
     "unfollow_probably_fake": True,
@@ -34,7 +34,7 @@ DEFAULT_CONFIG = {
     "follow_time": 18000,
     "unfollow_break_min": 15,
     "max_like_for_one_tag": 5,
-    "session_file": None,
+    "session_file": "{{login}}.session",
     "unfollow_not_following": True,
     "unfollow_break_max": 30,
     "comments_per_day": 0,
@@ -44,7 +44,14 @@ DEFAULT_CONFIG = {
     "unlike_per_day": 0,
     "end_at_m": 59,
     "end_at_h": 23,
+    "window_check_every": 300,
     "user_max_follow": 0,
+    "comments_per_run": "{{comments_per_day}}",
+    "follow_per_run": "{{follow_per_day}}",
+    "unfollow_per_run": "{{unfollow_per_day}}",
+    "like_per_run": "{{like_per_day}}",
+    "unlike_per_run": "{{unlike_per_day}}",
+
     "comment_list": [
         ["this", "the", "your"],
         ["photo", "picture", "pic", "shot", "snapshot"],
@@ -79,7 +86,7 @@ DEFAULT_CONFIG = {
         ],
         [".", "..", "...", "!", "!!", "!!!"],
     ],
-    "proxy": "",
+    "proxies": {},
     "unfollow_per_day": 0,
     "follow_per_day": 0,
     "unwanted_username_list": [],
