@@ -1,0 +1,13 @@
+like_per_day: 20
+unlike_per_day: 20
+comments_per_day: 20
+max_like_for_one_tag: 20
+follow_per_day: 20
+unfollow_per_day: 20
+follow_time: 0
+unfollow_break_min: 1
+unfollow_break_max: 1
+unfollow_selebgram: false
+unfollow_probably_fake: true
+unfollow_inactive: true
+unfollow_recent_feed: false

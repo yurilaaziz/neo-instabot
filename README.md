@@ -35,7 +35,7 @@ On Windows you might have to use `python` without the version (`3`) suffix. Expe
 
   - `instabot-py` or `python3 -m instabot_py`
   - `instabot-py -c myconfiguration.yml` or `python3 -m instabot_py -c myconfiguration.yml`
-  - `instabot-py --interactive`or `instabot-py -i` to use the legacy interactive mode (deprecated and will be removed soon)
+  - `instabot-interactive` to use the legacy interactive mode (deprecated and will be removed soon)
 
 - ** Configuration  ** ⚙️
 
