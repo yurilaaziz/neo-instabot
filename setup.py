@@ -1,7 +1,11 @@
 import os.path
 
-from pkg_resources import get_distribution, DistributionNotFound
 from setuptools import setup, find_packages
+try:
+    import instabot_py
+    __version__ = instabot_py.__version__
+except:
+    __version__ = "devel"
 
 try:
     here = os.path.abspath(os.path.dirname(__file__))
@@ -11,17 +15,6 @@ try:
 except IOError:
     required = []
     README = ""
-
-try:
-    _dist = get_distribution('instabot_py')
-    dist_loc = os.path.normcase(_dist.location)
-    here = os.path.normcase(__file__)
-    if not here.startswith(os.path.join(dist_loc, 'instabot_py')):
-        raise DistributionNotFound
-except DistributionNotFound:
-    __version__ = 'Please install this project with setup.py'
-else:
-    __version__ = _dist.version
 
 setup(
     name="instabot-py",
