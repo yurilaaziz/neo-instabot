@@ -2,7 +2,6 @@
 
 **Instabot.py** is an extremely light instagram bot that uses the undocumented Web API. Unlike other bots, Instabot.py does _not_ require Selenium or a WebDriver. Instead, it interacts with the API over simple HTTP Requests. It runs on most systems, including Raspberry Pi.
 
-[![Donate](https://img.shields.io/badge/PayPal-Donate%20to%20Author-blue.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=7BMM6JGE73322&lc=US)
 [![Chat on Telegram](https://img.shields.io/badge/Chat%20on-Telegram-brightgreen.svg)](https://t.me/joinchat/DYKH-0G_8hsDDoN_iE8ZlA)
 [![Latest version on](https://badge.fury.io/py/instabot-py.svg)](https://badge.fury.io/py/instabot-py)
 [![Supported Python versions](https://img.shields.io/pypi/pyversions/instabot-py.svg)](https://pypi.org/project/instabot-py/)
@@ -34,13 +33,19 @@ On Windows you might have to use `python` without the version (`3`) suffix. Expe
 
 - **Start the bot** 🏁
 
-  - `instabot-py`
-  - or `python3 -m instabot_py`
-  - For more advanced parameters and configurations download and edit [example.py](https://raw.githubusercontent.com/instabot-py/instabot.py/master/example.py) and run `python3 example.py`
+  - `instabot-py` or `python3 -m instabot_py`
+  - `instabot-py -c myconfiguration.yml` or `python3 -m instabot_py -c myconfiguration.yml`
+  - `instabot-py --interactive`or `instabot-py -i` to use the legacy interactive mode (deprecated and will be removed soon)
 
-- **Config** ⚙️
+- ** Configuration  ** ⚙️
 
-When you first run `instabot-py` a file called `config.ini` will be created in your current directory, along with an SQLite DB, and an error.log.
+By running `instabot-py`,  the Bot reads its configuration from instabot.config.yml in your current directory.
+you can run the bot with a different configuration `instabot-py -c myconfiguration.yml`
+
+
+- **Legacy Interactive Mode (DEPRECATED)** ⚙️
+
+When you first run `instabot-py -i` a file called `config.ini` will be created in your current directory, along with an SQLite DB.
 
 After the initial configuration, you can manually edit `config.ini` with a text editor. Restart the bot for changes to take effect.
 
@@ -52,6 +57,7 @@ The `%username%.session` file stores your session with Instagram to avoid re-log
 ## Upgrade ⬆️
 
 - `python3 -m pip install instabot-py --no-cache-dir --upgrade`
+- `pip3 install instabot-py --no-cache-dir --upgrade`
 
 ## Install methods
 
@@ -72,19 +78,23 @@ The `%username%.session` file stores your session with Instagram to avoid re-log
 | start\_at\_m         | int | Start program at the min                             | 0    |
 | end\_at\_h           | int | End program at the hour                              | 23   |
 | end\_at\_m           | int | End program at the min                               | 59   |
-| database\_name       | str | change the name of database file to use multiple account | "follows\_db.db"   |
+| database             | dict| Contains the database configuration                  | {"type": "sql", "connection_string": "sqlite:///{{login}}.db"}   |
 | session\_file        | str | change the name of session file so to avoid having to login every time. Set False to disable. | "username.session"   |
-| like_per_day         | int | Number of photos to like per day (over 1000 may cause throttling) | 1000 |
+| like_per_day         | int | DEPRECATED, WILL BE REMOVED SOON, REPLACED BY like_per_run |  |
+| like_per_run         | int | Number of photos to like per day (over 1000 may cause throttling) | 1000 |
 | media_max_like       | int | Maximum number of likes on photos to like (set to 0 to disable) | 0    |
 | media_min_like       | int | Minimum number of likes on photos to like (set to 0 to disable) | 0    |
-| follow_per_day       | int | Users to follow per day                              | 0    |
+| follow_per_day       | int | DEPRECATED, WILL BE REMOVED SOON, REPLACED BY follow_per_run                              | 0    |
+| follow_per_run       | int | Users to follow per day                              | 0    |
 | follow_time          | int | Seconds to wait before unfollowing                   | 5 * 60 * 60 |
 | user_min_follow      | int | Check user before following them if they have X minimum of followers. Set 0 to disable                   | 0 |
 | user_max_follow      | int | Check user before following them if they have X maximum of followers. Set 0 to disable                   | 0 |
-| follow_time_enabled  | bool| Whether to wait seconds set in follow_time before unfollowing | True |
-| unfollow_per_day     | int | Users to unfollow per day                            | 0    |
+| follow_time_enabled  | bool| REMOVED, TO DISBALE Follow_time, just set it to 0  | -- |
+| unfollow_per_day     | int | DEPRECATED, WILL BE REMOVED SOON, REPLACED BY unfollow_per_run                            | 0    |
+| unfollow_per_run     | int | Users to unfollow per day                            | 0    |
 | unfollow_recent_feed | bool| If enabled, will populate database with users from recent feed and unfollow if they meet the conditions. Disable if you only want the bot to unfollow people it has previously followed. | True |
-| unlike_per_day     | int | Number of media to unlike that the bot has previously liked. Set to 0 to disable.                           | 0    |
+| unlike_per_day     | int | DEPRECATED, WILL BE REMOVED SOON, REPLACED BY unlike_per_run                          | 0    |
+| unlike_per_run     | int | Number of media to unlike that the bot has previously liked. Set to 0 to disable.                           | 0    |
 | time_till_unlike     | int | How long to wait after liking media before unliking them. | 3 * 24 * 60 * 60 (3 days) |
 | comments_per_day     | int | Comments to post per day                             | 0    |
 | comment_list         | [[str]] | List of word lists for comment generation. @username@ will be replaced by the media owner's username     | [['this', 'your'], ['photo', 'picture', 'pic', 'shot'], ['is', 'looks', 'is really'], ['great', 'super', 'good'], ['.', '...', '!', '!!']] |
@@ -96,7 +106,7 @@ The `%username%.session` file stores your session with Instagram to avoid re-log
 | unfollow_break_min   | int | Minimum seconds to break between unfollows           | 15 |
 | unfollow_break_max   | int | Maximum seconds to break between unfollows           | 30 |
 | log_mod              | int | Logging target (0 log to console, 1 log to file, 2 no log.) | 0 |
-| proxy                | str | Access instagram through a proxy. (host:port or user:password@host:port) | |
+| proxies              | dict | Access instagram through a proxy. {"http_proxy":"http://IP:PORT", "https_proxy":"http://IP:PORT"} (host:port or user:password@host:port) | |
 | unfollow_not_following   | bool | Unfollow Condition: Unfollow those who do not follow you back | True |
 | unfollow_inactive   | bool | Unfollow Condition: Unfollow those who have not posted in a while (inactive) | True |
 | unfollow_probably_fake  | bool | Unfollow Condition: Unfollow accounts which skewed follow/follower ratio (probably fake) | True |
@@ -105,14 +115,6 @@ The `%username%.session` file stores your session with Instagram to avoid re-log
 
 ## Contributing
 Please feel free to contribute and submit PR requests. All help is appreciated. Look for issues with the label [needs help](https://github.com/instabot-py/instabot.py/labels/needs%20help).
-
-<!-- 
-## Video Tutorials
-The following video tutorials demo setting up and running the bot:
-* [Windows](https://www.youtube.com/watch?v=V8P0UCrACA0)
-* [Mac/Linux](https://www.youtube.com/watch?v=ASO-cZO6uqo)
--->
-
 
 ## Instabot with yaml config
 By default, instabot looks for configuration file (instabot.config.yml)
@@ -147,7 +149,8 @@ follow_per_day: 1000
 [Create Telegram bot for instabot](https://core.telegram.org/bots#3-how-do-i-create-a-bot)
 
 ## Blogs
-- [Instabot-Py Rework](https://medium.com/@asker_amine/instabot-py-rework-7fa68a6cadab)
+
+- [Instabot-Py Rework: What's changed & how to configure the Telegram handler](https://medium.com/@asker_amine/instabot-py-rework-7fa68a6cadab)
 
 ## Community
 

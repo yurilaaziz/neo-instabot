@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from __future__ import print_function
 
 import atexit
 import datetime
@@ -17,8 +16,10 @@ import time
 
 import instaloader
 import requests
+from config42 import ConfigManager
 
-from instabot_py.config import config
+import instabot_py
+from instabot_py.default_config import DEFAULT_CONFIG
 from instabot_py.persistence.manager import PersistenceManager
 
 
@@ -42,109 +43,108 @@ class InstaBot:
     url_media = "https://www.instagram.com/p/%s/"
     url_user_detail = "https://www.instagram.com/%s/"
     api_user_detail = "https://i.instagram.com/api/v1/users/%s/info/"
-    instabot_repo_update = (
-        "https://github.com/instabot-py/instabot.py/raw/master/version.txt"
-    )
 
-    def __init__(self, **kwargs):
+    def __init__(self, config=None, **kwargs):
         self.logger = logging.getLogger(self.__class__.__name__)
-        config.set_many(kwargs)
-        login = config.get("login")
-        password = config.get("password")
+        if not config:
+            self.config = ConfigManager(defaults=DEFAULT_CONFIG)
+            self.config.set_many(kwargs)
+        else:
+            self.config = config
+
+        login = self.config.get("login")
+        password = self.config.get("password")
         if login is None or password is None:
             raise Exception("Account details are missing")
 
-        self.persistence = PersistenceManager(config.get("database"))
+        self.persistence = PersistenceManager(self.config.get("database"))
         self.persistence.bot = self
-        self.session_file = config.get("session_file")
+        self.session_file = self.config.get("session_file")
 
-        self.user_agent = random.sample(config.get("list_of_ua"), 1)[0]
-
-        self.current_version = 1_559_201_997
-
+        self.user_agent = random.sample(self.config.get("list_of_ua"), 1)[0]
         self.bot_start = datetime.datetime.now()
         self.bot_start_ts = time.time()
-        self.start_at_h = config.get("start_at_h")
-        self.start_at_m = config.get("start_at_m")
-        self.end_at_h = config.get("end_at_h")
-        self.end_at_m = config.get("end_at_m")
-        self.window_check_every = config.get("window_check_every")
-        self.unfollow_break_min = config.get("unfollow_break_min")
-        self.unfollow_break_max = config.get("unfollow_break_max")
-        self.user_blacklist = config.get("user_blacklist")
-        self.tag_blacklist = config.get("tag_blacklist")
-        self.unfollow_whitelist = config.get("unfollow_whitelist")
-        self.comment_list = config.get("comment_list")
+        self.start_at_h = self.config.get("start_at_h")
+        self.start_at_m = self.config.get("start_at_m")
+        self.end_at_h = self.config.get("end_at_h")
+        self.end_at_m = self.config.get("end_at_m")
+        self.window_check_every = self.config.get("window_check_every")
+        self.unfollow_break_min = self.config.get("unfollow_break_min")
+        self.unfollow_break_max = self.config.get("unfollow_break_max")
+        self.user_blacklist = self.config.get("user_blacklist")
+        self.tag_blacklist = self.config.get("tag_blacklist")
+        self.unfollow_whitelist = self.config.get("unfollow_whitelist")
+        self.comment_list = self.config.get("comment_list")
 
         self.instaloader = instaloader.Instaloader()
 
         # Unfollow Criteria & Options
-        self.unfollow_recent_feed = self.str2bool(config.get("unfollow_recent_feed"))
+        self.unfollow_recent_feed = self.str2bool(self.config.get("unfollow_recent_feed"))
         self.unfollow_not_following = self.str2bool(
-            config.get("unfollow_not_following")
+            self.config.get("unfollow_not_following")
         )
-        self.unfollow_inactive = self.str2bool(config.get("unfollow_inactive"))
+        self.unfollow_inactive = self.str2bool(self.config.get("unfollow_inactive"))
         self.unfollow_probably_fake = self.str2bool(
-            config.get("unfollow_probably_fake")
+            self.config.get("unfollow_probably_fake")
         )
-        self.unfollow_selebgram = self.str2bool(config.get("unfollow_selebgram"))
-        self.unfollow_everyone = self.str2bool(config.get("unfollow_everyone"))
+        self.unfollow_selebgram = self.str2bool(self.config.get("unfollow_selebgram"))
+        self.unfollow_everyone = self.str2bool(self.config.get("unfollow_everyone"))
 
         self.time_in_day = 24 * 60 * 60
         # Like
-        self.like_per_run = int(config.get("like_per_run"))
+        self.like_per_run = int(self.config.get("like_per_run"))
 
         if self.like_per_run > 0:
             self.like_delay = self.time_in_day / self.like_per_run
 
         # Unlike
-        self.time_till_unlike = config.get("time_till_unlike")
-        self.unlike_per_run = int(config.get("unlike_per_run"))
+        self.time_till_unlike = self.config.get("time_till_unlike")
+        self.unlike_per_run = int(self.config.get("unlike_per_run"))
         if self.unlike_per_run > 0:
             self.unlike_delay = self.time_in_day / self.unlike_per_run
 
         # Follow
-        self.follow_time = config.get("follow_time")
-        self.follow_per_run = int(config.get("follow_per_run"))
-        self.follow_delay = config.get("follow_delay")
+        self.follow_time = self.config.get("follow_time")
+        self.follow_per_run = int(self.config.get("follow_per_run"))
+        self.follow_delay = self.config.get("follow_delay")
         if self.follow_per_run > 0 and not self.follow_delay:
             self.follow_delay = self.time_in_day / self.follow_per_run
 
         # Unfollow
-        self.unfollow_per_run = int(config.get("unfollow_per_run"))
-        self.unfollow_delay = config.get("unfollow_delay")
+        self.unfollow_per_run = int(self.config.get("unfollow_per_run"))
+        self.unfollow_delay = self.config.get("unfollow_delay")
         if self.unfollow_per_run > 0 and not self.unfollow_delay:
             self.unfollow_delay = self.time_in_day / self.unfollow_per_run
 
         # Comment
-        self.comments_per_run = int(config.get("comments_per_run"))
-        self.comments_delay = config.get("comments_delay")
+        self.comments_per_run = int(self.config.get("comments_per_run"))
+        self.comments_delay = self.config.get("comments_delay")
         if self.comments_per_run > 0 and not self.comments_delay:
             self.comments_delay = self.time_in_day / self.comments_per_run
 
         # Don't like if media have more than n likes.
-        self.media_max_like = config.get("media_max_like")
+        self.media_max_like = self.config.get("media_max_like")
         # Don't like if media have less than n likes.
-        self.media_min_like = config.get("media_min_like")
+        self.media_min_like = self.config.get("media_min_like")
         # Don't follow if user have more than n followers.
-        self.user_max_follow = config.get("user_max_follow")
+        self.user_max_follow = self.config.get("user_max_follow")
         # Don't follow if user have less than n followers.
-        self.user_min_follow = config.get("user_min_follow")
+        self.user_min_follow = self.config.get("user_min_follow")
 
         # Auto mod seting:
         # Default list of tag.
-        self.tag_list = config.get("tag_list")
+        self.tag_list = self.config.get("tag_list")
         # Default keywords.
-        self.keywords = config.get("keywords")
+        self.keywords = self.config.get("keywords")
         # Get random tag, from tag_list, and like (1 to n) times.
-        self.max_like_for_one_tag = config.get("max_like_for_one_tag")
+        self.max_like_for_one_tag = self.config.get("max_like_for_one_tag")
         # log_mod 0 to console, 1 to file
-        self.log_mod = config.get("log_mod")
+        self.log_mod = self.config.get("log_mod")
 
         self.s = requests.Session()
         self.c = requests.Session()
 
-        self.proxies = config.get('proxies')
+        self.proxies = self.config.get('proxies')
         if self.proxies:
             self.s.proxies.update(self.proxies)
             self.c.proxies.update(self.proxies)
@@ -186,16 +186,12 @@ class InstaBot:
         self.media_by_user = []
         self.current_owner = ""
         self.error_400 = 0
-        self.error_400_to_ban = config.get("error_400_to_ban")
-        self.ban_sleep_time = config.get("ban_sleep_time")
-        self.unwanted_username_list = config.get("unwanted_username_list")
+        self.error_400_to_ban = self.config.get("error_400_to_ban")
+        self.ban_sleep_time = self.config.get("ban_sleep_time")
+        self.unwanted_username_list = self.config.get("unwanted_username_list")
         now_time = datetime.datetime.now()
-        self.check_for_bot_update()
-        log_string = "Instabot v1.2.6/0 started at %s:" % (
-            now_time.strftime("%d.%m.%Y %H:%M")
-        )
-        self.logger.info(log_string)
-        self.login()
+        self.logger.info(
+            "Instabot v{} started at {}:".format(instabot_py.__version__, now_time.strftime("%d.%m.%Y %H:%M")))
         self.prog_run = True
         self.next_iteration = {
             "Like": 0,
@@ -207,29 +203,13 @@ class InstaBot:
         }
 
         self.populate_user_blacklist()
+        self.login()
         signal.signal(signal.SIGINT, self.cleanup)
         signal.signal(signal.SIGTERM, self.cleanup)
         atexit.register(self.cleanup)
-        self.instaload = instaloader.Instaloader()
 
     def url_user(self, username):
         return self.url_user_detail % username
-
-    def check_for_bot_update(self):
-        self.logger.info("Checking for updates...")
-
-        try:
-            # CHANGE THIS TO OFFICIAL REPO IF KEPT
-            updated_timestamp = self.c.get(self.instabot_repo_update)
-            if int(updated_timestamp.text) > self.current_version:
-                self.logger.info(
-                    "> UPDATE AVAILABLE Please update Instabot 'python3 -m pip install instabot-py --upgrade' "
-                )
-            else:
-                self.logger.info("You are running the latest stable version")
-        except Exception as exc:
-            self.logger.warning("Could not check for updates")
-            self.logger.exception(exc)
 
     def get_user_id_by_username(self, user_name):
         url_info = self.url_user_detail % (user_name)
@@ -277,7 +257,7 @@ class InstaBot:
         self.s.headers.update(
             {
                 "Accept": "*/*",
-                "Accept-Language": config.get("accept_language"),
+                "Accept-Language": self.config.get("accept_language"),
                 "Accept-Encoding": "gzip, deflate, br",
                 "Connection": "keep-alive",
                 "Host": "www.instagram.com",
@@ -351,7 +331,7 @@ class InstaBot:
                         clg.headers.update(
                             {
                                 "Accept": "*/*",
-                                "Accept-Language": config.get("accept_language"),
+                                "Accept-Language": self.config.get("accept_language"),
                                 "Accept-Encoding": "gzip, deflate, br",
                                 "Connection": "keep-alive",
                                 "Host": "www.instagram.com",
@@ -536,7 +516,7 @@ class InstaBot:
 
     def get_username_by_user_id(self, user_id):
         try:
-            profile = instaloader.Profile.from_id(self.instaload.context, user_id)
+            profile = instaloader.Profile.from_id(self.instaloader.context, user_id)
             return profile.username
         except Exception as exc:
             logging.exception(exc)

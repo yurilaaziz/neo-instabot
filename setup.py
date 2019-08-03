@@ -1,5 +1,6 @@
-import os
+import os.path
 
+from pkg_resources import get_distribution, DistributionNotFound
 from setuptools import setup, find_packages
 
 try:
@@ -11,17 +12,21 @@ except IOError:
     required = []
     README = ""
 
-"""
-Building python Wheels:
-1 : python3 -m venv venv; .venv/bin/activate ; pip install --upgrade setuptools wheel
-2 : python setup.py sdist bdist_wheel
-3 : twine upload dist/*
-"""
+try:
+    _dist = get_distribution('instabot_py')
+    dist_loc = os.path.normcase(_dist.location)
+    here = os.path.normcase(__file__)
+    if not here.startswith(os.path.join(dist_loc, 'instabot_py')):
+        raise DistributionNotFound
+except DistributionNotFound:
+    __version__ = 'Please install this project with setup.py'
+else:
+    __version__ = _dist.version
 
 setup(
     name="instabot-py",
     packages=find_packages(),
-    version="0.4.9",
+    version=__version__,
     python_requires=">3.6.1",
     license="MIT",
     description="Instagram Python Bot",
@@ -33,7 +38,9 @@ setup(
     download_url="https://github.com/instabot-py/instabot.py/tarball/master",
     keywords="instagram bot, Instagram API hack",
     install_requires=required,
-    entry_points={"console_scripts": ["instabot-py = instabot_py.__main__:main"]},
+    entry_points={"console_scripts": ["instabot-py = instabot_py.__main__:main",
+                                      "instabot-interactive = instabot_py.interactive:main"
+                                      ]},
     classifiers=[
         "Development Status :: 5 - Production/Stable",
         "Intended Audience :: Developers",
