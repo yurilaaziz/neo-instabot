@@ -23,6 +23,14 @@ from instabot_py.default_config import DEFAULT_CONFIG
 from instabot_py.persistence.manager import PersistenceManager
 
 
+class CredsMissing(Exception):
+    """ Raised when the Instagram credentials are missing"""
+    message = "Instagram credentials are missing."
+
+    def __str__(self):
+        return CredsMissing.message
+
+
 class InstaBot:
     """
     Instabot.py
@@ -55,7 +63,7 @@ class InstaBot:
         login = self.config.get("login")
         password = self.config.get("password")
         if login is None or password is None:
-            raise Exception("Account details are missing")
+            raise CredsMissing()
 
         self.persistence = PersistenceManager(self.config.get("database"))
         self.persistence.bot = self

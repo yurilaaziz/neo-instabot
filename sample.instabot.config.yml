@@ -1,13 +1,8 @@
 ---
 login : "username"
 password : "password"
-database:
-  type: sql
-  connection_string: sqlite:///username.db
-
 debug: 0
 follow_time: 604800
-
 like_per_day: 709
 comments_per_day: 31
 max_like_for_one_tag: 36

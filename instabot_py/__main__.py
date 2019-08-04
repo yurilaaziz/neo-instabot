@@ -10,7 +10,7 @@ from config42.handlers import ArgParse
 import instabot_py
 from instabot_py import InstaBot
 from instabot_py.default_config import DEFAULT_CONFIG
-
+import yaml
 schema = [
     dict(
         name="login",
@@ -196,10 +196,16 @@ schema = [
         required=False
 
     ), dict(
-        name="Show Version",
+        name="Show release version",
         key="show_version",
         source=dict(argv=["--version"], argv_options=dict(nargs='?', const=True)),
         description="Show Instabot version",
+        required=False
+    ), dict(
+        name="Dump configuration",
+        key="dump_configuration",
+        source=dict(argv=["--dump"], argv_options=dict(nargs='?', const=True)),
+        description="Dumps current configuration",
         required=False
     )
 
@@ -223,9 +229,16 @@ def main():
     config.set_many(ConfigManager(path=_config.get('config.file')).as_dict())
     config.set_many(_config.as_dict())
     config.commit()
+
+    if config.get('dump_configuration'):
+        conf = config.as_dict()
+        conf.pop('config42')
+        print(yaml.dump(conf))
+        exit(0)
     if config.get('show_version'):
         print(instabot_py.__version__)
         exit(0)
+
     if config.get('verbosity'):
         verbosity = int(config.get('verbosity'))
         if verbosity == 1:

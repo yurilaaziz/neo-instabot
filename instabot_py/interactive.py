@@ -393,6 +393,7 @@ def main():
         configdict = interactive()
 
     bot = InstaBot(**configdict)
+
     bot.mainloop()
 
 
