@@ -37,23 +37,23 @@ def ask_question(_q, label="", tip="", prepend="", header=" Instabot Configurato
             print(TERM.italic(TERM.white_on_black(label)))
 
         with TERM.location(
-            int((TERM.width / 2) - (len(tip) / 2)), int((TERM.height / 2) + 3)
+                int((TERM.width / 2) - (len(tip) / 2)), int((TERM.height / 2) + 3)
         ):
             print(TERM.italic(TERM.white_on_black(tip)))
 
         with TERM.location(
-            int(TERM.width - ((TERM.width / 2) + (len(_q) / 2))),
-            int(TERM.height / 2) - 2,
+                int(TERM.width - ((TERM.width / 2) + (len(_q) / 2))),
+                int(TERM.height / 2) - 2,
         ):
             print(TERM.bold(_q))
 
         with TERM.location(
-            int((TERM.width / 2) - (len(_q) / 2)), int(TERM.height / 2) + 1
+                int((TERM.width / 2) - (len(_q) / 2)), int(TERM.height / 2) + 1
         ):
             print("-" * len(_q), end="")
 
         with TERM.location(
-            int(TERM.width - ((TERM.width / 2) + (len(_q) / 2))), int((TERM.height / 2))
+                int(TERM.width - ((TERM.width / 2) + (len(_q) / 2))), int((TERM.height / 2))
         ):
             print(prepend, end="")
             _input = input()
@@ -348,7 +348,7 @@ def interactive(askusername=None, loaded_with_argv=False):
             )
     else:
         if "yes" in ask_question(
-            "Could not find user in settings. Would you like to add now? (yes/no): "
+                "Could not find user in settings. Would you like to add now? (yes/no): "
         ):
             setupinteractive(config, config_location)
         else:
@@ -382,6 +382,10 @@ def interactive(askusername=None, loaded_with_argv=False):
 
 
 def main():
+    print("The interactive mode is deprecated. Please use the declarative mode with YAML settings\n"
+          "Please refer to Github README + (instabot -h) + Blog section for further information")
+    _ = input("Press Enter to continue. ")
+
     if len(sys.argv) > 1:
         param = sys.argv[1].lower()
         configdict = interactive(param, loaded_with_argv=True)

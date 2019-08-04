@@ -7,6 +7,7 @@ from collections import OrderedDict
 from config42 import ConfigManager
 from config42.handlers import ArgParse
 
+import instabot_py
 from instabot_py import InstaBot
 from instabot_py.default_config import DEFAULT_CONFIG
 
@@ -153,38 +154,32 @@ schema = [
     ), dict(
         name="unfollow_not_following",
         key="unfollow_not_following",
-        source=dict(argv=["--unfollow-not-following"]),
+        source=dict(argv=["--unfollow-not-following"], argv_options=dict(nargs='?', const=True)),
         description="Unfollow Condition: Unfollow those who do not follow you back",
         required=False
     ), dict(
         name="unfollow_inactive",
         key="unfollow_inactive",
-        source=dict(argv=["--unfollow-inactive"]),
+        source=dict(argv=["--unfollow-inactive"], argv_options=dict(nargs='?', const=True)),
         description="Unfollow Condition: Unfollow those who have not posted in a while (inactive)",
         required=False
     ), dict(
         name="unfollow_probably_fake",
         key="unfollow_probably_fake",
-        source=dict(argv=["--unfollow-probably-fake"]),
+        source=dict(argv=["--unfollow-probably-fake"], argv_options=dict(nargs='?', const=True)),
         description="Unfollow Condition: Unfollow accounts which skewed follow/follower ratio (probably fake)",
         required=False
     ), dict(
         name="unfollow_selebgram",
         key="unfollow_selebgram",
-        source=dict(argv=["--unfollow-selebgram"]),
+        source=dict(argv=["--unfollow-selebgram"], argv_options=dict(nargs='?', const=True)),
         description="Unfollow Condition: Unfollow (celebrity) accounts with too many followers and not enough following",
         required=False
     ), dict(
         name="unfollow_everyone",
         key="unfollow_everyone",
-        source=dict(argv=["--unfollow-everyone"]),
+        source=dict(argv=["--unfollow-everyone"], argv_options=dict(nargs='?', const=True)),
         description="Unfollow Condition: Will unfollow everyone in unfollow queue (wildcard condition)",
-        required=False
-    ), dict(
-        name="Legacy Interactive Mode",
-        key="interactive",
-        source=dict(argv=["-i", "--interactive"]),
-        description="Activate Interactive Mode ",
         required=False
     ), dict(
         name="Verbosity",
@@ -200,14 +195,21 @@ schema = [
         description="Configuration file ",
         required=False
 
+    ), dict(
+        name="Show Version",
+        key="show_version",
+        source=dict(argv=["--version"], argv_options=dict(nargs='?', const=True)),
+        description="Show Instabot version",
+        required=False
     )
 
 ]
+
 defaults = {'config42': OrderedDict(
     [
         ('argv', dict(handler=ArgParse, schema=schema)),
         ('env', {'prefix': 'INSTABOT'}),
-        # ('file', {'path': 'instabot.config.yml'}),
+        ('file', {'path': 'instabot.config.yml'}),
     ]
 )
 }
@@ -221,6 +223,9 @@ def main():
     config.set_many(ConfigManager(path=_config.get('config.file')).as_dict())
     config.set_many(_config.as_dict())
     config.commit()
+    if config.get('show_version'):
+        print(instabot_py.__version__)
+        exit(0)
     if config.get('verbosity'):
         verbosity = int(config.get('verbosity'))
         if verbosity == 1:
