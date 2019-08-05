@@ -275,7 +275,7 @@ def main():
         last_version = get_last_version()
         if last_version and last_version != instabot_py.__version__:
             print("Newer version available: {}, The current version: {}".format(last_version, instabot_py.__version__))
-            print("To update, please type \n python3 -m pip install instabot-py --upgrade")
+            print("To update, please type \n python3 -m pip install instabot-py --upgrade --no-cache-dir ")
             print("")
             print("  > You can ignore warning, run the instabot with --ignore-updates flag")
             exit(0)
