@@ -4,13 +4,15 @@
 import logging.config
 from collections import OrderedDict
 
+import requests
+import yaml
 from config42 import ConfigManager
 from config42.handlers import ArgParse
 
 import instabot_py
 from instabot_py import InstaBot
 from instabot_py.default_config import DEFAULT_CONFIG
-import yaml
+
 schema = [
     dict(
         name="login",
@@ -41,6 +43,7 @@ schema = [
         key="like_per_run",
         source=dict(argv=["--like-per-run"]),
         description="Number of photos to like per day (over 1000 may cause throttling)",
+        type="integer",
         required=False
 
     ), dict(
@@ -48,13 +51,15 @@ schema = [
         key="media_max_like",
         source=dict(argv=["--media-max-like"]),
         description="Maximum number of likes on photos to like (set to 0 to disable)",
-        required=False
+        type="integer",
+        required=False,
 
     ), dict(
         name="media_min_like",
         key="media_min_like",
         source=dict(argv=["--media-min-like"]),
         description="Minimum number of likes on photos to like (set to 0 to disable)",
+        type="integer",
         required=False
 
     ), dict(
@@ -62,6 +67,7 @@ schema = [
         key="follow_per_run",
         source=dict(argv=["--follow-per-run"]),
         description="Users to follow per day",
+        type="integer",
         required=False
 
     ), dict(
@@ -69,6 +75,7 @@ schema = [
         key="follow_time",
         source=dict(argv=["--follow-time"]),
         description="Seconds to wait before unfollowing",
+        type="integer",
         required=False
 
     ), dict(
@@ -76,6 +83,7 @@ schema = [
         key="user_min_follow",
         source=dict(argv=["--user-min-follow"]),
         description="Check user before following them if they have X minimum of followers. Set 0 to disable",
+        type="integer",
         required=False
 
     ), dict(
@@ -83,6 +91,7 @@ schema = [
         key="user_max_follow",
         source=dict(argv=["--user-max-follow"]),
         description="Check user before following them if they have X maximum of followers. Set 0 to disable",
+        type="integer",
         required=False
 
     ), dict(
@@ -90,6 +99,7 @@ schema = [
         key="unfollow_per_run",
         source=dict(argv=["--unfollow-per-run"]),
         description="Users to unfollow per day",
+        type="integer",
         required=False
 
     ), dict(
@@ -97,18 +107,21 @@ schema = [
         key="unfollow_recent_feed",
         source=dict(argv=["--unfollow-recent-feed"]),
         description="If enabled, will populate database with users from recent feed and unfollow if they meet the conditions. Disable if you only want the bot to unfollow people it has previously followed.",
+        type="integer",
         required=False
     ), dict(
         name="unlike_per_run",
         key="unlike_per_run",
         source=dict(argv=["--unlike-per-run"]),
         description="Number of media to unlike that the bot has previously liked. Set to 0 to disable.",
+        type="integer",
         required=False
     ), dict(
         name="time_till_unlike",
         key="time_till_unlike",
         source=dict(argv=["--time-till-unlike"]),
         description="How long to wait after liking media before u",
+        type="integer",
         required=False
     ), dict(
         name="comment_list",
@@ -126,18 +139,21 @@ schema = [
         key="max_like_for_one_tag",
         source=dict(argv=["--max-like-for-one-tag"]),
         description="How many media of a given tag to like at once (out of 21)",
+        type="integer",
         required=False
     ), dict(
         name="unfollow_break_min",
         key="unfollow_break_min",
         source=dict(argv=["--unfollow-break-min"]),
         description="Minimum seconds to break between unfollows",
+        type="integer",
         required=False
     ), dict(
         name="unfollow_break_max",
         key="unfollow_break_max",
         source=dict(argv=["--unfollow-break-max"]),
         description="Maximum seconds to break between unfollows",
+        type="integer",
         required=False
     ), dict(
         name="HTTPS Proxy",
@@ -202,6 +218,12 @@ schema = [
         description="Show Instabot version",
         required=False
     ), dict(
+        name="Ignore updates",
+        key="ignore_updates",
+        source=dict(argv=["--ignore-updates"], argv_options=dict(nargs='?', const=True)),
+        description="Ignore updates",
+        required=False
+    ), dict(
         name="Dump configuration",
         key="dump_configuration",
         source=dict(argv=["--dump"], argv_options=dict(nargs='?', const=True)),
@@ -221,12 +243,21 @@ defaults = {'config42': OrderedDict(
 }
 
 
+def get_last_version():
+    url = "https://pypi.org/pypi/instabot-py/json"
+    try:
+        version = requests.get(url).json()['info']['version']
+    except:
+        version = None
+    return version
+
+
 def main():
     config = ConfigManager()
     config.set_many(DEFAULT_CONFIG)
     _config = ConfigManager(schema=schema, defaults=defaults)
     config.set_many(_config.as_dict())
-    config.set_many(ConfigManager(path=_config.get('config.file')).as_dict())
+    config.set_many(ConfigManager(schema=schema, path=_config.get('config.file')).as_dict())
     config.set_many(_config.as_dict())
     config.commit()
 
@@ -236,8 +267,17 @@ def main():
         print(yaml.dump(conf))
         exit(0)
     if config.get('show_version'):
-        print(instabot_py.__version__)
+        print("Installed version {}".format(instabot_py.__version__))
         exit(0)
+
+    if not config.get('ignore_updates'):
+        last_version = get_last_version()
+        if last_version and last_version != instabot_py.__version__:
+            print("Newer version available: {}, The current version: {}".format(last_version, instabot_py.__version__))
+            print("To update, please type \n python3 -m pip install instabot-py --upgrade")
+            print("")
+            print("  > You can ignore warning, run the instabot with --ignore-updates flag")
+            exit(0)
 
     if config.get('verbosity'):
         verbosity = int(config.get('verbosity'))
