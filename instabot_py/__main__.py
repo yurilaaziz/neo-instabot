@@ -11,6 +11,7 @@ from config42.handlers import ArgParse
 
 import instabot_py
 from instabot_py import InstaBot
+from instabot_py.instabot import CredsMissing
 from instabot_py.default_config import DEFAULT_CONFIG
 
 schema = [
@@ -288,7 +289,17 @@ def main():
         config.set("logging.root.level", level)
 
     logging.config.dictConfig(config.get("logging"))
-    bot = InstaBot(config=config)
+    try:
+        bot = InstaBot(config=config)
+    except CredsMissing:
+        print("You didn't provide your Instagram login & password or you didn't specify the configuration file")
+        print("Try again :")
+        print("")
+        print("   instabot-py --login YOUR_LOGIN --password YOUR_PASSWORD")
+        print("   instabot-py -c your-config.yml")
+        print("You can export and modify the default configuration by typing the command below")
+        print("    instabot-py --dump")
+        exit(1)
     bot.mainloop()
 
 
