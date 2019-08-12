@@ -749,6 +749,8 @@ class InstaBot:
                 medias_raw = self.get_media_id_by_tag(random.choice(self.tag_list))
                 max_tag_like_count = random.randint(1, self.max_like_for_one_tag)
                 medias = self.remove_already_liked_medias(medias_raw)[:max_tag_like_count]
+                continue
+
             media = medias.pop()
             self.new_auto_mod_like(media)
             self.new_auto_mod_unlike()
