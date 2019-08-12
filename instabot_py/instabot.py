@@ -746,9 +746,12 @@ class InstaBot:
                 continue
 
             if len(medias) == 0:
-                medias_raw = self.get_media_id_by_tag(random.choice(self.tag_list))
+                tag = random.choice(self.tag_list)
+                medias_raw = self.get_media_id_by_tag(tag)
+                self.logger.debug(f"Retrieved {len(medias_raw)} medias")
                 max_tag_like_count = random.randint(1, self.max_like_for_one_tag)
                 medias = self.remove_already_liked_medias(medias_raw)[:max_tag_like_count]
+                self.logger.debug(f"Select {max_tag_like_count} medias to process. Increase max_like_for_one_tag value for more processing medias ")
                 continue
 
             media = medias.pop()
