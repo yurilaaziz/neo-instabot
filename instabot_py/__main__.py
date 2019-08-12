@@ -265,6 +265,7 @@ def main():
     if config.get('dump_configuration'):
         conf = config.as_dict()
         conf.pop('config42')
+        conf.pop('dump_configuration')
         print(yaml.dump(conf))
         exit(0)
     if config.get('show_version'):
