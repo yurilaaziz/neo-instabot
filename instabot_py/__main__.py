@@ -11,8 +11,8 @@ from config42.handlers import ArgParse
 
 import instabot_py
 from instabot_py import InstaBot
-from instabot_py.instabot import CredsMissing
 from instabot_py.default_config import DEFAULT_CONFIG
+from instabot_py.instabot import CredsMissing
 
 schema = [
     dict(
@@ -253,15 +253,29 @@ def get_last_version():
     return version
 
 
+def configure_logging(config):
+    if config.get('verbosity'):
+        verbosity = int(config.get('verbosity'))
+        if verbosity == 1:
+            level = logging.INFO
+        elif verbosity > 1:
+            level = logging.DEBUG
+        config.set("logging.root.level", level)
+
+    logging.config.dictConfig(config.get("logging"))
+
+
 def main():
     config = ConfigManager()
     config.set_many(DEFAULT_CONFIG)
     _config = ConfigManager(schema=schema, defaults=defaults)
     config.set_many(_config.as_dict())
-    config.set_many(ConfigManager(schema=schema, path=_config.get('config.file')).as_dict())
+    config_file = _config.get('config.file')
+    config.set_many(ConfigManager(schema=schema, path=config_file).as_dict())
     config.set_many(_config.as_dict())
     config.commit()
 
+    configure_logging(config)
     if config.get('dump_configuration'):
         conf = config.as_dict()
         conf.pop('config42')
@@ -281,17 +295,13 @@ def main():
             print("  > You can ignore warning, run the instabot with --ignore-updates flag")
             exit(0)
 
-    if config.get('verbosity'):
-        verbosity = int(config.get('verbosity'))
-        if verbosity == 1:
-            level = logging.INFO
-        elif verbosity > 1:
-            level = logging.DEBUG
-        config.set("logging.root.level", level)
-
-    logging.config.dictConfig(config.get("logging"))
     try:
         bot = InstaBot(config=config)
+        if config_file:
+            bot.logger.info(f"Reading configuration ({len(_config.as_dict())} settings) from {config_file}")
+        else:
+            bot.logger.info(f"Use the default configuration, add '-c your-config.yml' to specify your config")
+
     except CredsMissing:
         print("You didn't provide your Instagram login & password or you didn't specify the configuration file")
         print("Try again :")
