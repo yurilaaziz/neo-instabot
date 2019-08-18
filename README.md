@@ -154,5 +154,5 @@ follow_per_day: 1000
 - [What’s new in the Instagram bot 0.5.2](https://medium.com/@asker_amine/whats-new-in-the-instagram-bot-0-5-2-fe52154fdc8a)
 ## Community
 
-- [Telegram Group](https://t.me/Instabot.py%20Community/)
+- [Telegram Group](https://t.me/joinchat/NTpLCxe7JqimNaZJYMRkYQ)
 - [New Facebook Group](https://www.facebook.com/groups/2268834063428118/)
