@@ -18,7 +18,7 @@ def cwd():
 
 @pytest.fixture
 def bot(tmp_path, cwd):
-    from instabot_py import InstaBot
+    from instabot import InstaBot
     import logging.config
     _config = ConfigManager(defaults={'config42': OrderedDict(
         [

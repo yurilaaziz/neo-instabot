@@ -18,9 +18,9 @@ import instaloader
 import requests
 from config42 import ConfigManager
 
-import instabot_py
-from instabot_py.default_config import DEFAULT_CONFIG
-from instabot_py.persistence.manager import PersistenceManager
+import instabot
+from instabot.default_config import DEFAULT_CONFIG
+from instabot.persistence.manager import PersistenceManager
 
 
 class CredsMissing(Exception):
@@ -166,28 +166,9 @@ class InstaBot:
         self.follow_counter = 0
         self.unfollow_counter = 0
         self.comments_counter = 0
-        self.current_index = 0
-        self.current_id = "abcds"
-        # List of user_id, that bot follow
-        self.user_info_list = []
-        self.user_list = []
-        self.ex_user_list = []
-        self.unwanted_username_list = []
-        self.is_checked = False
-        self.is_selebgram = False
-        self.is_fake_account = False
-        self.is_active_user = False
-        self.is_following = False
-        self.is_follower = False
-        self.is_rejected = False
-        self.is_self_checking = False
-        self.is_by_tag = False
-        self.is_follower_number = 0
 
         self.user_id = 0
         self.login_status = False
-        self.by_location = False
-
         self.user_login = login.lower()
         self.user_password = password
         self.unfollow_from_feed = False
@@ -202,7 +183,7 @@ class InstaBot:
         self.unwanted_username_list = self.config.get("unwanted_username_list")
         now_time = datetime.datetime.now()
         self.logger.info(
-            "Instabot v{} started at {}:".format(instabot_py.__version__, now_time.strftime("%d.%m.%Y %H:%M")))
+            "Instabot v{} started at {}:".format(instabot.__version__, now_time.strftime("%d.%m.%Y %H:%M")))
         self.prog_run = True
         self.next_iteration = {
             "Like": 0,
@@ -691,13 +672,6 @@ class InstaBot:
         else:
             return False
 
-    # Backwards Compatibility for old example.py files
-    def auto_mod(self):
-        self.mainloop()
-
-    def new_auto_mod(self):
-        self.mainloop()
-
     def run_during_time_window(self):
         # TODO this method is subject of deprecation
 
@@ -740,7 +714,7 @@ class InstaBot:
             time.sleep(1)
             return False
 
-    def mainloop(self):
+    def run(self):
         medias = []
         while self.prog_run and self.login_status:
             if not self.run_during_time_window():

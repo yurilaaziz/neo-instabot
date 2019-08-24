@@ -1,2 +1,2 @@
 def test_mainloop(bot):
-    bot.mainloop()
+    bot.run()

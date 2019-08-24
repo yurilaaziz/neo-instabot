@@ -13,8 +13,8 @@ LOGGING_CONFIG = {
         }
     },
     "loggers": {
-        "InstaBot": {"level": "DEBUG", "handlers": ["console"], "propagate": "no"},
-        "Persistence": {"level": "DEBUG", "handlers": ["console"], "propagate": "no"}
+        "InstaBot": {"level": "WARN", "handlers": ["console"], "propagate": "no"},
+        "Persistence": {"level": "WARN", "handlers": ["console"], "propagate": "no"}
     },
     "root": {"level": "INFO"},
 }
@@ -27,7 +27,6 @@ DEFAULT_CONFIG = {
     "unfollow_selebgram": False,
     "user_blacklist": {},
     "unfollow_probably_fake": True,
-    "log_mod": 0,
     "start_at_h": 0,
     "start_at_m": 0,
     "follow_time_enabled": True,

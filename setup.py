@@ -1,9 +1,11 @@
 import os.path
 
 from setuptools import setup, find_packages
+
 try:
-    import instabot_py
-    __version__ = instabot_py.__version__
+    import instabot
+
+    __version__ = instabot.__version__
 except:
     __version__ = "devel"
 
@@ -17,7 +19,7 @@ except IOError:
     README = ""
 
 setup(
-    name="instabot-py",
+    name="neo-instabot",
     packages=find_packages(),
     version=__version__,
     python_requires=">3.6.1",
@@ -25,14 +27,16 @@ setup(
     description="Instagram Python Bot",
     long_description=README,
     long_description_content_type="text/markdown",
-    author="Pasha Lev",
-    author_email="levpasha@gmail.com",
-    url="https://github.com/instabot-py/instabot.py",
-    download_url="https://github.com/instabot-py/instabot.py/tarball/master",
-    keywords="instagram bot, Instagram API hack",
+    author="Amine Ben Asker",
+    author_email="ben.asker.amine@gmail.com",
+    url="https://github.com/yurilaaziz/bot.py",
+    download_url="https://github.com/yurilaaziz/bot.py/tarball/master",
+    keywords="instagram bot, Instagram web API hack, automation tool.",
     install_requires=required,
-    entry_points={"console_scripts": ["instabot-py = instabot_py.__main__:main",
-                                      "instabot-interactive = instabot_py.interactive:main"
+    entry_points={"console_scripts": ["neo-instabot = instabot.__main__:main",
+                                      # Backwards Compatibility
+                                      "instabot-py = instabot.__main__:main"
+
                                       ]},
     classifiers=[
         "Development Status :: 5 - Production/Stable",

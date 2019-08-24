@@ -1,11 +1,11 @@
-# Instabot.py 🤖 🌟
+# Neo-Instabot 🤖 🌟
 
-**Instabot.py** is an extremely light instagram bot that uses the undocumented Web API. Unlike other bots, Instabot.py does _not_ require Selenium or a WebDriver. Instead, it interacts with the API over simple HTTP Requests. It runs on most systems, including Raspberry Pi.
+**Neo-Instabot** is an extremely light instagram bot that uses the undocumented Web API. Unlike other bots, Instabot.py does _not_ require Selenium or a WebDriver. Instead, it interacts with the API over simple HTTP Requests. It runs on most systems, including Raspberry Pi.
 
-[![Chat on Telegram](https://img.shields.io/badge/Chat%20on-Telegram-brightgreen.svg)](https://t.me/joinchat/DYKH-0G_8hsDDoN_iE8ZlA)
-[![Latest version on](https://badge.fury.io/py/instabot-py.svg)](https://badge.fury.io/py/instabot-py)
-[![Supported Python versions](https://img.shields.io/pypi/pyversions/instabot-py.svg)](https://pypi.org/project/instabot-py/)
-<!-- [![Travis Pipelines build status](https://img.shields.io/travis/com/yurilaaziz/instabot-py.svg)](https://travis-ci.com/yurilaaziz/instabot-py/) -->
+[![Chat on Telegram](https://img.shields.io/badge/Chat%20on-Telegram-brightgreen.svg)](https://t.me/joinchat/NTpLCxe7JqimNaZJYMRkYQ)
+[![Latest version on](https://badge.fury.io/py/neo-instabot.svg)](https://badge.fury.io/py/neo-instabot)
+[![Supported Python versions](https://img.shields.io/pypi/pyversions/neo-instabot.svg)](https://pypi.org/project/neo-instabot/)
+[![Travis Pipelines build status](https://img.shields.io/travis/com/yurilaaziz/neo-instabot.svg)](https://travis-ci.com/yurilaaziz/neo-instabot/)
 
 ## Requirements
 
@@ -21,41 +21,36 @@
 
 On Windows you might have to use `python` without the version (`3`) suffix. Experienced users should use virtualenv.
 
-- **If your version is below 3.6, we recommend you install the latest Python 3.7**
-
-  - [Python on Windows](https://github.com/instabot-py/instabot.py/wiki/Installing-Python-on-Windows)
-  - [Python on Mac](https://github.com/instabot-py/instabot.py/wiki/Installing-Python-3.7-on-macOS)
-  - [Python on Raspberry Raspbian / Debian / Ubuntu](https://github.com/instabot-py/instabot.py/wiki/Installing-Python-3.7-on-Raspberry-Pi)
 
 - **Install instabot.py from PyPi repository**
 
-  - `python3 -m pip install instabot-py`
+  - `python3 -m pip install neo-instabot`
 
 - **Start the bot** 🏁
 
-  - `instabot-py` or `python3 -m instabot_py`
-  - `instabot-py -c myconfiguration.yml` or `python3 -m instabot_py -c myconfiguration.yml`
+  - `neo-instabot` or `python3 -m instabot`
+  - `neo-instabot -c myconfiguration.yml` or `python3 -m instabot -c myconfiguration.yml`
 
 - ** Configuration  ** ⚙️
 
-By running `instabot-py`,  the Bot reads its configuration from instabot.config.yml in your current directory.
-you can run the bot with a different configuration `instabot-py -c myconfiguration.yml`
+By running `neo-instabot`,  the Bot reads its configuration from instabot.config.yml in your current directory.
+you can run the bot with a different configuration `neo-instabot -c myconfiguration.yml`
 
 
 ## Upgrade ⬆️
 
-- `python3 -m pip install instabot-py --no-cache-dir --upgrade`
-- `pip3 install instabot-py --no-cache-dir --upgrade`
+- `python3 -m pip install neo-instabot --no-cache-dir --upgrade`
+- `pip3 install neo-instabot --no-cache-dir --upgrade`
 
 ## Install methods
 
 **Recommended: From PyPi:** (Stable)
 
-- `python3 -m pip install instabot-py`
+- `python3 -m pip install neo-instabot`
 
 **From sources:**  (Bleeding edge)
 
-- `python3 -m pip install git+https://github.com/yurilaaziz/instabot.py`
+- `python3 -m pip install git+https://github.com/yurilaaziz/neo-instabot`
 
 ## Parameters
 | Parameter            | Type|                Description                           |        Default value             |
@@ -106,7 +101,7 @@ you can run the bot with a different configuration `instabot-py -c myconfigurati
 | unfollow_everyone  | bool | Unfollow Condition: Will unfollow everyone in unfollow queue (wildcard condition) | False |
 
 ## Contributing
-Please feel free to contribute and submit PR requests. All help is appreciated. Look for issues with the label [needs help](https://github.com/instabot-py/instabot.py/labels/needs%20help).
+Please feel free to contribute and submit PR requests. All help is appreciated. Look for issues with the label [needs help](https://github.com/neo-instabot/instabot.py/labels/needs%20help).
 
 ## Instabot with yaml config
 By default, instabot looks for configuration file (instabot.config.yml)
@@ -142,7 +137,7 @@ follow_per_day: 1000
 
 ## Blogs
 
-- [Instabot-Py Rework: What's changed & how to configure the Telegram handler](https://medium.com/@asker_amine/instabot-py-rework-7fa68a6cadab)
+- [neo-instabot Rework: What's changed & how to configure the Telegram handler](https://medium.com/@asker_amine/neo-instabot-rework-7fa68a6cadab)
 - [What’s new in the Instagram bot 0.5.2](https://medium.com/@asker_amine/whats-new-in-the-instagram-bot-0-5-2-fe52154fdc8a)
 ## Community
 

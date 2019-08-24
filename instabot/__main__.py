@@ -1,6 +1,21 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+"""
+Welcome to Neo-Instabot
+
+THIS PROJECT HAS BEEN FORKED FROM neo-instabot Project.
+DUE TO THE INACTIVITY OF ITS OWNER.
+
+We hope that you enjoy the newer project.
+Please follow & star the Neo-Instabot
+Github : https://github.com/yurilaaziz/neo-instabot/
+Telegram channel : https://t.me/joinchat/NTpLCxe7JqimNaZJYMRkYQ
+
+Neo-Instabot is free and will remain free
+
+"""
+
 import logging.config
 from collections import OrderedDict
 
@@ -9,10 +24,10 @@ import yaml
 from config42 import ConfigManager
 from config42.handlers import ArgParse
 
-import instabot_py
-from instabot_py import InstaBot
-from instabot_py.default_config import DEFAULT_CONFIG
-from instabot_py.instabot import CredsMissing
+import instabot
+from instabot import InstaBot
+from instabot.default_config import DEFAULT_CONFIG
+from instabot.bot import CredsMissing
 
 schema = [
     dict(
@@ -257,7 +272,7 @@ defaults = {'config42': OrderedDict(
 
 
 def get_last_version():
-    url = "https://pypi.org/pypi/instabot-py/json"
+    url = "https://pypi.org/pypi/neo-instabot/json"
     try:
         version = requests.get(url).json()['info']['version']
     except:
@@ -272,12 +287,15 @@ def configure_logging(config):
             level = logging.INFO
         elif verbosity > 1:
             level = logging.DEBUG
-        config.set("logging.root.level", level)
+        for logger in config.get("logging.loggers").keys() or []:
+            config.set("logging.loggers.{}.level".format(logger), level)
 
     logging.config.dictConfig(config.get("logging"))
 
 
+
 def main():
+    print(__doc__)
     config = ConfigManager()
     config.set_many(DEFAULT_CONFIG)
     _config = ConfigManager(schema=schema, defaults=defaults)
@@ -295,14 +313,14 @@ def main():
         print(yaml.dump(conf))
         exit(0)
     if config.get('show_version'):
-        print("Installed version {}".format(instabot_py.__version__))
+        print("Installed version {}".format(instabot.__version__))
         exit(0)
 
     if not config.get('ignore_updates'):
         last_version = get_last_version()
-        if last_version and last_version != instabot_py.__version__:
-            print("Newer version available: {}, The current version: {}".format(last_version, instabot_py.__version__))
-            print("To update, please type \n python3 -m pip install instabot-py --upgrade --no-cache-dir ")
+        if last_version and last_version != instabot.__version__:
+            print("Newer version available: {}, The current version: {}".format(last_version, instabot.__version__))
+            print("To update, please type \n python3 -m pip install neo-instabot --upgrade --no-cache-dir ")
             print("")
             print("  > You can ignore warning, run the instabot with --ignore-updates flag")
             exit(0)
@@ -318,12 +336,12 @@ def main():
         print("You didn't provide your Instagram login & password or you didn't specify the configuration file")
         print("Try again :")
         print("")
-        print("   instabot-py --login YOUR_LOGIN --password YOUR_PASSWORD")
-        print("   instabot-py -c your-config.yml")
+        print("   neo-instabot --login YOUR_LOGIN --password YOUR_PASSWORD")
+        print("   neo-instabot -c your-config.yml")
         print("You can export and modify the default configuration by typing the command below")
-        print("    instabot-py --dump")
+        print("    neo-instabot --dump")
         exit(1)
-    bot.mainloop()
+    bot.run()
 
 
 if __name__ == "__main__":
