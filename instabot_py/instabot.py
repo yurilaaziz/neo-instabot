@@ -98,7 +98,9 @@ class InstaBot:
         self.unfollow_selebgram = self.str2bool(self.config.get("unfollow_selebgram"))
         self.unfollow_everyone = self.str2bool(self.config.get("unfollow_everyone"))
 
-        self.time_in_day = 24 * 60 * 60
+        self.time_in_day = ((self.end_at_h - self.start_at_h) % 24 * 60 * 60) + (
+                (self.end_at_m - self.start_at_m) % 60 * 60)
+
         # Like
         self.like_per_run = int(self.config.get("like_per_run"))
 
@@ -751,7 +753,8 @@ class InstaBot:
                 self.logger.debug(f"Retrieved {len(medias_raw)} medias")
                 max_tag_like_count = random.randint(1, self.max_like_for_one_tag)
                 medias = self.remove_already_liked_medias(medias_raw)[:max_tag_like_count]
-                self.logger.debug(f"Select {max_tag_like_count} medias to process. Increase max_like_for_one_tag value for more processing medias ")
+                self.logger.debug(
+                    f"Select {max_tag_like_count} medias to process. Increase max_like_for_one_tag value for more processing medias ")
                 continue
 
             media = medias.pop()
