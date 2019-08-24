@@ -87,6 +87,14 @@ DEFAULT_CONFIG = {
         [".", "..", "...", "!", "!!", "!!!"],
     ],
     "proxies": {},
+    "proxy_auth_string": "{{ proxy_user}}:{{proxy_password}}@",
+    "proxy_auth": "{{ proxy_auth_string if (proxy_user and proxy_password)}}",
+    "proxy_http_string": "http://{{proxy_auth}}{{proxy_ip}}:{{proxy_port}}",
+    "proxy_https_string": "https://{{proxy_auth}}{{proxy_ip}}:{{proxy_port}}",
+    "proxies": {
+        "http": "{{ proxy_http_string if (proxy_ip and proxy_port)}}",
+        "https": "{{ proxy_http_string if (proxy_ip and proxy_port)}}"
+    },
     "unfollow_per_day": 0,
     "follow_per_day": 0,
     "unwanted_username_list": [],

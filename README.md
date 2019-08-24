@@ -35,23 +35,11 @@ On Windows you might have to use `python` without the version (`3`) suffix. Expe
 
   - `instabot-py` or `python3 -m instabot_py`
   - `instabot-py -c myconfiguration.yml` or `python3 -m instabot_py -c myconfiguration.yml`
-  - `instabot-interactive` to use the legacy interactive mode (deprecated and will be removed soon)
 
 - ** Configuration  ** ⚙️
 
 By running `instabot-py`,  the Bot reads its configuration from instabot.config.yml in your current directory.
 you can run the bot with a different configuration `instabot-py -c myconfiguration.yml`
-
-
-- **Legacy Interactive Mode (DEPRECATED)** ⚙️
-
-When you first run `instabot-py -i` a file called `config.ini` will be created in your current directory, along with an SQLite DB.
-
-After the initial configuration, you can manually edit `config.ini` with a text editor. Restart the bot for changes to take effect.
-
-The `%username%.db` file contains a record of the posts the bot has liked, and the users it has followed/unfollowed.
-
-The `%username%.session` file stores your session with Instagram to avoid re-logins each time you start the bot.
 
 
 ## Upgrade ⬆️
@@ -67,7 +55,7 @@ The `%username%.session` file stores your session with Instagram to avoid re-log
 
 **From sources:**  (Bleeding edge)
 
-- `python3 -m pip install git+https://github.com/instabot-py/instabot.py`
+- `python3 -m pip install git+https://github.com/yurilaaziz/instabot.py`
 
 ## Parameters
 | Parameter            | Type|                Description                           |        Default value             |
@@ -106,7 +94,11 @@ The `%username%.session` file stores your session with Instagram to avoid re-log
 | unfollow_break_min   | int | Minimum seconds to break between unfollows           | 15 |
 | unfollow_break_max   | int | Maximum seconds to break between unfollows           | 30 |
 | log_mod              | int | Logging target (0 log to console, 1 log to file, 2 no log.) | 0 |
-| proxies              | dict | Access instagram through a proxy. {"http_proxy":"http://IP:PORT", "https_proxy":"http://IP:PORT"} (host:port or user:password@host:port) | |
+| proxies (deprecated) | dict | Access instagram through a proxy. {"http":"http://IP:PORT", "https":"http://IP:PORT"} (host:port or user:password@host:port) | |
+| proxy_ip             | dict | HTTP Proxy IP address | |
+| proxy_port           | int | HTTP Proxy Port | |
+| proxy_user           | str | HTTP Proxy username | |
+| proxy_password       | str | HTTP Proxy password | |
 | unfollow_not_following   | bool | Unfollow Condition: Unfollow those who do not follow you back | True |
 | unfollow_inactive   | bool | Unfollow Condition: Unfollow those who have not posted in a while (inactive) | True |
 | unfollow_probably_fake  | bool | Unfollow Condition: Unfollow accounts which skewed follow/follower ratio (probably fake) | True |

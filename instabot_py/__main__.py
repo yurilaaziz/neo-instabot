@@ -157,16 +157,28 @@ schema = [
         type="integer",
         required=False
     ), dict(
-        name="HTTPS Proxy",
-        key="proxies.https_proxy",
-        source=dict(argv=["--https_proxy"]),
-        description="HTTPS proxy ",
+        name="HTTP Proxy IP",
+        key="proxy_ip",
+        source=dict(argv=["--proxy-ip"]),
+        description="HTTP Proxy IP ",
         required=False
     ), dict(
-        name="HTTP Proxy ",
-        key="proxies.http_proxy",
-        source=dict(argv=["--proxies"]),
-        description="HTTP Proxy",
+        name="HTTP Proxy Port",
+        key="proxy_port",
+        source=dict(argv=["--proxy-port"]),
+        description="HTTP Proxy Port ",
+        required=False
+    ), dict(
+        name="HTTP Proxy User",
+        key="proxy_user",
+        source=dict(argv=["--proxy-user"]),
+        description="HTTP Proxy User ",
+        required=False
+    ), dict(
+        name="HTTP Proxy Password",
+        key="proxy-password",
+        source=dict(argv=["--proxy-password"]),
+        description="HTTP proxy Password ",
         required=False
     ), dict(
         name="unfollow_not_following",

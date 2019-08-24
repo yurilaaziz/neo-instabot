@@ -156,6 +156,7 @@ class InstaBot:
 
         self.proxies = self.config.get('proxies')
         if self.proxies:
+            self.logger.debug(f"using proxy configuration {self.proxies}")
             self.s.proxies.update(self.proxies)
             self.c.proxies.update(self.proxies)
 
